@@ -16,6 +16,6 @@ This is a patch file version of https://github.com/TransmissionZero/Wine
 
 This patch add support for Windows 1.x and 2.x applications.
 
-- 0002-Add-OleIsCurrentClipboard-stub.patch add OleIsCurrentClipboard stub
+- 0002-Add-OleIsCurrentClipboard-stub.patch
 
-This make application like Microsoft Word 6.0 Thai Edition not crash when accessing clipboard.
+This patch add OleIsCurrentClipboard stub, this make application like Microsoft Word 6.0 Thai Edition not crash when accessing clipboard.
