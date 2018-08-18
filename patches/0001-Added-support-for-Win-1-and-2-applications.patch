@@ -1,0 +1,466 @@
+From a9c1ac8f6cc16164a70876dc2593253b34d9e52e Mon Sep 17 00:00:00 2001
+From: Martin Payne <development@martinpayne.me.uk>
+Date: Sun, 17 Sep 2017 21:21:36 +0100
+Subject: Added support for Windows 1.x and 2.x applications.
+
+diff --git a/dlls/krnl386.exe16/ne_module.c b/dlls/krnl386.exe16/ne_module.c
+index 14f8075166..f27a4f3211 100644
+--- a/dlls/krnl386.exe16/ne_module.c
++++ b/dlls/krnl386.exe16/ne_module.c
+@@ -597,11 +597,10 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+ 
+     /* We now have a valid NE header */
+ 
+-    /* check to be able to fall back to loading OS/2 programs as DOS
+-     * FIXME: should this check be reversed in order to be less strict?
+-     * (only fail for OS/2 ne_exetyp 0x01 here?) */
++    /* check to be able to fall back to loading OS/2 programs as DOS */
+     if ((ne_header->ne_exetyp != 0x02 /* Windows */)
+-        && (ne_header->ne_exetyp != 0x04) /* Windows 386 */)
++        && (ne_header->ne_exetyp != 0x00 /* Unknown - possible early 1.x or 2.x app */)
++        && (ne_header->ne_ver == 0x04 /* link4 version 4.x has no ne_exetyp field - possible early 1.x app */))
+         return ERROR_BAD_FORMAT;
+ 
+     size = sizeof(NE_MODULE) +
+@@ -649,6 +648,11 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+ 
+     pModule->ne_flags &= ~(NE_FFLAGS_BUILTIN | NE_FFLAGS_WIN32);
+ 
++    /* The original NE spec (which link4 version 4.x follows) doesn't have an ne_expver field and reserves it for
++       future use. Other early executables have the version set to 0.0. Assume Windows 1.01 in either case. */
++    if ((ne_header->ne_ver == 0x04) || (ne_header->ne_expver == 0x0000))
++        pModule->ne_expver = 0x0101;
++
+     /* Get the segment table */
+ 
+     pModule->ne_segtab = pData - (BYTE *)pModule;
+@@ -658,6 +662,24 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+     for (i = ne_header->ne_cseg; i > 0; i--, pSeg++)
+     {
+         memcpy( pData, pSeg, sizeof(*pSeg) );
++
++        /* The original NE spec (which link4 version 4.x follows) uses the top four bits of the segment flags to set a
++           discard priority (0 = not discardable, 15 = highest priority). Later specs repurpose the top three bits and
++           use a single bit for the discardable flag. The top three bits must be masked off and discardable flag set
++           appropriately, otherwise a discard priority could get misinterpreted as a 32 bit segment flag which results
++           in an application crash. */
++        if (ne_header->ne_ver == 0x04)
++        {
++            WORD* seg_flags;
++            BOOL isDiscardable;
++
++            seg_flags = (WORD*)(pData + FIELD_OFFSET(SEGTABLEENTRY, flags));
++            isDiscardable = ((*seg_flags & 0xF000) > 0);
++
++            if (isDiscardable)
++                *seg_flags = ((*seg_flags & 0x0FFF) | NE_SEGFLAGS_DISCARDABLE);
++        }
++
+         pData += sizeof(SEGTABLEENTRY);
+     }
+ 
+@@ -697,6 +719,42 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+                        ne_header->ne_enttab - ne_header->ne_imptab )) goto failed;
+     pData += ne_header->ne_enttab - ne_header->ne_imptab;
+ 
++    /* If the linker version is 4.x or the executable type is unknown, it is necessary to check the import table for
++       known Windows and OS/2 libraries to determine whether it's a Windows executable. Executables with no module table
++       or which don't import known Windows or OS/2 libraries are also assumed to be Windows. */
++    if (((ne_header->ne_ver == 0x04) || (ne_header->ne_exetyp == 0x00)) && pModule->ne_modtab)
++    {
++        WORD* pModuleTable;
++        LPCSTR pImportTable;
++        int i;
++        BOOL importsDosCalls = FALSE;
++        BOOL importsKernel = FALSE;
++
++        /* Get address of module table and import table from their offsets */
++        pModuleTable = (WORD*)(((BYTE*)pModule) + pModule->ne_modtab);
++        pImportTable = (LPCSTR)(((BYTE*)pModule) + pModule->ne_imptab);
++
++        /* Look for imports from DOSCALLS and KERNEL */
++        for (i = 0; i < pModule->ne_cmod; i++)
++        {
++            /* Module name is a Pascal string with byte length prefix */
++            LPCSTR module = pImportTable + pModuleTable[i];
++
++            if (!importsDosCalls && !strncmp("DOSCALLS", &module[1], module[0]))
++                importsDosCalls = TRUE;
++
++            else if (!importsKernel && !strncmp("KERNEL", &module[1], module[0]))
++                importsKernel = TRUE;
++
++            if (importsDosCalls && importsKernel)
++                break;
++        }
++
++        /* If the module has imports from DOSCALLS but not KERNEL, assume it's for OS/2 or Multitasking DOS 4. */
++        if (importsDosCalls && !importsKernel)
++            goto failed;
++    }
++
+     /* Load entry table, convert it to the optimized version used by Windows */
+ 
+     pModule->ne_enttab = pData - (BYTE *)pModule;
+diff --git a/dlls/krnl386.exe16/ne_segment.c b/dlls/krnl386.exe16/ne_segment.c
+index 1ceb714358..b2e163c3dc 100644
+--- a/dlls/krnl386.exe16/ne_segment.c
++++ b/dlls/krnl386.exe16/ne_segment.c
+@@ -337,6 +337,45 @@ unknown:
+ }
+ 
+ 
++/* Early Windows 1 C applications initialise their "_psp" variable to 0. It should actually be initialised with the
++   segment / selector of the PSP. Applications running in real mode manage to get away with this, but in protected mode
++   the application will crash when it tries to use the PSP. This function checks for the faulty entry point code and
++   patches it to load _psp from the ES register. */
++void NE_FixWin1Startup(NE_MODULE *pModule, WORD segnum)
++{
++    SEGTABLEENTRY seg;
++    BYTE* pEntryPoint;
++    WORD* patch1;
++    WORD* patch2;
++
++    /* Do nothing if this is a Windows 2 or later application */
++    if (pModule->ne_expver >= 0x0200)
++        return;
++
++    /* Do nothing if the segment doesn't contain the application entry point */
++    if (segnum != HIWORD(pModule->ne_csip))
++        return;
++
++    /* Get the code segment */
++    seg = NE_SEG_TABLE(pModule)[segnum-1];
++
++    /* Get flat pointer to executable entry point */
++    pEntryPoint = MapSL(MAKESEGPTR(seg.hSeg, LOWORD(pModule->ne_csip)));
++
++    /* Instructions to patch and NOP are 9 and 13 bytes after the entry point */
++    patch1 = (WORD*)(pEntryPoint + 9);
++    patch2 = (WORD*)(pEntryPoint + 13);
++
++    /* Check for "mov WORD PTR ds:[_psp],0" and patch if present */
++    if ((*patch1 == 0x06C7) && (*patch2 == 0x0000))
++    {
++        /* Patch the instruction, leaving the _psp address as-is and NOP-ing out the rest */
++        *patch1 = 0x068C; /* mov WORD PTR ds:[_psp],es */
++        *patch2 = 0x9090; /* nop nop */
++    }
++}
++
++
+ /***********************************************************************
+  *           NE_LoadSegment
+  */
+@@ -437,6 +476,9 @@ BOOL NE_LoadSegment( NE_MODULE *pModule, WORD segnum )
+     /* Perform exported function prolog fixups */
+     NE_FixupSegmentPrologs( pModule, segnum );
+ 
++    /* Fixup potentially incorrect Windows 1 startup code */
++    NE_FixWin1Startup( pModule, segnum );
++
+     if (!(pSeg->flags & NE_SEGFLAGS_RELOC_DATA))
+         return TRUE;  /* No relocation data, we are done */
+ 
+diff --git a/dlls/user.exe16/user.c b/dlls/user.exe16/user.c
+index 27b9279383..66bc805966 100644
+--- a/dlls/user.exe16/user.c
++++ b/dlls/user.exe16/user.c
+@@ -459,6 +459,67 @@ static void free_module_icons( HINSTANCE16 inst )
+     }
+ }
+ 
++/* Old Windows 1.x / 2.x bitmap */
++struct old_win16_bitmap
++{
++    BYTE type;         /* 2 = bitmap */
++    BYTE format;       /* 0 = non-discardable, 0x80 = discardable */
++    WORD unused1;      /* Unused / unknown */
++    WORD width;        /* Width in pixels */
++    WORD height;       /* Height in pixels */
++    WORD widthBytes;   /* Width in bytes */
++    BYTE planes;       /* Number of color planes */
++    BYTE bitsPerPixel; /* Bits per pixel */
++    DWORD unused2;     /* Unused / unknown */
++    BYTE bits[];       /* Bitmap bits */
++};
++
++/* Load an old Windows 1.x / 2.x bitmap */
++static HBITMAP16 load_old_bitmap(HMODULE16 hModule, LPCSTR name)
++{
++    HRSRC16 hRsrc;
++    DWORD resSize;
++    HGLOBAL16 hmem;
++    struct old_win16_bitmap* bmp;
++    HBITMAP16 hBitmap = 0;
++
++    /* Find and load the bitmap resource */
++    hRsrc = FindResource16(hModule, name, MAKEINTRESOURCEA(RT_BITMAP));
++
++    if (!hRsrc)
++        return 0;
++
++    hmem = LoadResource16(hModule, hRsrc);
++
++    if (!hmem)
++        return 0;
++
++    bmp = (struct old_win16_bitmap*)LockResource16(hmem);
++
++    resSize = SizeofResource16(hModule, hRsrc);
++
++    /* Ensure resource is at least as large as old_win16_bitmap struct and has type 2 (bitmap) */
++    if ((resSize >= sizeof(struct old_win16_bitmap)) && (bmp->type == 2))
++    {
++        DWORD widthBytes;
++        DWORD expectedSize;
++
++        /* Calculate the width in bytes as the one in the struct can be unreliable. The width in bytes must be even
++           (i.e. data is WORD aligned). */
++        widthBytes = (((bmp->width * bmp->bitsPerPixel) + 15) >> 3) & ~1;
++
++        expectedSize = sizeof(struct old_win16_bitmap) + (bmp->height * widthBytes * bmp->planes);
++
++        /* Load the bitmap if size is correct */
++        if (resSize >= expectedSize)
++            hBitmap = HBITMAP_16(CreateBitmap(bmp->width, bmp->height, bmp->planes, bmp->bitsPerPixel, bmp->bits));
++    }
++
++    FreeResource16(hmem);
++
++    return hBitmap;
++}
++
+ /**********************************************************************
+  * Management of the 16-bit clipboard formats
+  */
+@@ -2157,6 +2218,10 @@ HANDLE16 WINAPI LoadImage16(HINSTANCE16 hinst, LPCSTR name, UINT16 type, INT16 c
+         WCHAR path[MAX_PATH], filename[MAX_PATH];
+         HANDLE file;
+ 
++        /* Windows 1.x and 2.x have a different bitmap resource type */
++        if (GetExeVersion16() < 0x0300)
++            return load_old_bitmap( hinst, name );
++
+         filename[0] = 0;
+         if (!(hRsrc = FindResource16( hinst, name, (LPCSTR)RT_BITMAP ))) return 0;
+         if (!(handle = LoadResource16( hinst, hRsrc ))) return 0;
+@@ -2193,27 +2258,43 @@ HANDLE16 WINAPI LoadImage16(HINSTANCE16 hinst, LPCSTR name, UINT16 type, INT16 c
+     {
+         HICON16 hIcon = 0;
+         BYTE *dir, *bits;
+-        INT id = 0;
++        DWORD iconVersion;
+ 
+-        if (!(hRsrc = FindResource16( hinst, name,
+-                                      (LPCSTR)(type == IMAGE_ICON ? RT_GROUP_ICON : RT_GROUP_CURSOR ))))
+-            return 0;
+-        hGroupRsrc = hRsrc;
++        /* Windows 3.x and later use an icon directory containing multiple icons, whereas Windows 1.x / 2.x use a single
++           icon resource. */
++        if (GetExeVersion16() >= 0x0300)
++        {
++            INT id = 0;
+ 
+-        if (!(handle = LoadResource16( hinst, hRsrc ))) return 0;
+-        if ((dir = LockResource16( handle ))) id = LookupIconIdFromDirectory( dir, type == IMAGE_ICON );
+-        FreeResource16( handle );
+-        if (!id) return 0;
++            if (!(hRsrc = FindResource16( hinst, name,
++                                          (LPCSTR)(type == IMAGE_ICON ? RT_GROUP_ICON : RT_GROUP_CURSOR ))))
++                return 0;
++            hGroupRsrc = hRsrc;
+ 
+-        if (!(hRsrc = FindResource16( hinst, MAKEINTRESOURCEA(id),
+-                                      (LPCSTR)(type == IMAGE_ICON ? RT_ICON : RT_CURSOR) ))) return 0;
++            if (!(handle = LoadResource16( hinst, hRsrc ))) return 0;
++            if ((dir = LockResource16( handle ))) id = LookupIconIdFromDirectory( dir, type == IMAGE_ICON );
++            FreeResource16( handle );
++            if (!id) return 0;
++
++            if (!(hRsrc = FindResource16( hinst, MAKEINTRESOURCEA(id),
++                                          (LPCSTR)(type == IMAGE_ICON ? RT_ICON : RT_CURSOR) ))) return 0;
++            iconVersion = 0x00030000;
++        }
++        else
++        {
++            if (!(hRsrc = FindResource16( hinst, name,
++                                          (LPCSTR)(type == IMAGE_ICON ? RT_ICON : RT_CURSOR) ))) return 0;
++            hGroupRsrc = hRsrc;
++            iconVersion = 0x00020000;
++        }
+ 
+         if ((flags & LR_SHARED) && (hIcon = find_shared_icon( hinst, hRsrc ) ) != 0) return hIcon;
+ 
+         if (!(handle = LoadResource16( hinst, hRsrc ))) return 0;
+         bits = LockResource16( handle );
+         size = SizeofResource16( hinst, hRsrc );
+-        hIcon = CreateIconFromResourceEx16( bits, size, type == IMAGE_ICON, 0x00030000, cx, cy, flags );
++
++        hIcon = CreateIconFromResourceEx16( bits, size, type == IMAGE_ICON, iconVersion, cx, cy, flags );
+         FreeResource16( handle );
+ 
+         if (hIcon && (flags & LR_SHARED)) add_shared_icon( hinst, hRsrc, hGroupRsrc, hIcon );
+diff --git a/dlls/user32/cursoricon.c b/dlls/user32/cursoricon.c
+index 0adb73bf56..4928decd2a 100644
+--- a/dlls/user32/cursoricon.c
++++ b/dlls/user32/cursoricon.c
+@@ -1435,6 +1435,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
+ }
+ 
+ 
++/* Old Windows 1.x / 2.x icon or cursor */
++struct old_win16_iconinfo
++{
++    BYTE type;       /* 1 = icon, 3 = cursor */
++    BYTE format;     /* 0 = device idependent, 1 = device dependent, 2 = both */
++    WORD hotSpotX;   /* Cursor hotspot horizontal */
++    WORD hotSpotY;   /* Cursor hotspot vertical */
++    WORD width;      /* Width in pixels */
++    WORD height;     /* Height in pixels */
++    WORD widthBytes; /* Width in bytes */
++    WORD unused;     /* Unused */
++    BYTE bits[];     /* Byte array of AND bits followed by XOR bits */
++};
++
++
++/* Load a Windows 1.x / 2.x style icon or cursor */
++static HICON CURSORICON_CreateIconV2(LPBYTE bits, UINT cbSize, BOOL bIcon, INT width, INT height)
++{
++    struct old_win16_iconinfo* oldIconInfo = (struct old_win16_iconinfo*)bits;
++    WORD widthBytes;
++    DWORD bitmaskSize;
++    POINT hotspot;
++    HBITMAP bitmapMask;
++    ICONINFO iconInfo;
++    HICON icon;
++
++    /* Ensure buffer size is at least the size of old_win16_iconinfo struct */
++    if (cbSize < sizeof(struct old_win16_iconinfo))
++        return 0;
++
++    /* Calculate the width in bytes as the one in the struct can be unreliable. The width in bytes must be even (i.e.
++       data is WORD aligned). */
++    widthBytes = ((oldIconInfo->width + 15) >> 3) & ~1;
++
++    /* Total number of bytes in the AND and XOR bits */
++    bitmaskSize = oldIconInfo->height * widthBytes * 2;
++
++    /* Ensure buffer size is at least as large as the icon claims to be */
++    if (cbSize < (sizeof(struct old_win16_iconinfo) + bitmaskSize))
++        return 0;
++
++    /* Validate cursor / icon type and determine hotspot */
++    if (bIcon)
++    {
++        /* Ensure image type is correct for an icon */
++        if (oldIconInfo->type != 1)
++            return 0;
++
++        /* Use centre of icon as hotspot */
++        hotspot.x = width / 2;
++        hotspot.y = height / 2;
++    }
++    else
++    {
++        /* Ensure image type is correct for a cursor */
++        if (oldIconInfo->type != 3)
++            return 0;
++
++        /* Set cursor hotspot */
++        hotspot.x = oldIconInfo->hotSpotX;
++        hotspot.y = oldIconInfo->hotSpotY;
++
++        /* Scale hotspot if cursor is being resized */
++        if (oldIconInfo->width != width)
++            hotspot.x = (hotspot.x * width) / oldIconInfo->width;
++
++        if (oldIconInfo->height != height)
++            hotspot.y = (hotspot.y * height) / oldIconInfo->height;
++    }
++
++    /* Create a bitmap from the AND and XOR bitmasks. The bitmasks are stacked in a single bitmap, so the height must be
++       twice the height of the icon. */
++    bitmapMask = CreateBitmap(oldIconInfo->width, oldIconInfo->height * 2, 1, 1, oldIconInfo->bits);
++
++    if (!bitmapMask)
++        return 0;
++
++    /* Resize the bitmap if it isn't the requested size */
++    if ((oldIconInfo->width != width) || (oldIconInfo->height != height))
++    {
++        HDC hdcSrc;
++        HDC hdcDst;
++        HBITMAP bitmapResized;
++
++        /* Bitmap for the resized image */
++        bitmapResized = CreateBitmap(width, height * 2, 1, 1, NULL);
++
++        /* Free the original bitmap if the resized one couldn't be created */
++        if (!bitmapResized)
++        {
++            DeleteObject(bitmapMask);
++            return 0;
++        }
++
++        /* StretchBlt the bitmap in a memory DC */
++        hdcSrc = CreateCompatibleDC(NULL);
++        hdcDst = CreateCompatibleDC(NULL);
++
++        SelectObject(hdcSrc, bitmapMask);
++        SelectObject(hdcDst, bitmapResized);
++
++        StretchBlt(hdcDst, 0, 0, width, height * 2,
++                   hdcSrc, 0, 0, oldIconInfo->width, oldIconInfo->height * 2, SRCCOPY);
++
++        DeleteDC(hdcSrc);
++        DeleteDC(hdcDst);
++
++        /* Delete original mask and swap in the resized one */
++        DeleteObject(bitmapMask);
++        bitmapMask = bitmapResized;
++    }
++
++    /* Create the new style icon from the old icon information */
++    iconInfo.fIcon = bIcon & TRUE;
++    iconInfo.xHotspot = hotspot.x;
++    iconInfo.yHotspot = hotspot.y;
++    iconInfo.hbmMask = bitmapMask;
++    iconInfo.hbmColor = NULL;
++
++    icon = CreateIconIndirect(&iconInfo);
++
++    /* Delete the bitmap mask */
++    DeleteObject(iconInfo.hbmMask);
++
++    return icon;
++}
++
++
+ /*
+  * .ANI layout:
+  *
+@@ -1654,8 +1782,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
+ 
+     if (dwVersion == 0x00020000)
+     {
+-        FIXME_(cursor)("\t2.xx resources are not supported\n");
+-        return 0;
++        INT cxDesired;
++        INT cyDesired;
++
++        /* If width or height are 0, use the default icon or cursor size */
++        if (width == 0)
++            cxDesired = GetSystemMetrics((bIcon) ? SM_CXICON : SM_CXCURSOR);
++        else
++            cxDesired = width;
++
++        if (height == 0)
++            cyDesired = GetSystemMetrics((bIcon) ? SM_CYICON : SM_CYCURSOR);
++        else
++            cyDesired = height;
++
++        return CURSORICON_CreateIconV2( bits, cbSize, bIcon, cxDesired, cyDesired );
+     }
+ 
+     /* Check if the resource is an animated icon/cursor */
