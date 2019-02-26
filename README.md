@@ -10,17 +10,31 @@ To apply patches, copy all patches to wine source code directory and `git apply 
 
 # Patches Lists
 
-- 0001-Added-support-for-Win-1-and-2-applications.patch
+- 0001_wine-esync.patch
+
+wine esync patch rev. ce79346
+
+- 0002_staging-config.patch
+
+Toggle upstream CSMT implementation patch from https://github.com/wine-staging/wine-staging/pull/60
+
+...
+
+- 0009_Update_OpenCL.patch
+
+Update wine OpenCL pass-thought to OpenCL 2.1.
+
+- 0010-Added-support-for-Win-1-and-2-applications.patch
 
 This is a patch file version of https://github.com/TransmissionZero/Wine
 
 This patch add support for Windows 1.x and 2.x applications.
 
-- 0002-Add-OleIsCurrentClipboard-stub.patch
+- 0011-Add-OleIsCurrentClipboard-stub.patch
 
 This patch add OleIsCurrentClipboard stub, this make application like Microsoft Word 6.0 Thai Edition not crash when accessing clipboard.
 
-- xxxx_winevdm_*.patch
+- 01xx_winevdm_*.patch
 
-This patch is from the winevdm project (wine on Windows) rev. 8dbcdfc22ccbad366d0b4e482bb2c1244130e5cf,
+This patch is from the winevdm project (wine on Windows) rev. 8dbcdfc2,
 which can be found at https://github.com/otya128/winevdm
