@@ -1,0 +1,36 @@
+From cbeb3bff6c765e3fe7c9e96cecb698f6aeaa28ef Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 18 Feb 2019 09:43:10 +0700
+Subject: ctl3d.dll16: Add Ctl3dSetStyle stub.
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+
+diff --git a/dlls/ctl3d.dll16/ctl3d.c b/dlls/ctl3d.dll16/ctl3d.c
+index fa46175da2..53572882f3 100644
+--- a/dlls/ctl3d.dll16/ctl3d.c
++++ b/dlls/ctl3d.dll16/ctl3d.c
+@@ -217,3 +217,11 @@ LRESULT WINAPI Ctl3dDlgProc16(HWND16 hwnd, UINT16 msg, WPARAM16 wparam, LPARAM l
+ {
+     return 0;
+ }
++
++/***********************************************************************
++ *		Ctl3dSetStyle (CTL3DV2.19)
++ */
++WORD WINAPI Ctl3dSetStyle16(WORD a1, SEGPTR a2, WORD a3)
++{
++    return 0;
++}
+diff --git a/dlls/ctl3d.dll16/ctl3d.dll16.spec b/dlls/ctl3d.dll16/ctl3d.dll16.spec
+index ae1e0fde24..a7a8b26640 100644
+--- a/dlls/ctl3d.dll16/ctl3d.dll16.spec
++++ b/dlls/ctl3d.dll16/ctl3d.dll16.spec
+@@ -14,7 +14,7 @@
+ 16 pascal -ret16 Ctl3dAutoSubclass(word) Ctl3dAutoSubclass16
+ 17 pascal Ctl3dDlgProc(word word word long) Ctl3dDlgProc16
+ 18 pascal -ret16 Ctl3dCtlColorEx(word word long) Ctl3dCtlColorEx16
+-19 stub Ctl3dSetStyle
++19 pascal -ret16 Ctl3dSetStyle(word long word) Ctl3dSetStyle16
+ 20 pascal Ctl3dDlgFramePaint(word word word long) Ctl3dDlgFramePaint16
+ 21 pascal -ret16 Ctl3dSubclassDlgEx(word long) Ctl3dSubclassDlgEx16
+ 22 pascal -ret16 Ctl3dWinIniChange() Ctl3dWinIniChange16

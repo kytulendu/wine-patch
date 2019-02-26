@@ -1,0 +1,84 @@
+From b963aafeeed3538c74f5f2dcfd64c927c6e42cba Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 25 Feb 2019 00:45:04 +0700
+Subject: timer.drv16: Port the patch from winevdm.
+
+https://github.com/otya128/winevdm/tree/master/timer
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+
+diff --git a/configure.ac b/configure.ac
+index 784c2bd7d7..cdcdb5fbb5 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -3842,6 +3842,7 @@ WINE_CONFIG_MAKEFILE(dlls/taskschd)
+ WINE_CONFIG_MAKEFILE(dlls/taskschd/tests)
+ WINE_CONFIG_MAKEFILE(dlls/tdh)
+ WINE_CONFIG_MAKEFILE(dlls/tdi.sys)
++WINE_CONFIG_MAKEFILE(dlls/timer.drv16,enable_win16)
+ WINE_CONFIG_MAKEFILE(dlls/toolhelp.dll16,enable_win16)
+ WINE_CONFIG_MAKEFILE(dlls/traffic)
+ WINE_CONFIG_MAKEFILE(dlls/twain.dll16,enable_win16)
+diff --git a/dlls/krnl386.exe16/kernel.c b/dlls/krnl386.exe16/kernel.c
+index 17b0c156c0..a3642af625 100644
+--- a/dlls/krnl386.exe16/kernel.c
++++ b/dlls/krnl386.exe16/kernel.c
+@@ -141,6 +141,7 @@ BOOL WINAPI KERNEL_DllEntryPoint( DWORD reasion, HINSTANCE16 inst, WORD ds,
+     /* Force loading of some dlls */
+     LoadLibrary16( "system.drv" );
+     LoadLibrary16( "comm.drv" );
++    LoadLibrary16( "timer.drv" );
+ 
+     return TRUE;
+ }
+diff --git a/dlls/timer.drv16/Makefile.in b/dlls/timer.drv16/Makefile.in
+new file mode 100644
+index 0000000000..5620d6d93a
+--- /dev/null
++++ b/dlls/timer.drv16/Makefile.in
+@@ -0,0 +1,7 @@
++MODULE = timer.drv16
++
++EXTRADLLFLAGS = -m16
++
++C_SRCS = timer.c
++
++RC_SRCS = timer.rc
+diff --git a/dlls/timer.drv16/timer.c b/dlls/timer.drv16/timer.c
+new file mode 100644
+index 0000000000..1a4323ce6b
+--- /dev/null
++++ b/dlls/timer.drv16/timer.c
+@@ -0,0 +1,15 @@
++#include <stdarg.h>
++
++#include "windef.h"
++#include "winbase.h"
++#include "wine/winuser16.h"
++
++#include "wine/debug.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(timer);
++
++LRESULT WINAPI DriverProc16(DWORD dwDevID, HDRVR16 hDrv, WORD wMsg, DWORD dwParam1, DWORD dwParam2)
++{
++    FIXME("\n");
++    return 0;
++}
+diff --git a/dlls/timer.drv16/timer.drv16.spec b/dlls/timer.drv16/timer.drv16.spec
+new file mode 100644
+index 0000000000..8ddce52231
+--- /dev/null
++++ b/dlls/timer.drv16/timer.drv16.spec
+@@ -0,0 +1,2 @@
++#1 WEP
++2 pascal DriverProc(long word word long long) DriverProc16
+diff --git a/dlls/timer.drv16/timer.rc b/dlls/timer.drv16/timer.rc
+new file mode 100644
+index 0000000000..1a38ca6add
+--- /dev/null
++++ b/dlls/timer.drv16/timer.rc
+@@ -0,0 +1,3 @@
++#define WINE_FILEDESCRIPTION_STR "Wine timer driver"
++
++#include "wine/wine_common_ver.rc"
