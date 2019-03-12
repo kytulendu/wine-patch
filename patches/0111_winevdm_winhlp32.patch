@@ -1,6 +1,6 @@
-From 3933797cef9556baed168920c7167afb0a73b89d Mon Sep 17 00:00:00 2001
+From d8fd5d9bcbfcd5e55096975ded5f908f9b2caba7 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
-Date: Mon, 25 Feb 2019 02:58:17 +0700
+Date: Tue, 12 Mar 2019 14:09:14 +0700
 Subject: winhlp32: Port the patch from winevdm.
 
 https://github.com/otya128/winevdm/tree/master/winhlp32
@@ -20,7 +20,7 @@ index 40ce8a1f11..db245dccaa 100644
  
  C_SRCS = \
 diff --git a/programs/winhlp32/hlpfile.c b/programs/winhlp32/hlpfile.c
-index 3ade6c1d5d..99a98e3248 100644
+index 3ade6c1d5d..e75cb19841 100644
 --- a/programs/winhlp32/hlpfile.c
 +++ b/programs/winhlp32/hlpfile.c
 @@ -29,6 +29,7 @@
@@ -31,6 +31,24 @@ index 3ade6c1d5d..99a98e3248 100644
  
  #include "wine/debug.h"
  
+@@ -66,7 +67,7 @@ static HLPFILE *first_hlpfile = 0;
+  *     Pointer to block identified by key, or NULL if failure.
+  *
+  */
+-static void* HLPFILE_BPTreeSearch(BYTE* buf, const void* key,
++void* HLPFILE_BPTreeSearch(BYTE* buf, const void* key,
+                            HLPFILE_BPTreeCompare comp)
+ {
+     unsigned magic;
+@@ -382,7 +383,7 @@ HLPFILE_PAGE *HLPFILE_PageByOffset(HLPFILE* hlpfile, LONG offset, ULONG* relativ
+     {
+         if (page->offset <= offset && (!found || found->offset < page->offset))
+         {
+-            *relative = offset - page->offset;
++            *relative = offset;
+             found = page;
+         }
+     }
 @@ -596,7 +597,7 @@ static ULONG fetch_ulong(const BYTE** ptr)
          (*ptr) += 2;
      }
@@ -40,7 +58,68 @@ index 3ade6c1d5d..99a98e3248 100644
  
  static short fetch_short(const BYTE** ptr)
  {
-@@ -1032,16 +1033,20 @@ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE*
+@@ -783,7 +784,7 @@ static HLPFILE_LINK*       HLPFILE_AllocLink(struct RtfData* rd, int cookie,
+  *
+  */
+ static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
+-                                    const BYTE* start, ULONG hs_size, ULONG hs_offset)
++                                    const BYTE* start, ULONG hs_size, ULONG hs_offset, int coorddiv)
+ {
+     unsigned    i, hs_num;
+     ULONG       hs_macro;
+@@ -817,10 +818,13 @@ static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
+          */
+         {
+         case 0xC8:
++        case 0xCC:
+             hslink = (HLPFILE_HOTSPOTLINK*)
+                 HLPFILE_AllocLink(rd, hlp_link_macro, str, -1, 0, FALSE, TRUE, -1);
+             break;
+ 
++        case 0xE2:
++        case 0xE3:
+         case 0xE6:
+         case 0xE7:
+             hslink = (HLPFILE_HOTSPOTLINK*)
+@@ -861,10 +865,13 @@ static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
+         }
+         if (hslink)
+         {
+-            hslink->x      = GET_USHORT(start, 7 + 15 * i + 3);
+-            hslink->y      = GET_USHORT(start, 7 + 15 * i + 5);
+-            hslink->width  = GET_USHORT(start, 7 + 15 * i + 7);
+-            hslink->height = GET_USHORT(start, 7 + 15 * i + 9);
++            hslink->x      = GET_USHORT(start, 7 + 15 * i + 3) / coorddiv;
++            hslink->y      = GET_USHORT(start, 7 + 15 * i + 5) / coorddiv;
++            hslink->width  = GET_USHORT(start, 7 + 15 * i + 7) / coorddiv;
++            hslink->height = GET_USHORT(start, 7 + 15 * i + 9) / coorddiv;
++            hslink->imgidx = rd->imgcnt;
++            hslink->next = rd->first_hs;
++            rd->first_hs = hslink;
+             /* target = GET_UINT(start, 7 + 15 * i + 11); */
+         }
+         str += strlen(str) + 1;
+@@ -953,9 +960,8 @@ static BOOL HLPFILE_RtfAddTransparentBitmap(struct RtfData* rd, const BITMAPINFO
+ 
+     return ret;
+ }
+-
+ /******************************************************************
+- *		HLPFILE_RtfAddBitmap
++ *             HLPFILE_RtfAddBitmap
+  *
+  */
+ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE* beg, BYTE type, BYTE pack)
+@@ -999,7 +1005,7 @@ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE*
+ 
+     off = GET_UINT(ptr, 0); ptr += 4;
+     hs_offset = GET_UINT(ptr, 0); ptr += 4;
+-    HLPFILE_AddHotSpotLinks(rd, file, beg, hs_size, hs_offset);
++    HLPFILE_AddHotSpotLinks(rd, file, beg, hs_size, hs_offset, 1);
+ 
+     /* now read palette info */
+     if (type == 0x06)
+@@ -1032,16 +1038,20 @@ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE*
      if (!HLPFILE_RtfAddControl(rd, "{\\pict")) goto done;
      if (type == 0x06)
      {
@@ -66,7 +145,88 @@ index 3ade6c1d5d..99a98e3248 100644
          if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
      }
      if (!HLPFILE_RtfAddHexBytes(rd, pict_beg, bi->bmiHeader.biSizeImage)) goto done;
-@@ -1430,7 +1435,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1074,7 +1084,7 @@ static BOOL     HLPFILE_RtfAddMetaFile(struct RtfData* rd, HLPFILE* file, const
+     ptr = beg + 2; /* for type and pack */
+ 
+     mm = fetch_ushort(&ptr); /* mapping mode */
+-    sprintf(tmp, "{\\pict\\wmetafile%d\\picw%d\\pich%d",
++    sprintf(tmp, "\\sl0{\\pict\\wmetafile%d\\picw%d\\pich%d",
+             mm, GET_USHORT(ptr, 0), GET_USHORT(ptr, 2));
+     if (!HLPFILE_RtfAddControl(rd, tmp)) return FALSE;
+     ptr += 4;
+@@ -1086,7 +1096,8 @@ static BOOL     HLPFILE_RtfAddMetaFile(struct RtfData* rd, HLPFILE* file, const
+     hs_offset = GET_UINT(ptr, 4);
+     ptr += 8;
+ 
+-    HLPFILE_AddHotSpotLinks(rd, file, beg, hs_size, hs_offset);
++    // WMF type uses MM_HIMETRIC units for size
++    HLPFILE_AddHotSpotLinks(rd, file, beg, hs_size, hs_offset, mm == 8 ? 27 : 1);
+ 
+     WINE_TRACE("sz=%u csz=%u offs=%u/%u,%u/%u\n",
+                size, csize, off, (ULONG)(ptr - beg), hs_size, hs_offset);
+@@ -1144,6 +1155,7 @@ static  BOOL    HLPFILE_RtfAddGfxByAddr(struct RtfData* rd, HLPFILE *hlpfile,
+         if (numpict != 1) WINE_FIXME("Supporting only one bitmap format per logical bitmap (for now). Using first format\n");
+         break;
+     }
++    rd->imgcnt++;
+     return TRUE;
+ }
+ 
+@@ -1229,7 +1241,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+     LONG               size, blocksize, datalen;
+     unsigned short     bits;
+     unsigned           ncol = 1;
+-    short              nc, lastcol, table_width;
++    short              nc, lastcol, table_width, lastfont = 0;
+     char               tmp[256];
+     BOOL               ret = FALSE;
+ 
+@@ -1323,6 +1335,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+     lastcol = -1;
+     for (nc = 0; nc < ncol; /**/)
+     {
++        BYTE brdr;
+         WINE_TRACE("looking for format at offset %lu in column %d\n", (SIZE_T)(format - (buf + 0x15)), nc);
+         if (!HLPFILE_RtfAddControl(rd, "\\pard")) goto done;
+         if (buf[0x14] == HLP_TABLE)
+@@ -1374,11 +1387,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+             sprintf(tmp, "\\fi%d", HLPFILE_HalfPointsScale(page, fetch_short(&format)));
+             if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
+         }
++        /* prevents contents from being cut off */
++        if (!HLPFILE_RtfAddControl(rd, "\\slmult1")) goto done;
+         if (bits & 0x0100)
+         {
+-            BYTE        brdr = *format++;
+             short       w;
+-
++            brdr = *format++;
++            // richedit won't display any borders except as part of a table
++            if ((brdr & 0x03) && !HLPFILE_RtfAddControl(rd, "{\\pard\\trowd\\cellx100000\\intbl\\f0\\fs0\\cell\\row\\pard}")) goto done;
++/*
+             if ((brdr & 0x01) && !HLPFILE_RtfAddControl(rd, "\\box")) goto done;
+             if ((brdr & 0x02) && !HLPFILE_RtfAddControl(rd, "\\brdrt")) goto done;
+             if ((brdr & 0x04) && !HLPFILE_RtfAddControl(rd, "\\brdrl")) goto done;
+@@ -1386,15 +1403,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+             if ((brdr & 0x10) && !HLPFILE_RtfAddControl(rd, "\\brdrr")) goto done;
+             if ((brdr & 0x20) && !HLPFILE_RtfAddControl(rd, "\\brdrth")) goto done;
+             if (!(brdr & 0x20) && !HLPFILE_RtfAddControl(rd, "\\brdrs")) goto done;
+-            if ((brdr & 0x40) && !HLPFILE_RtfAddControl(rd, "\\brdrdb")) goto done;
++            if ((brdr & 0x40) && !HLPFILE_RtfAddControl(rd, "\\brdrdb")) goto done; */
+             /* 0x80: unknown */
+ 
+             w = GET_SHORT(format, 0); format += 2;
+-            if (w)
++/*          if (w)
+             {
+                 sprintf(tmp, "\\brdrw%d", HLPFILE_HalfPointsScale(page, w));
+                 if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
+-            }
++            } */
+         }
+         if (bits & 0x0200)
+         {
+@@ -1430,7 +1447,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
  
          /* 0x1000 doesn't need space */
          if ((bits & 0x1000) && !HLPFILE_RtfAddControl(rd, "\\keep")) goto done;
@@ -75,7 +235,7 @@ index 3ade6c1d5d..99a98e3248 100644
              WINE_FIXME("Unsupported bits %04x, potential trouble ahead\n", bits);
  
          while (text < text_end && format < format_end)
-@@ -1447,7 +1452,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1447,7 +1464,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                  }
                  if (!HLPFILE_RtfAddText(rd, text)) goto done;
                  if (rd->force_color && !HLPFILE_RtfAddControl(rd, "}")) goto done;
@@ -84,17 +244,148 @@ index 3ade6c1d5d..99a98e3248 100644
              }
              /* else: null text, keep on storing attributes */
              text += textsize + 1;
-@@ -1745,11 +1750,21 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1490,12 +1507,13 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+                     /* FIXME: colors are missing, at a minimum; also, the bold attribute loses information */
+ 
+                     sprintf(tmp, "\\f%d\\cf%d\\fs%d%s%s%s%s",
+-                            font, font + 2, fs,
++                            font + 1, font + 2, fs,
+                             page->file->fonts[font].LogFont.lfWeight > 400 ? "\\b" : "\\b0",
+                             page->file->fonts[font].LogFont.lfItalic ? "\\i" : "\\i0",
+                             page->file->fonts[font].LogFont.lfUnderline ? "\\ul" : "\\ul0",
+                             page->file->fonts[font].LogFont.lfStrikeOut ? "\\strike" : "\\strike0");
+                     if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
++                    lastfont = font;
+                 }
+                break;
+ 
+@@ -1588,14 +1606,34 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+                 }
+                 break;
+ 
+-	    case 0x89:
++            case 0x89:
++            {
++                unsigned fs;
+                 format += 1;
+                 if (!rd->current_link)
+                     WINE_FIXME("No existing link\n");
++                if (!HLPFILE_RtfAddControl(rd, "}}}")) goto done;
+                 rd->current_link->cpMax = rd->char_pos;
+                 rd->current_link = NULL;
+                 rd->force_color = FALSE;
++
++                // fix the font
++                switch (rd->font_scale)
++                {
++                    case 0: fs = page->file->fonts[lastfont].LogFont.lfHeight - 4; break;
++                    default:
++                    case 1: fs = page->file->fonts[lastfont].LogFont.lfHeight; break;
++                    case 2: fs = page->file->fonts[lastfont].LogFont.lfHeight + 4; break;
++                }
++                sprintf(tmp, "\\f%d\\cf%d\\fs%d%s%s%s%s",
++                            lastfont + 1, lastfont + 2, fs,
++                            page->file->fonts[lastfont].LogFont.lfWeight > 400 ? "\\b" : "\\b0",
++                            page->file->fonts[lastfont].LogFont.lfItalic ? "\\i" : "\\i0",
++                            page->file->fonts[lastfont].LogFont.lfUnderline ? "\\ul" : "\\ul0",
++                            page->file->fonts[lastfont].LogFont.lfStrikeOut ? "\\strike" : "\\strike0");
++                if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
+                 break;
++            }
+ 
+             case 0x8B:
+                 if (!HLPFILE_RtfAddControl(rd, "\\~")) goto done;
+@@ -1621,6 +1659,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+                 WINE_TRACE("macro => %s\n", debugstr_a((char *)format + 3));
+                 HLPFILE_AllocLink(rd, hlp_link_macro, (const char*)format + 3,
+                                   GET_USHORT(format, 1), 0, !(*format & 4), FALSE, -1);
++                sprintf(tmp, "{\\field{\\*\\fldinst{ HYPERLINK \"%p\" }}{\\fldrslt{", rd->current_link);
++                if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
+                 format += 3 + GET_USHORT(format, 1);
+                 break;
+ 
+@@ -1629,8 +1669,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+                 WINE_WARN("jump topic 1 => %u\n", GET_UINT(format, 1));
+                 HLPFILE_AllocLink(rd, (*format & 1) ? hlp_link_link : hlp_link_popup,
+                                   page->file->lpszPath, -1, GET_UINT(format, 1), TRUE, FALSE, -1);
+-
+-
++                sprintf(tmp, "{\\field{\\*\\fldinst{ HYPERLINK \"%p\" }}{\\fldrslt{", rd->current_link);
++                if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
+                 format += 5;
+                 break;
+ 
+@@ -1642,6 +1682,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+                 HLPFILE_AllocLink(rd, (*format & 1) ? hlp_link_link : hlp_link_popup,
+                                   page->file->lpszPath, -1, GET_UINT(format, 1),
+                                   !(*format & 4), FALSE, -1);
++                sprintf(tmp, "{\\field{\\*\\fldinst{ HYPERLINK \"%p\" }}{\\fldrslt{", rd->current_link);
++                if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
+                 format += 5;
+                 break;
+ 
+@@ -1679,6 +1721,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+                     }
+                     HLPFILE_AllocLink(rd, (*format & 1) ? hlp_link_link : hlp_link_popup,
+                                       ptr, -1, GET_UINT(format, 4), !(*format & 4), FALSE, wnd);
++                    sprintf(tmp, "{\\field{\\*\\fldinst{ HYPERLINK \"%p\" }}{\\fldrslt{", rd->current_link);
++                    if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
+                 }
+                 format += 3 + GET_USHORT(format, 1);
+                 break;
+@@ -1688,6 +1732,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+                 format++;
+ 	    }
+ 	}
++        if (bits & 0x0100)
++        {
++            if (buf[0x14] == HLP_TABLE)
++            {
++                WINE_FIXME("border in table\n");
++            }
++            else
++            if ((brdr & 0x09) && !HLPFILE_RtfAddControl(rd, "{\\pard\\trowd\\cellx100000\\intbl\\f0\\fs0\\cell\\row\\pard}")) goto done;
++        }
+     }
+     ret = TRUE;
+ done:
+@@ -1706,19 +1759,23 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+     HLPFILE     *hlpfile = page->file;
+     BYTE        *buf, *end;
+     DWORD       ref = page->reference;
+-    unsigned    index, old_index = -1, offset, count = 0, offs = 0;
++    unsigned    index, old_index = hlpfile->version <= 16 ? -1 : page->offset >> 15;
++    unsigned    offset, count = 0, offs = page->offset & 0x7fff;
+     unsigned    cpg, parlen;
+     char        tmp[1024];
+     const char* ck = NULL;
++    BOOL        found = FALSE;
+ 
+     rd->in_text = TRUE;
+     rd->data = rd->ptr = HeapAlloc(GetProcessHeap(), 0, rd->allocated = 32768);
+     rd->char_pos = 0;
+     rd->first_link = rd->current_link = NULL;
++    rd->first_hs = NULL;
+     rd->force_color = FALSE;
+     rd->font_scale = font_scale;
+     rd->relative = relative;
+     rd->char_pos_rel = 0;
++    rd->imgcnt = 0;
+ 
+     switch (hlpfile->charset)
+     {
+@@ -1745,20 +1802,31 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
      }
      if (ck)
      {
+-        sprintf(tmp, "{\\rtf1\\%s\\deff0", ck);
 +        rd->code_page = CP_MACCP;
-         sprintf(tmp, "{\\rtf1\\%s\\deff0", ck);
-+
++        sprintf(tmp, "{\\rtf1\\%s\\deff1", ck);
          if (!HLPFILE_RtfAddControl(rd, tmp)) return FALSE;
      }
      else
      {
+-        sprintf(tmp, "{\\rtf1\\ansi\\ansicpg%d\\deff0", cpg);
 +        if (hlpfile->charset == DEFAULT_CHARSET)
 +        {
 +            rd->code_page = CP_ACP;
@@ -103,10 +394,63 @@ index 3ade6c1d5d..99a98e3248 100644
 +        {
 +            rd->code_page = cpg;
 +        }
-         sprintf(tmp, "{\\rtf1\\ansi\\ansicpg%d\\deff0", cpg);
++        sprintf(tmp, "{\\rtf1\\ansi\\ansicpg%d\\deff1", cpg);
          if (!HLPFILE_RtfAddControl(rd, tmp)) return FALSE;
      }
-@@ -2047,6 +2062,12 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
+ 
+     /* generate font table */
+     if (!HLPFILE_RtfAddControl(rd, "{\\fonttbl")) return FALSE;
++    if (!HLPFILE_RtfAddControl(rd, "{\\f0 Arial;}")) return FALSE;
+     for (index = 0; index < hlpfile->numFonts; index++)
+     {
+         const char* family;
++        const char* face = hlpfile->fonts[index].LogFont.lfFaceName;
+         switch (hlpfile->fonts[index].LogFont.lfPitchAndFamily & 0xF0)
+         {
+         case FF_MODERN:     family = "modern";  break;
+@@ -1768,11 +1836,13 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+         case FF_DECORATIVE: family = "decor";   break;
+         default:            family = "nil";     break;
+         }
++        if (!*face)
++            face = "System"; /* winhelp.exe: System, winhlp32.exe: GUI font? */
+         sprintf(tmp, "{\\f%d\\f%s\\fprq%d\\fcharset%d %s;}",
+-                index, family,
++                index + 1, family,
+                 hlpfile->fonts[index].LogFont.lfPitchAndFamily & 0x0F,
+                 hlpfile->fonts[index].LogFont.lfCharSet,
+-                hlpfile->fonts[index].LogFont.lfFaceName);
++                face);
+         if (!HLPFILE_RtfAddControl(rd, tmp)) return FALSE;
+     }
+     if (!HLPFILE_RtfAddControl(rd, "}")) return FALSE;
+@@ -1822,9 +1892,15 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+         case HLP_DISPLAY30:
+         case HLP_DISPLAY:
+         case HLP_TABLE:
+-            if (!HLPFILE_BrowseParagraph(page, rd, buf, end, &parlen)) return FALSE;
+-            if (relative > index * 0x8000 + offs)
++            if ((relative <= index * 0x8000 + offs) && !found)
++            {
++                sprintf(tmp, "{\\v\\pard scroll_%x}", relative);
++                if (!HLPFILE_RtfAddControl(rd, tmp)) return FALSE;
++                found = TRUE;
+                 rd->char_pos_rel = rd->char_pos;
++            }
++            if (!HLPFILE_BrowseParagraph(page, rd, buf, end, &parlen)) return FALSE;
++
+             offs += parlen;
+             break;
+         default:
+@@ -1841,6 +1917,7 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+     } while (ref != 0xffffffff);
+ done:
+     page->first_link = rd->first_link;
++    page->first_hs = rd->first_hs;
+     return HLPFILE_RtfAddControl(rd, "}");
+ }
+ 
+@@ -2047,6 +2124,12 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
      if (hlpfile->version <= 16)
      {
          char *str = (char*)buf + 0x15;
@@ -119,7 +463,7 @@ index 3ade6c1d5d..99a98e3248 100644
  
          hlpfile->lpszTitle = HeapAlloc(GetProcessHeap(), 0, strlen(str) + 1);
          if (!hlpfile->lpszTitle) return FALSE;
-@@ -2105,13 +2126,13 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
+@@ -2105,13 +2188,13 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
          case 6:
              if (GET_USHORT(ptr, 2) != 90) {WINE_WARN("system6\n");break;}
  
@@ -138,7 +482,7 @@ index 3ade6c1d5d..99a98e3248 100644
              if (hlpfile->windows)
              {
                  HLPFILE_WINDOWINFO* wi = &hlpfile->windows[hlpfile->numWindows - 1];
-@@ -2131,6 +2152,7 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
+@@ -2131,6 +2214,7 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
                  wi->win_style = WS_OVERLAPPEDWINDOW;
                  wi->sr_color = (flags & 0x0100) ? GET_UINT(ptr, 86) : 0xFFFFFF;
                  wi->nsr_color = (flags & 0x0200) ? GET_UINT(ptr, 90) : 0xFFFFFF;
@@ -146,10 +490,67 @@ index 3ade6c1d5d..99a98e3248 100644
                  WINE_TRACE("System-Window: flags=%c%c%c%c%c%c%c%c type=%s name=%s caption=%s (%d,%d)x(%d,%d)\n",
                             flags & 0x0001 ? 'T' : 't',
                             flags & 0x0002 ? 'N' : 'n',
+@@ -2257,6 +2341,26 @@ static BOOL HLPFILE_GetTOMap(HLPFILE *hlpfile)
+     return TRUE;
+ }
+ 
++/***********************************************************************
++ *
++ *           HLPFILE_GetTTLBtree
++ */
++static BOOL HLPFILE_GetTTLBtree(HLPFILE *hlpfile)
++{
++    BYTE                *cbuf, *cend;
++    unsigned            clen;
++
++    if (!HLPFILE_FindSubFile(hlpfile, "|TTLBTREE",  &cbuf, &cend))
++    {WINE_WARN("no ttlbtree section\n"); return FALSE;}
++
++    clen = cend - cbuf;
++    hlpfile->ttlbtree = HeapAlloc(GetProcessHeap(), 0, clen);
++    if (!hlpfile->ttlbtree) return FALSE;
++    memcpy(hlpfile->ttlbtree, cbuf, clen);
++    return TRUE;
++}
++
++
+ /***********************************************************************
+  *
+  *           DeleteMacro
+@@ -2336,6 +2440,12 @@ void HLPFILE_FreeHlpFile(HLPFILE* hlpfile)
+     HeapFree(GetProcessHeap(), 0, hlpfile->phrases_buffer);
+     HeapFree(GetProcessHeap(), 0, hlpfile->topic_map);
+     HeapFree(GetProcessHeap(), 0, hlpfile->help_on_file);
++    HeapFree(GetProcessHeap(), 0, hlpfile->kwbtree);
++    HeapFree(GetProcessHeap(), 0, hlpfile->kwdata);
++    if (hlpfile->TOMap)
++	    HeapFree(GetProcessHeap(), 0, hlpfile->TOMap);
++    if (hlpfile->ttlbtree)
++	    HeapFree(GetProcessHeap(), 0, hlpfile->ttlbtree);
+     HeapFree(GetProcessHeap(), 0, hlpfile);
+ }
+ 
+@@ -2748,6 +2858,7 @@ static BOOL HLPFILE_DoReadHlpFile(HLPFILE *hlpfile, LPCSTR lpszPath)
+ 
+     HLPFILE_GetKeywords(hlpfile);
+     HLPFILE_GetMap(hlpfile);
++    HLPFILE_GetTTLBtree(hlpfile);
+     if (hlpfile->version <= 16) return TRUE;
+     return HLPFILE_GetContext(hlpfile);
+ }
 diff --git a/programs/winhlp32/hlpfile.h b/programs/winhlp32/hlpfile.h
-index 55ef681edd..d561805f62 100644
+index 55ef681edd..c680c0e2ba 100644
 --- a/programs/winhlp32/hlpfile.h
 +++ b/programs/winhlp32/hlpfile.h
+@@ -22,7 +22,7 @@
+ 
+ struct tagHelpFile;
+ 
+-typedef struct 
++typedef struct
+ {
+     char        type[10];
+     char        name[9];
 @@ -30,6 +30,7 @@ typedef struct
      POINT       origin;
      SIZE        size;
@@ -158,19 +559,104 @@ index 55ef681edd..d561805f62 100644
      DWORD       win_style;
      COLORREF    sr_color;       /* color for scrollable region */
      COLORREF    nsr_color;      /* color for non scrollable region */
-@@ -198,6 +199,7 @@ struct RtfData {
+@@ -55,6 +56,8 @@ typedef struct tagHlpFileHotSpotLink
+     unsigned    y;
+     unsigned    width;
+     unsigned    height;
++    unsigned	imgidx;
++    struct tagHlpFileHotSpotLink *next; /* don't have to walk all the links */
+ } HLPFILE_HOTSPOTLINK;
+ 
+ typedef struct tagHlpFileMacro
+@@ -69,6 +72,7 @@ typedef struct tagHlpFilePage
+     HLPFILE_MACRO*              first_macro;
+ 
+     HLPFILE_LINK*               first_link;
++    HLPFILE_HOTSPOTLINK*        first_hs;
+ 
+     unsigned                    wNumber;
+     unsigned                    offset;
+@@ -113,6 +117,7 @@ typedef struct tagHlpFileFile
+     unsigned                    wTOMapLen;
+     unsigned*                   TOMap;
+     unsigned long               contents_start;
++    BYTE*                       ttlbtree;
+ 
+     struct tagHlpFileFile*      prev;
+     struct tagHlpFileFile*      next;
+@@ -183,6 +188,7 @@ HLPFILE_PAGE* HLPFILE_PageByOffset(HLPFILE* hlpfile, LONG offset, ULONG* relativ
+ LONG          HLPFILE_Hash(LPCSTR lpszContext);
+ void          HLPFILE_FreeHlpFile(HLPFILE*);
+ 
++void* HLPFILE_BPTreeSearch(BYTE* buf, const void* key, HLPFILE_BPTreeCompare comp);
+ void  HLPFILE_BPTreeEnum(BYTE*, HLPFILE_BPTreeCallback cb, void *cookie);
+ 
+ struct RtfData {
+@@ -195,9 +201,12 @@ struct RtfData {
+     unsigned    font_scale;     /* how to scale fonts */
+     HLPFILE_LINK*first_link;
+     HLPFILE_LINK*current_link;
++    HLPFILE_HOTSPOTLINK*first_hs;
      BOOL        force_color;
      unsigned    relative;       /* offset within page to lookup for */
      unsigned    char_pos_rel;   /* char_pos correspondinf to relative */
 +    unsigned    code_page;
++    unsigned    imgcnt;
  };
  
  BOOL          HLPFILE_BrowsePage(HLPFILE_PAGE*, struct RtfData* rd,
+diff --git a/programs/winhlp32/macro.c b/programs/winhlp32/macro.c
+index 280e618236..8009afd94b 100644
+--- a/programs/winhlp32/macro.c
++++ b/programs/winhlp32/macro.c
+@@ -767,7 +767,7 @@ static void CALLBACK MACRO_RegisterRoutine(LPCSTR dll_name, LPCSTR proc, LPCSTR
+     {
+         HANDLE hLib = LoadLibraryA(dll_name);
+ 
+-        /* FIXME: the library will not be unloaded until exit of program 
++        /* FIXME: the library will not be unloaded until exit of program
+          * We don't send the DW_TERM message
+          */
+         WINE_TRACE("Loading %s\n", debugstr_a(dll_name));
+@@ -847,13 +847,13 @@ static void CALLBACK MACRO_SetHelpOnFile(LPCSTR str)
+         strcpy(page->file->help_on_file, str);
+ }
+ 
+-static void CALLBACK MACRO_SetPopupColor(LONG r, LONG g, LONG b)
++static void CALLBACK MACRO_SetPopupColor(LONG rgb)
+ {
+     HLPFILE_PAGE*       page = MACRO_CurrentWindow()->page;
+ 
+-    WINE_TRACE("(%x, %x, %x)\n", r, g, b);
++    WINE_TRACE("(%d)\n", rgb);
+     page->file->has_popup_color = TRUE;
+-    page->file->popup_color = RGB(r, g, b);
++    page->file->popup_color = rgb;
+ }
+ 
+ static void CALLBACK MACRO_ShellExecute(LPCSTR str1, LPCSTR str2, LONG u1, LONG u2, LPCSTR str3, LPCSTR str4)
+@@ -993,7 +993,7 @@ static struct MacroDesc MACRO_Builtins[] = {
+     {"Search",              NULL, 0, "",       MACRO_Search},
+     {"SetContents",         NULL, 0, "SU",     MACRO_SetContents},
+     {"SetHelpOnFile",       NULL, 0, "S",      MACRO_SetHelpOnFile},
+-    {"SetPopupColor",       "SPC",0, "UUU",    MACRO_SetPopupColor},
++    {"SetPopupColor",       "SPC",0, "U",      MACRO_SetPopupColor},
+     {"ShellExecute",        "SE", 0, "SSUUSS", MACRO_ShellExecute},
+     {"ShortCut",            "SH", 0, "SSUUS",  MACRO_ShortCut},
+     {"TCard",               NULL, 0, "U",      MACRO_TCard},
 diff --git a/programs/winhlp32/winhelp.c b/programs/winhlp32/winhelp.c
-index 7ce5d4a0a8..1226d9c39e 100644
+index 7ce5d4a0a8..e72b140a58 100644
 --- a/programs/winhlp32/winhelp.c
 +++ b/programs/winhlp32/winhelp.c
-@@ -39,6 +39,7 @@
+@@ -27,6 +27,7 @@
+ #include <string.h>
+ #include <stdarg.h>
+ #include <stdlib.h>
++#include <wchar.h>
+ 
+ #define NONAMELESSUNION
+ 
+@@ -39,6 +40,7 @@
  #include "winhelp_res.h"
  #include "shellapi.h"
  #include "richedit.h"
@@ -178,7 +664,58 @@ index 7ce5d4a0a8..1226d9c39e 100644
  #include "commctrl.h"
  
  #include "wine/debug.h"
-@@ -196,12 +197,14 @@ BOOL WINHELP_GetOpenFileName(LPSTR lpszFile, int len)
+@@ -109,6 +111,7 @@ static void WINHELP_SetupText(HWND hTextWnd, WINHELP_WINDOW* win, ULONG relative
+     SendMessageW(hTextWnd, EM_SETBKGNDCOLOR, 0, (LPARAM)win->info->sr_color);
+     /* set word-wrap to window size (undocumented) */
+     SendMessageW(hTextWnd, EM_SETTARGETDEVICE, 0, 0);
++    SendMessageW(hTextWnd, EM_EXLIMITTEXT, 0, -1);
+     if (win->page)
+     {
+         struct RtfData  rd;
+@@ -126,13 +129,40 @@ static void WINHELP_SetupText(HWND hTextWnd, WINHELP_WINDOW* win, ULONG relative
+             es.pfnCallback = WINHELP_RtfStreamIn;
+ 
+             SendMessageW(hTextWnd, EM_STREAMIN, SF_RTF, (LPARAM)&es);
+-            cp = rd.char_pos_rel;
+         }
+         /* FIXME: else leaking potentially the rd.first_link chain */
+         HeapFree(GetProcessHeap(), 0, rd.data);
+-        SendMessageW(hTextWnd, EM_POSFROMCHAR, (WPARAM)&ptl, cp ? cp - 1 : 0);
++        if (rd.char_pos_rel)
++        {
++            wchar_t tmp[32];
++            FINDTEXTW find;
++            const wchar_t search[] = {'s','c','r','o','l','l','_','%','x',0};
++            find.chrg.cpMin = 0;
++            find.chrg.cpMax = -1;
++            find.lpstrText = &tmp;
++            swprintf(tmp, 32, search, relative);
++            cp = SendMessageW(hTextWnd, EM_FINDTEXTW, FR_DOWN, &find);
++        }
++        SendMessageW(hTextWnd, EM_POSFROMCHAR, (WPARAM)&ptl, cp || (cp != -1) ? cp - 1 : 0);
+         pt.x = 0; pt.y = ptl.y;
+         SendMessageW(hTextWnd, EM_SETSCROLLPOS, 0, (LPARAM)&pt);
++        if (rd.first_hs)
++        {
++            IRichEditOle *reole;
++            REOBJECT obj = {sizeof(REOBJECT)};
++            SendMessageW(hTextWnd, EM_GETOLEINTERFACE, 0, &reole);
++            for(int i = 0; i < rd.imgcnt; i++)
++            {
++                HLPFILE_HOTSPOTLINK* hs = rd.first_hs;
++                reole->lpVtbl->GetObject(reole, i, &obj, REO_GETOBJ_NO_INTERFACES);
++                while(hs)
++                {
++                    if (hs->link.bHotSpot && (i == hs->imgidx))
++                        hs->link.cpMin = hs->link.cpMax = obj.cp;
++                    hs = hs->next;
++                }
++            }
++         }
+     }
+     SendMessageW(hTextWnd, WM_SETREDRAW, TRUE, 0);
+     RedrawWindow(hTextWnd, NULL, NULL, RDW_FRAME|RDW_INVALIDATE);
+@@ -196,12 +226,14 @@ BOOL WINHELP_GetOpenFileName(LPSTR lpszFile, int len)
  static INT WINHELP_MessageBoxIDS_s(UINT ids_text, LPCSTR str, UINT ids_title, WORD type)
  {
      CHAR text[MAX_STRING_LEN];
@@ -194,7 +731,7 @@ index 7ce5d4a0a8..1226d9c39e 100644
  }
  
  /***********************************************************************
-@@ -301,7 +304,7 @@ static HLPFILE_WINDOWINFO*     WINHELP_GetPopupWindowInfo(HLPFILE* hlpfile,
+@@ -301,7 +333,7 @@ static HLPFILE_WINDOWINFO*     WINHELP_GetPopupWindowInfo(HLPFILE* hlpfile,
      static      HLPFILE_WINDOWINFO      wi;
  
      RECT parent_rect;
@@ -203,7 +740,7 @@ index 7ce5d4a0a8..1226d9c39e 100644
      wi.type[0] = wi.name[0] = wi.caption[0] = '\0';
  
      /* Calculate horizontal size and position of a popup window */
-@@ -335,7 +338,8 @@ typedef struct
+@@ -335,7 +367,8 @@ typedef struct
      LONG reserved;
      WORD ofsFilename;
      WORD ofsData;
@@ -213,23 +750,21 @@ index 7ce5d4a0a8..1226d9c39e 100644
  
  static BOOL WINHELP_HasWorkingWindow(void)
  {
-@@ -344,6 +348,15 @@ static BOOL WINHELP_HasWorkingWindow(void)
+@@ -344,6 +377,13 @@ static BOOL WINHELP_HasWorkingWindow(void)
      return Globals.active_win->page != NULL && Globals.active_win->page->file != NULL;
  }
  
-+static void cb_KWBTreeKey(void *p, void **next, void *cookie)
++static void comp_KWBTreeKey(void *p, const void *key, int leaf, void **next)
 +{
-+    char **key = (char **)cookie;
-+    if(!strcasecmp(*key, (char *)p))
-+        *key = (char *)p;
 +    *next = (char*)p + strlen((char*)p) + 7;
++    return strcasecmp(p, key);
 +}
 +
 +
  /******************************************************************
   *		WINHELP_HandleCommand
   *
-@@ -352,7 +365,7 @@ static BOOL WINHELP_HasWorkingWindow(void)
+@@ -352,7 +392,7 @@ static BOOL WINHELP_HasWorkingWindow(void)
  static LRESULT  WINHELP_HandleCommand(HWND hSrcWnd, LPARAM lParam)
  {
      COPYDATASTRUCT*     cds = (COPYDATASTRUCT*)lParam;
@@ -238,7 +773,7 @@ index 7ce5d4a0a8..1226d9c39e 100644
  
      if (cds->dwData != 0xA1DE505)
      {
-@@ -365,6 +378,8 @@ static LRESULT  WINHELP_HandleCommand(HWND hSrcWnd, LPARAM lParam)
+@@ -365,6 +405,8 @@ static LRESULT  WINHELP_HandleCommand(HWND hSrcWnd, LPARAM lParam)
      if (wh)
      {
          char*   ptr = (wh->ofsFilename) ? (LPSTR)wh + wh->ofsFilename : NULL;
@@ -247,7 +782,7 @@ index 7ce5d4a0a8..1226d9c39e 100644
  
          WINE_TRACE("Got[%u]: cmd=%u data=%08x fn=%s\n",
                     wh->size, wh->command, wh->data, debugstr_a(ptr));
-@@ -414,9 +429,31 @@ static LRESULT  WINHELP_HandleCommand(HWND hSrcWnd, LPARAM lParam)
+@@ -414,9 +456,31 @@ static LRESULT  WINHELP_HandleCommand(HWND hSrcWnd, LPARAM lParam)
                  MACRO_JumpHash(ptr, "main", 0);
              }
              break;
@@ -262,8 +797,8 @@ index 7ce5d4a0a8..1226d9c39e 100644
 +                break;
 +            }
 +            key = ((char *)wh + wh->ofsData);
-+            HLPFILE_BPTreeEnum(hlpfile->kwbtree, cb_KWBTreeKey, &key);
-+            if (key == ((char *)wh + wh->ofsData))
++            key = HLPFILE_BPTreeSearch(hlpfile->kwbtree, key, comp_KWBTreeKey);
++            if (!key)
 +            {
 +                HLPFILE_FreeHlpFile(hlpfile);
 +                if (!WINHELP_HasWorkingWindow()) MACRO_Exit();
@@ -280,31 +815,103 @@ index 7ce5d4a0a8..1226d9c39e 100644
          /* case HELP_COMMAND: */
          /* case HELP_PARTIALKEY: */
          /* case HELP_MULTIKEY: */
-@@ -584,7 +621,8 @@ static void WINHELP_DeleteWindow(WINHELP_WINDOW* win)
+@@ -584,7 +648,8 @@ static void WINHELP_DeleteWindow(WINHELP_WINDOW* win)
  
  static char* WINHELP_GetCaption(WINHELP_WNDPAGE* wpage)
  {
 -    if (wpage->wininfo->caption[0]) return wpage->wininfo->caption;
-+    if ((wpage->wininfo->flags & 4) || !wpage->page)
++    if (((wpage->wininfo->flags & 4) && (wpage->wininfo->caption[0])) || !wpage->page)
 +        return wpage->wininfo->caption;
      return wpage->page->file->lpszTitle;
  }
  
-@@ -638,7 +676,6 @@ static HLPFILE_LINK* WINHELP_FindLink(WINHELP_WINDOW* win, LPARAM pos)
-     mouse_ptl.y = (short)HIWORD(pos);
-     cp = SendMessageW(GetDlgItem(win->hMainWnd, CTL_ID_TEXT), EM_CHARFROMPOS,
-                       0, (LPARAM)&mouse_ptl);
+@@ -622,74 +687,164 @@ static void WINHELP_RememberPage(WINHELP_WINDOW* win, WINHELP_WNDPAGE* wpage)
+     wpage->page->file->wRefCount++;
+ }
+ 
+-/***********************************************************************
+- *
+- *           WINHELP_FindLink
+- */
+-static HLPFILE_LINK* WINHELP_FindLink(WINHELP_WINDOW* win, LPARAM pos)
++static HLPFILE_HOTSPOTLINK* WINHELP_FindHotSpot(WINHELP_WINDOW* win, LPARAM pos)
+ {
+-    HLPFILE_LINK*           link;
+-    POINTL                  mouse_ptl, char_ptl, char_next_ptl;
+-    DWORD                   cp;
 -
-     for (link = win->page->first_link; link; link = link->next)
+-    if (!win->page) return NULL;
+-
+-    mouse_ptl.x = (short)LOWORD(pos);
+-    mouse_ptl.y = (short)HIWORD(pos);
+-    cp = SendMessageW(GetDlgItem(win->hMainWnd, CTL_ID_TEXT), EM_CHARFROMPOS,
+-                      0, (LPARAM)&mouse_ptl);
+-
+-    for (link = win->page->first_link; link; link = link->next)
++    int x = LOWORD(pos), y = HIWORD(pos);
++    POINTL pntl = {x, y};
++    HWND hwndtext = GetDlgItem(win->hMainWnd, CTL_ID_TEXT);
++    LRESULT cp = SendMessageW(hwndtext, EM_CHARFROMPOS, 0, &pntl);
++    HLPFILE_HOTSPOTLINK* hs = win->page->first_hs;
++    while (hs)
      {
-         if (link->cpMin <= cp && cp <= link->cpMax)
-@@ -672,8 +709,17 @@ static LRESULT CALLBACK WINHELP_RicheditWndProc(HWND hWnd, UINT msg,
+-        if (link->cpMin <= cp && cp <= link->cpMax)
++        if ((cp == hs->link.cpMin) || (cp == (hs->link.cpMin + 1)))
+         {
+-            /* check whether we're at end of line */
+-            SendMessageW(GetDlgItem(win->hMainWnd, CTL_ID_TEXT), EM_POSFROMCHAR,
+-                         (LPARAM)&char_ptl, cp);
+-            SendMessageW(GetDlgItem(win->hMainWnd, CTL_ID_TEXT), EM_POSFROMCHAR,
+-                         (LPARAM)&char_next_ptl, cp + 1);
+-            if (link->bHotSpot)
+-            {
+-                HLPFILE_HOTSPOTLINK*    hslink = (HLPFILE_HOTSPOTLINK*)link;
+-                if ((mouse_ptl.x < char_ptl.x + hslink->x) ||
+-                    (mouse_ptl.x >= char_ptl.x + hslink->x + hslink->width) ||
+-                    (mouse_ptl.y < char_ptl.y + hslink->y) ||
+-                    (mouse_ptl.y >= char_ptl.y + hslink->y + hslink->height))
+-                    continue;
+-                break;
+-            }
+-            if (char_next_ptl.y != char_ptl.y || mouse_ptl.x >= char_next_ptl.x)
+-                link = NULL;
+-            break;
++            SendMessageW(hwndtext, EM_POSFROMCHAR, &pntl, hs->link.cpMin);
++            if ((x > pntl.x + hs->x) && (x <= pntl.x + hs->x + hs->width) &&
++                (y > pntl.y + hs->y) && (y <= pntl.y + hs->y + hs->height))
++                return hs;
+         }
++        hs = hs->next;
+     }
+-    return link;
++    return NULL;
+ }
+ 
+ static LRESULT CALLBACK WINHELP_RicheditWndProc(HWND hWnd, UINT msg,
+                                                 WPARAM wParam, LPARAM lParam)
+ {
      WINHELP_WINDOW *win = (WINHELP_WINDOW*) GetWindowLongPtrW(GetParent(hWnd), 0);
-     DWORD messagePos;
-     POINT pt;
+-    DWORD messagePos;
+-    POINT pt;
 +    LRESULT result;
      switch(msg)
      {
+-        case WM_SETCURSOR:
+-            messagePos = GetMessagePos();
+-            pt.x = (short)LOWORD(messagePos);
+-            pt.y = (short)HIWORD(messagePos);
+-            ScreenToClient(hWnd, &pt);
+-            if (win->page && WINHELP_FindLink(win, MAKELPARAM(pt.x, pt.y)))
++        case WM_SHOWWINDOW:
++            if (!wParam)
+             {
+-                SetCursor(win->hHandCur);
++                DestroyWindow(hWnd);
+                 return 0;
+             }
+-            /* fall through */
+         default:
+             return CallWindowProcA(win->origRicheditWndProc, hWnd, msg, wParam, lParam);
 +        case WM_KEYDOWN:
 +        case WM_KEYUP:
 +        case WM_LBUTTONDOWN:
@@ -313,10 +920,18 @@ index 7ce5d4a0a8..1226d9c39e 100644
 +            result = CallWindowProcA(win->origRicheditWndProc, hWnd, msg, wParam, lParam);
 +            HideCaret(hWnd);
 +            return result;
-         case WM_SETCURSOR:
-             messagePos = GetMessagePos();
-             pt.x = (short)LOWORD(messagePos);
-@@ -690,6 +736,95 @@ static LRESULT CALLBACK WINHELP_RicheditWndProc(HWND hWnd, UINT msg,
++         case WM_SETCURSOR:
++         {
++             DWORD messagePos = GetMessagePos();
++             POINT pt = {LOWORD(messagePos), HIWORD(messagePos)};
++             ScreenToClient(hWnd, &pt);
++             if (win->page && WINHELP_FindHotSpot(win, MAKELPARAM(pt.x, pt.y)))
++             {
++                 SetCursor(win->hHandCur);
++                 return 0;
++             }
++             return CallWindowProcA(win->origRicheditWndProc, hWnd, msg, wParam, lParam);
++         }
      }
  }
  
@@ -330,12 +945,12 @@ index 7ce5d4a0a8..1226d9c39e 100644
 +    return 0;
 +}
 +
-+ULONG STDMETHODCALLTYPE WINHELP_OLE_Callback_Release(IRichEditOleCallback *This)
++ULONG STDMETHODCALLTYPE WINHELP_OLE_Callback_Release (IRichEditOleCallback *This)
 +{
 +    return 0;
 +}
 +
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetNewStorage(IRichEditOleCallback *This, LPSTORAGE *lplpstg)
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetNewStorage (IRichEditOleCallback *This, LPSTORAGE *lplpstg)
 +{
 +    LPLOCKBYTES lpLockBytes = NULL;
 +    HRESULT result = CreateILockBytesOnHGlobal(NULL, TRUE, &lpLockBytes);
@@ -347,50 +962,60 @@ index 7ce5d4a0a8..1226d9c39e 100644
 +    return result;
 +
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetInPlaceContext(IRichEditOleCallback *This, LPOLEINPLACEFRAME * lplpFrame,
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetInPlaceContext (IRichEditOleCallback *This, LPOLEINPLACEFRAME * lplpFrame,
 +    LPOLEINPLACEUIWINDOW * lplpDoc,
 +    LPOLEINPLACEFRAMEINFO lpFrameInfo)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_ShowContainerUI(IRichEditOleCallback *This, BOOL fShow)
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_ShowContainerUI (IRichEditOleCallback *This, BOOL fShow)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_QueryInsertObject(IRichEditOleCallback *This, LPCLSID lpclsid, LPSTORAGE lpstg,
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_QueryInsertObject (IRichEditOleCallback *This, LPCLSID lpclsid, LPSTORAGE lpstg,
 +    LONG cp)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_DeleteObject(IRichEditOleCallback *This, LPOLEOBJECT lpoleobj)
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_DeleteObject (IRichEditOleCallback *This, LPOLEOBJECT lpoleobj)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_QueryAcceptData(IRichEditOleCallback *This, LPDATAOBJECT lpdataobj,
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_QueryAcceptData (IRichEditOleCallback *This, LPDATAOBJECT lpdataobj,
 +    CLIPFORMAT * lpcfFormat, DWORD reco,
 +    BOOL fReally, HGLOBAL hMetaPict)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_ContextSensitiveHelp(IRichEditOleCallback *This, BOOL fEnterMode)
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_ContextSensitiveHelp  (IRichEditOleCallback *This, BOOL fEnterMode)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetClipboardData(IRichEditOleCallback *This, CHARRANGE * lpchrg, DWORD reco, LPDATAOBJECT * lplpdataobj)
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetClipboardData (IRichEditOleCallback *This, CHARRANGE * lpchrg, DWORD reco, LPDATAOBJECT * lplpdataobj)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetDragDropEffect(IRichEditOleCallback *This, BOOL fDrag, DWORD grfKeyState,
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetDragDropEffect (IRichEditOleCallback *This, BOOL fDrag, DWORD grfKeyState,
 +    LPDWORD pdwEffect)
 +{
 +    return S_OK;
 +}
-+HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetContextMenu(IRichEditOleCallback *This, WORD seltype, LPOLEOBJECT lpoleobj,
++
++HRESULT STDMETHODCALLTYPE WINHELP_OLE_Callback_GetContextMenu (IRichEditOleCallback *This, WORD seltype, LPOLEOBJECT lpoleobj,
 +    CHARRANGE * lpchrg,
 +    HMENU * lphmenu)
 +{
 +    return S_OK;
 +}
++
 +IRichEditOleCallbackVtbl callbackv =
 +{
 +    WINHELP_OLE_Callback_QueryInterface,
@@ -412,42 +1037,444 @@ index 7ce5d4a0a8..1226d9c39e 100644
  /***********************************************************************
   *
   *           WINHELP_CreateHelpWindow
-@@ -749,7 +884,7 @@ BOOL WINHELP_CreateHelpWindow(WINHELP_WNDPAGE* wpage, int nCmdShow, BOOL remembe
+@@ -710,7 +865,7 @@ BOOL WINHELP_CreateHelpWindow(WINHELP_WNDPAGE* wpage, int nCmdShow, BOOL remembe
+         {
+             if (!lstrcmpiA(win->info->name, wpage->wininfo->name))
+             {
+-                if (win->page == wpage->page && win->info == wpage->wininfo)
++                if (win->page == wpage->page && win->info == wpage->wininfo && win->offset == wpage->relative)
+                 {
+                     /* see #22979, some hlp files have a macro (run at page opening), which
+                      * jumps to the very same page
+@@ -748,12 +903,10 @@ BOOL WINHELP_CreateHelpWindow(WINHELP_WNDPAGE* wpage, int nCmdShow, BOOL remembe
+ 
                  win->page = wpage->page;
                  win->info = wpage->wininfo;
++                win->offset = wpage->relative;
                  hTextWnd = GetDlgItem(win->hMainWnd, CTL_ID_TEXT);
 -                WINHELP_SetupText(hTextWnd, win, wpage->relative);
-+                DestroyWindow(hTextWnd);
- 
-                 InvalidateRect(win->hMainWnd, NULL, TRUE);
-                 if (win->hHistoryWnd) InvalidateRect(win->hHistoryWnd, NULL, TRUE);
-@@ -814,15 +949,17 @@ BOOL WINHELP_CreateHelpWindow(WINHELP_WNDPAGE* wpage, int nCmdShow, BOOL remembe
+-
+-                InvalidateRect(win->hMainWnd, NULL, TRUE);
+-                if (win->hHistoryWnd) InvalidateRect(win->hHistoryWnd, NULL, TRUE);
+-
++                /* hide the window then destroy it in the message loop */
++                ShowWindow(hTextWnd, 0);
+                 break;
+             }
+         }
+@@ -814,16 +967,19 @@ BOOL WINHELP_CreateHelpWindow(WINHELP_WNDPAGE* wpage, int nCmdShow, BOOL remembe
              /* Create button box and text Window */
              CreateWindowA(BUTTON_BOX_WIN_CLASS_NAME, "", WS_CHILD | WS_VISIBLE,
                           0, 0, 0, 0, win->hMainWnd, (HMENU)CTL_ID_BUTTON, Globals.hInstance, NULL);
-+    }
- 
+-
 -        hTextWnd = CreateWindowA(RICHEDIT_CLASS20A, NULL,
 -                                ES_MULTILINE | ES_READONLY | WS_CHILD | WS_HSCROLL | WS_VSCROLL | WS_VISIBLE,
 -                                0, 0, 0, 0, win->hMainWnd, (HMENU)CTL_ID_TEXT, Globals.hInstance, NULL);
 -        SendMessageW(hTextWnd, EM_SETEVENTMASK, 0,
-+    hTextWnd = CreateWindowA(RICHEDIT_CLASS20A, NULL,
+-                    SendMessageW(hTextWnd, EM_GETEVENTMASK, 0, 0) | ENM_MOUSEEVENTS);
+-        win->origRicheditWndProc = (WNDPROC)SetWindowLongPtrA(hTextWnd, GWLP_WNDPROC,
+-                                                             (LONG_PTR)WINHELP_RicheditWndProc);
+     }
+ 
++    hTextWnd = CreateWindowW(MSFTEDIT_CLASS, NULL,
 +                    ES_MULTILINE | ES_READONLY | WS_CHILD | WS_HSCROLL | WS_VSCROLL | WS_VISIBLE,
 +                    0, 0, 0, 0, win->hMainWnd, (HMENU)CTL_ID_TEXT, Globals.hInstance, NULL);
 +    /* set ole callback for showing bitmaps */
-+    SendMessageW(hTextWnd, EM_SETOLECALLBACK, NULL, &callback);
++    SendMessageW(hTextWnd, EM_SETOLECALLBACK, 0, &callback);
++    SendMessageW(hTextWnd, EM_SHOWSCROLLBAR, SB_HORZ, FALSE);
 +    SendMessageW(hTextWnd, EM_SETEVENTMASK, 0,
-                     SendMessageW(hTextWnd, EM_GETEVENTMASK, 0, 0) | ENM_MOUSEEVENTS);
--        win->origRicheditWndProc = (WNDPROC)SetWindowLongPtrA(hTextWnd, GWLP_WNDPROC,
--                                                             (LONG_PTR)WINHELP_RicheditWndProc);
--    }
++                    SendMessageW(hTextWnd, EM_GETEVENTMASK, 0, 0) | ENM_MOUSEEVENTS | ENM_LINK);
 +    win->origRicheditWndProc = (WNDPROC)SetWindowLongPtrA(hTextWnd, GWLP_WNDPROC,
 +                    (LONG_PTR)WINHELP_RicheditWndProc);
- 
++
      hIcon = (wpage->page) ? wpage->page->file->hIcon : NULL;
      if (!hIcon) hIcon = LoadImageW(Globals.hInstance, MAKEINTRESOURCEW(IDI_WINHELP), IMAGE_ICON,
+                                   GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_SHARED);
+@@ -887,69 +1043,87 @@ BOOL WINHELP_OpenHelpWindow(HLPFILE_PAGE* (*lookup)(HLPFILE*, LONG, ULONG*),
+     return WINHELP_CreateHelpWindow(&wpage, nCmdShow, TRUE);
+ }
+ 
++static void WINHELP_DoLink(WINHELP_WINDOW* win, HLPFILE_LINK* link, DWORD pos)
++{
++    HLPFILE*                hlpfile;
++    HLPFILE_WINDOWINFO*     wi;
++    switch (link->cookie)
++    {
++        case hlp_link_link:
++            if ((hlpfile = WINHELP_LookupHelpFile(link->string)))
++            {
++                if (link->window == -1)
++                {
++                    wi = win->info;
++                    if (wi->win_style & WS_POPUP) wi = Globals.active_win->info;
++                }
++                else if (link->window < hlpfile->numWindows)
++                    wi = &hlpfile->windows[link->window];
++                else
++                {
++                    WINE_WARN("link to window %d/%d\n", link->window, hlpfile->numWindows);
++                    break;
++                }
++                WINHELP_OpenHelpWindow(HLPFILE_PageByHash, hlpfile, link->hash, wi, SW_NORMAL);
++            }
++            break;
++        case hlp_link_popup:
++            if ((hlpfile = WINHELP_LookupHelpFile(link->string)))
++                    WINHELP_OpenHelpWindow(HLPFILE_PageByHash, hlpfile, link->hash,
++                    WINHELP_GetPopupWindowInfo(hlpfile, win, pos),
++                    SW_NORMAL);
++            break;
++        case hlp_link_macro:
++            MACRO_ExecuteMacro(win, link->string);
++            break;
++        default:
++            WINE_FIXME("Unknown link cookie %d\n", link->cookie);
++    }
++}
++
+ /******************************************************************
+- *             WINHELP_HandleTextMouse
++ *             WINHELP_HandleLink
+  *
+  */
+-static BOOL WINHELP_HandleTextMouse(WINHELP_WINDOW* win, UINT msg, LPARAM lParam)
++static BOOL WINHELP_HandleLink(ENLINK* enlink, WINHELP_WINDOW* win)
+ {
+-    HLPFILE*                hlpfile;
+     HLPFILE_LINK*           link;
+     BOOL                    ret = FALSE;
++    wchar_t                 tmp[32];
++    TEXTRANGEW              chars;
++    const wchar_t           format[] = {'%', 'p', 0};
+ 
+-    switch (msg)
++    chars.chrg.cpMin = enlink->chrg.cpMin;
++    chars.chrg.cpMax = enlink->chrg.cpMax;
++    chars.lpstrText = &tmp;
++    SendMessageW(enlink->nmhdr.hwndFrom, EM_GETTEXTRANGE, 0, &chars);
++    swscanf(tmp, format, &link);
++
++    switch (enlink->msg)
+     {
+     case WM_LBUTTONDOWN:
+-        if ((link = WINHELP_FindLink(win, lParam)))
+-        {
+-            HLPFILE_WINDOWINFO*     wi;
+-
+-            switch (link->cookie)
+-            {
+-            case hlp_link_link:
+-                if ((hlpfile = WINHELP_LookupHelpFile(link->string)))
+-                {
+-                    if (link->window == -1)
+-                    {
+-                        wi = win->info;
+-                        if (wi->win_style & WS_POPUP) wi = Globals.active_win->info;
+-                    }
+-                    else if (link->window < hlpfile->numWindows)
+-                        wi = &hlpfile->windows[link->window];
+-                    else
+-                    {
+-                        WINE_WARN("link to window %d/%d\n", link->window, hlpfile->numWindows);
+-                        break;
+-                    }
+-                    WINHELP_OpenHelpWindow(HLPFILE_PageByHash, hlpfile, link->hash, wi, SW_NORMAL);
+-                }
+-                break;
+-            case hlp_link_popup:
+-                if ((hlpfile = WINHELP_LookupHelpFile(link->string)))
+-                    WINHELP_OpenHelpWindow(HLPFILE_PageByHash, hlpfile, link->hash,
+-                                           WINHELP_GetPopupWindowInfo(hlpfile, win, lParam),
+-                                           SW_NORMAL);
+-                break;
+-            case hlp_link_macro:
+-                MACRO_ExecuteMacro(win, link->string);
+-                break;
+-            default:
+-                WINE_FIXME("Unknown link cookie %d\n", link->cookie);
+-            }
+-            ret = TRUE;
+-        }
++        WINHELP_DoLink(win, link, enlink->lParam);
++    case WM_MBUTTONDOWN:
++    case WM_RBUTTONDOWN:
++    case WM_NCLBUTTONDOWN:
++    case WM_NCMBUTTONDOWN:
++    case WM_NCRBUTTONDOWN:
++        ret = TRUE;
+         break;
+     }
+     return ret;
+ }
+ 
++static int inloop = FALSE;
++
+ /***********************************************************************
+  *
+  *           WINHELP_CheckPopup
+  */
+ static BOOL WINHELP_CheckPopup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT* lret)
+ {
+-    WINHELP_WINDOW*     popup;
++    WINHELP_WINDOW*     popup = Globals.active_popup;
++    BOOL                ret = TRUE;
+ 
+     if (!Globals.active_popup) return FALSE;
+ 
+@@ -958,37 +1132,52 @@ static BOOL WINHELP_CheckPopup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
+     case WM_NOTIFY:
+         {
+             MSGFILTER*  msgf = (MSGFILTER*)lParam;
+-            if (msgf->nmhdr.code == EN_MSGFILTER)
++            switch (msgf->nmhdr.code)
+             {
++            case EN_MSGFILTER:
+                 if (!WINHELP_CheckPopup(hWnd, msgf->msg, msgf->wParam, msgf->lParam, NULL))
+                     return FALSE;
+                 if (lret) *lret = 1;
+                 return TRUE;
++            case EN_LINK:
++                if (!WINHELP_HandleLink((ENLINK *)lParam, Globals.active_popup))
++                    return FALSE;
++                break;
++            default:
++                return FALSE;
+             }
+         }
+-        break;
+     case WM_ACTIVATE:
+         if (LOWORD(wParam) != WA_INACTIVE || (HWND)lParam == Globals.active_win->hMainWnd ||
+             (HWND)lParam == Globals.active_popup->hMainWnd ||
+             GetWindow((HWND)lParam, GW_OWNER) == Globals.active_win->hMainWnd)
+-            break;
+-        /* fall through */
++            return FALSE;
++        break;
+     case WM_LBUTTONDOWN:
+-        if (msg == WM_LBUTTONDOWN)
+-            WINHELP_HandleTextMouse(Globals.active_popup, msg, lParam);
+-        /* fall through */
++        if (hWnd == popup->hMainWnd)
++        {
++            if (inloop)
++                return FALSE;
++            inloop = TRUE;
++            CallWindowProcA(popup->origRicheditWndProc, GetDlgItem(popup->hMainWnd, CTL_ID_TEXT), msg, wParam, lParam);
++            inloop = FALSE;
++            break;
++        }
+     case WM_MBUTTONDOWN:
+     case WM_RBUTTONDOWN:
+     case WM_NCLBUTTONDOWN:
+     case WM_NCMBUTTONDOWN:
+     case WM_NCRBUTTONDOWN:
+-        popup = Globals.active_popup;
+-        Globals.active_popup = NULL;
+-        WINHELP_ReleaseWindow(popup);
+-        if (lret) *lret = 1;
+-        return TRUE;
++        if (hWnd != popup->hMainWnd)
++            ret = FALSE;
++        break;
++    default:
++        return FALSE;
+     }
+-    return FALSE;
++    Globals.active_popup = NULL;
++    WINHELP_ReleaseWindow(popup);
++    if (lret) *lret = 1;
++    return ret;
+ }
+ 
+ /***********************************************************************
+@@ -1193,6 +1382,62 @@ static LRESULT CALLBACK WINHELP_HistoryWndProc(HWND hWnd, UINT msg, WPARAM wPara
+     return DefWindowProcA(hWnd, msg, wParam, lParam);
+ }
+ 
++struct index_data
++{
++    HLPFILE*    hlpfile;
++    BOOL        jump;
++    ULONG       offset;
++    WORD        count;
++};
++
++static void comp_TTLBTree(void *p, const void *key, int leaf, void **next)
++{
++    *next = (char *)p + 5 + (leaf?strlen((char *)p + 4):1);
++    if (leaf && (*(DWORD *)*next > key))
++        return 0;
++    return *(DWORD *)p - (DWORD)key;
++}
++
++static INT_PTR CALLBACK WINHELP_TopicDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
++{
++    static struct index_data* id;
++    HWND hListWnd = GetDlgItem(hWnd, IDC_TOPICS);
++
++    switch (msg)
++    {
++    case WM_INITDIALOG:
++    {
++        id = (struct index_data*)lParam;
++        for (int i = 0; i < id->count; i++)
++        {
++            DWORD toffset = ((DWORD *)id->offset)[i];
++            BYTE* ptr = HLPFILE_BPTreeSearch(id->hlpfile->ttlbtree, toffset, comp_TTLBTree);
++            int idx = SendMessageA(hListWnd, LB_ADDSTRING, 0, (LPARAM)(ptr + 4));
++            SendMessageW(hListWnd, LB_SETITEMDATA, idx, (LPARAM)toffset);
++        }
++    }
++    case WM_COMMAND:
++    {
++        int sel = SendMessageW(hListWnd, LB_GETCURSEL, 0, 0);
++        switch (LOWORD(wParam))
++        {
++        case IDC_TOPICS:
++            if (HIWORD(wParam) == LBN_DBLCLK)
++                EndDialog(hWnd, SendMessageW(hListWnd, LB_GETITEMDATA, sel, 0));
++            break;
++        case 1:
++            EndDialog(hWnd, SendMessageW(hListWnd, LB_GETITEMDATA, sel, 0));
++            break;
++        case 2:
++            EndDialog(hWnd, -1);
++            break;
++        }
++        break;
++    }
++    }
++    return 0;
++}
++
+ /**************************************************************************
+  * cb_KWBTree
+  *
+@@ -1211,13 +1456,6 @@ static void cb_KWBTree(void *p, void **next, void *cookie)
+     *next = (char*)p + strlen((char*)p) + 7;
+ }
+ 
+-struct index_data
+-{
+-    HLPFILE*    hlpfile;
+-    BOOL        jump;
+-    ULONG       offset;
+-};
+-
+ /**************************************************************************
+  * WINHELP_IndexDlgProc
+  *
+@@ -1253,18 +1491,29 @@ static INT_PTR CALLBACK WINHELP_IndexDlgProc(HWND hWnd, UINT msg, WPARAM wParam,
+             if (sel != LB_ERR)
+             {
+                 BYTE *p;
+-                int count;
+ 
+                 p = (BYTE*)SendDlgItemMessageW(hWnd, IDC_INDEXLIST, LB_GETITEMDATA, sel, 0);
+-                count = *(short*)((char *)p + strlen((char *)p) + 1);
+-                if (count > 1)
++                p += strlen((char *)p);
++                id->count = *(short*)((char *)p + 1);
++                id->offset = *(ULONG*)((char *)p + 3);
++                id->offset = (DWORD)(id->hlpfile->kwdata + id->offset + 9);
++                if (id->count > 1)
+                 {
+-                    MessageBoxA(hWnd, "count > 1 not supported yet", "Error", MB_OK | MB_ICONSTOP);
+-                    SetWindowLongPtrW(hWnd, DWLP_MSGRESULT, PSNRET_INVALID);
+-                    return TRUE;
++                    if (id->hlpfile->ttlbtree)
++                    {
++                        id->offset = DialogBoxParamA(NULL, MAKEINTRESOURCE(IDD_TOPIC), hWnd, WINHELP_TopicDlgProc, id);
++                        if (id->offset == 0xFFFFFFFF)
++                            return TRUE;
++                    }
++                    else
++                    {
++                        MessageBoxA(hWnd, "topic not found", "Error", MB_OK | MB_ICONSTOP);
++                        SetWindowLongPtrW(hWnd, DWLP_MSGRESULT, PSNRET_INVALID);
++                        return TRUE;
++                    }
+                 }
+-                id->offset = *(ULONG*)((char *)p + strlen((char *)p) + 3);
+-                id->offset = *(long*)(id->hlpfile->kwdata + id->offset + 9);
++                else
++                    id->offset = *((ULONG*)id->offset);
+                 if (id->offset == 0xFFFFFFFF)
+                 {
+                     MessageBoxA(hWnd, "macro keywords not supported yet", "Error", MB_OK | MB_ICONSTOP);
+@@ -1449,6 +1698,7 @@ static LRESULT CALLBACK WINHELP_MainWndProc(HWND hWnd, UINT msg, WPARAM wParam,
+         if (wParam == CTL_ID_TEXT)
+         {
+             RECT        rc;
++            RECT        orc;
+ 
+             switch (((NMHDR*)lParam)->code)
+             {
+@@ -1457,6 +1707,18 @@ static LRESULT CALLBACK WINHELP_MainWndProc(HWND hWnd, UINT msg, WPARAM wParam,
+                     const MSGFILTER*    msgf = (const MSGFILTER*)lParam;
+                     switch (msgf->msg)
+                     {
++                    case WM_LBUTTONDOWN:
++                    {
++                        HLPFILE_HOTSPOTLINK* hs;
++                        win = (WINHELP_WINDOW*)GetWindowLongPtrW(hWnd, 0);
++                        hs = WINHELP_FindHotSpot(win, msgf->lParam);
++                        if (hs)
++                        {
++                            WINHELP_DoLink(win, &hs->link, msgf->lParam);
++                            return TRUE;
++                        }
++                        break;
++                    }
+                     case WM_KEYUP:
+                         if (msgf->wParam == VK_ESCAPE)
+                             WINHELP_ReleaseWindow((WINHELP_WINDOW*)GetWindowLongPtrW(hWnd, 0));
+@@ -1495,8 +1757,7 @@ static LRESULT CALLBACK WINHELP_MainWndProc(HWND hWnd, UINT msg, WPARAM wParam,
+                     }
+                     break;
+                     default:
+-                        return WINHELP_HandleTextMouse((WINHELP_WINDOW*)GetWindowLongPtrW(hWnd, 0),
+-                                                       msgf->msg, msgf->lParam);
++                        break;
+                     }
+                 }
+                 break;
+@@ -1504,6 +1765,13 @@ static LRESULT CALLBACK WINHELP_MainWndProc(HWND hWnd, UINT msg, WPARAM wParam,
+             case EN_REQUESTRESIZE:
+                 rc = ((REQRESIZE*)lParam)->rc;
+                 win = (WINHELP_WINDOW*) GetWindowLongPtrW(hWnd, 0);
++                GetClientRect(win->hMainWnd, &orc);
++                /* permit the popup to get wider but not narrower */
++                if ((rc.right - rc.left) < orc.right)
++                {
++                    rc.left = orc.left;
++                    rc.right = orc.right;
++                }
+                 AdjustWindowRect(&rc, GetWindowLongW(win->hMainWnd, GWL_STYLE),
+                                  FALSE);
+                 SetWindowPos(win->hMainWnd, HWND_TOP, 0, 0,
+@@ -1511,6 +1779,10 @@ static LRESULT CALLBACK WINHELP_MainWndProc(HWND hWnd, UINT msg, WPARAM wParam,
+                              SWP_NOMOVE | SWP_NOZORDER);
+                 WINHELP_LayoutMainWindow(win);
+                 break;
++
++            case EN_LINK:
++                WINHELP_HandleLink((ENLINK *)lParam, (WINHELP_WINDOW*)GetWindowLongPtrW(hWnd, 0));
++                break;
+             }
+         }
+         break;
+@@ -1652,7 +1924,7 @@ int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE prev, LPSTR cmdline, int show)
+ 
+     Globals.hInstance = hInstance;
+ 
+-    if (LoadLibraryA("riched20.dll") == NULL)
++    if (LoadLibraryA("msftedit.dll") == NULL)
+         return MessageBoxW(0, MAKEINTRESOURCEW(STID_NO_RICHEDIT),
+                            MAKEINTRESOURCEW(STID_WHERROR), MB_OK);
+ 
 diff --git a/programs/winhlp32/winhelp.h b/programs/winhlp32/winhelp.h
-index 519dec215a..24ba299f2c 100644
+index 519dec215a..d2c5b144f9 100644
 --- a/programs/winhlp32/winhelp.h
 +++ b/programs/winhlp32/winhelp.h
 @@ -30,6 +30,8 @@
@@ -459,3 +1486,44 @@ index 519dec215a..24ba299f2c 100644
  #ifndef RC_INVOKED
  
  #include <stdarg.h>
+@@ -91,6 +93,7 @@ typedef struct tagWinHelp
+ 
+     WINHELP_PAGESET     back;
+     unsigned            font_scale; /* 0 = small, 1 = normal, 2 = large */
++    ULONG               offset;
+ 
+     struct tagWinHelp*  next;
+ } WINHELP_WINDOW;
+diff --git a/programs/winhlp32/winhelp_res.h b/programs/winhlp32/winhelp_res.h
+index 5bf97aadae..5f0d6b0831 100644
+--- a/programs/winhlp32/winhelp_res.h
++++ b/programs/winhlp32/winhelp_res.h
+@@ -50,5 +50,7 @@
+ #define IDD_INDEX               0x150
+ #define IDC_INDEXLIST           0x151
+ #define IDD_SEARCH              0x152
++#define IDD_TOPIC               0x153
++#define IDC_TOPICS              0x154
+ 
+ #define IDI_WINHELP             0xF00
+diff --git a/programs/winhlp32/winhlp32.rc b/programs/winhlp32/winhlp32.rc
+index ac50c6af78..446c495693 100644
+--- a/programs/winhlp32/winhlp32.rc
++++ b/programs/winhlp32/winhlp32.rc
+@@ -109,6 +109,16 @@ CAPTION "Search"
+     LTEXT  "Not yet implemented", -1, 10, 10, 180, 150
+ }
+ 
++IDD_TOPIC DIALOG 0, 0, 160, 130
++STYLE DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
++FONT 8, "MS Shell Dlg"
++CAPTION "Topics Found"
++{
++    LISTBOX IDC_TOPICS, 5, 5, 150, 100, LBS_NOINTEGRALHEIGHT | LBS_STANDARD
++    DEFPUSHBUTTON "OK" 1, 50, 110, 45, 15, BS_DEFPUSHBUTTON | WS_GROUP | WS_TABSTOP
++    PUSHBUTTON "Cancel", 2, 100, 110, 50, 15, WS_GROUP | WS_TABSTOP
++}
++
+ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+ 
+ 

@@ -56,4 +56,4 @@ Add OleIsCurrentClipboard stub, this make application like Microsoft Word 6.0 Th
 
 - 01xx_winevdm_*.patch
 
-Patch from the winevdm project (wine on Windows) rev. 8dbcdfc2, https://github.com/otya128/winevdm
+Patch from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
