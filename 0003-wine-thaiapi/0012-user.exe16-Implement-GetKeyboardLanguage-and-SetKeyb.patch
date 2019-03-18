@@ -1,0 +1,94 @@
+From e838085b547c192ccb881d6abc39db55f182c63a Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Wed, 4 Apr 2018 11:45:38 +0700
+Subject: [PATCH 12/25] user.exe16: Implement GetKeyboardLanguage and
+ SetKeyboardLanguage.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c   | 25 ++++++++++++++++++++-----
+ include/wine/winuser16.h | 10 ++++++++++
+ 2 files changed, 30 insertions(+), 5 deletions(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index e0cc8598ef..cfa3c385a8 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -32,6 +32,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(user);
+ 
+ /* Thai API */
+ static WORD THAI_Interface = 0;         /* Thai API interface flags */
++static WORD THAI_KeyboardLang = KB_ENG; /* Thai API keyboard language */
+ static BOOL16 THAI_KbdSeqCheck = TRUE;  /* Thai API keyboard sequence check flags */
+ 
+ /***********************************************************************
+@@ -49,8 +50,7 @@ WORD WINAPI GetTaskInterface16( HTASK16 hTask )
+  */
+ WORD WINAPI GetKeyboardLanguage16(void)
+ {
+-    FIXME("stub\n");
+-    return 0;
++    return THAI_KeyboardLang;
+ }
+ 
+ 
+@@ -59,8 +59,23 @@ WORD WINAPI GetKeyboardLanguage16(void)
+  */
+ INT16 WINAPI SetKeyboardLanguage16( INT16 nKey )
+ {
+-    FIXME("(%d) stub\n", nKey);
+-    return 0;
++    INT16 oldKeyb = THAI_KeyboardLang;
++
++    FIXME("(%04x) semi-stub\n", nKey);
++
++    if (nKey == KB_TOGGLE)
++    {
++        if (THAI_KeyboardLang == KB_ENG)
++            THAI_KeyboardLang = KB_THAI;
++        else
++            THAI_KeyboardLang = KB_ENG;
++    }
++    else
++        THAI_KeyboardLang = nKey;
++
++    SendMessage16(GetActiveWindow16(), WM_LANGUAGE_CHANGE, nKey, 0L);
++
++    return oldKeyb;
+ }
+ 
+ 
+@@ -69,7 +84,7 @@ INT16 WINAPI SetKeyboardLanguage16( INT16 nKey )
+  */
+ WORD WINAPI SetLanguageToggleKey16( INT16 nScan )
+ {
+-    FIXME("(%d) stub\n", nScan);
++    FIXME("(%04x) stub\n", nScan);
+     return 0;
+ }
+ 
+diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
+index 615ae3de7c..bb0e6162f3 100644
+--- a/include/wine/winuser16.h
++++ b/include/wine/winuser16.h
+@@ -592,6 +592,16 @@ typedef struct tagCOPYDATASTRUCT16 {
+ #define lGetWindowTask(hwnd)  ( (hwnd==0) ? GetCurrentTask() :\
+                                 GetWindowTask(hwnd) )
+ 
++/* Message define */
++#define WM_LANGUAGE_NOTIFY  0x0370      /* intended for app */
++#define WM_LANGUAGE_CHANGE  0x0371      /* intended for DefWindowProc */
++
++/* Keyboard language flags */
++#define KB_TOGGLE           0x0002
++#define KB_ENG              0x0000
++#define KB_THAI             0x0001
++#define KB_CHARCHANGE       0x8000
++
+ /* Thai keyboard layout flags */
+ #define KL_KESMANEE              0
+ #define KL_PATTACHOTE            1
+-- 
+2.17.1
+

@@ -1,0 +1,82 @@
+From 24856abe90c7007a3c0c25ca2690d3b0a2f2954e Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Wed, 11 Apr 2018 09:29:50 +0700
+Subject: [PATCH 18/25] keyboard.drv16: Add function documentation.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/keyboard.drv16/thai.c | 36 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
+index de93435e5f..81dfe71474 100644
+--- a/dlls/keyboard.drv16/thai.c
++++ b/dlls/keyboard.drv16/thai.c
+@@ -33,6 +33,12 @@ static INT16 THAI_KbdLayout = KL_KESMANEE;  /* Thai keyboard layout flags */
+ 
+ /**********************************************************************
+  *      SetThaiKbdLayout (KEYBOARD.15)
++ * 
++ * Set Thai keyboard layout
++ * 
++ * PARAMS
++ *    nThaiKbd[I]  Specifies Thai keyboard layout
++ * 
+  */
+ VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
+ {
+@@ -46,6 +52,12 @@ VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
+ 
+ /**********************************************************************
+  *      GetThaiKbdLayout (KEYBOARD.16)
++ * 
++ * Get current Thai keyboard layout
++ * 
++ * RETURNS
++ *    Current Thai keyboard layout
++ * 
+  */
+ INT16 WINAPI GetThaiKbdLayout16(void)
+ {
+@@ -247,6 +259,18 @@ VOID WINAPI lstrKbdEngToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, INT16 n
+ 
+ /**********************************************************************
+  *      lstrNumThaiToArabic (KEYBOARD.19)
++ * 
++ * Converts Thai numbers in lpSrc for nCount to Arabic numbers and
++ * put it to lpDest
++ * 
++ * PARAMS
++ *    lpSrc   [I]  Null-terminated string contain Thai numbers
++ *    lpDest  [O]  Converted Arabic numbers null-terminated string
++ *    nCount  [I]  Specifies number of characters in lpSrc to process
++ * 
++ * NOTE
++ *    This function affect only Thai numbers
++ * 
+  */
+ VOID WINAPI lstrNumThaiToArabic16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
+ {
+@@ -289,6 +313,18 @@ VOID WINAPI lstrNumThaiToArabic16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
+ 
+ /**********************************************************************
+  *      lstrNumArabicToThai (KEYBOARD.20)
++ * 
++ * Converts Arabic numbers in lpSrc for nCount to Thai numbers and
++ * put it to lpDest
++ * 
++ * PARAMS
++ *    lpSrc   [I]  Null-terminated string contain Arabic numbers
++ *    lpDest  [O]  Converted Thai numbers null-terminated string
++ *    nCount  [I]  Specifies number of characters in lpSrc to process
++ * 
++ * NOTE
++ *    This function affect only Arabic numbers
++ * 
+  */
+ VOID WINAPI lstrNumArabicToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
+ {
+-- 
+2.17.1
+

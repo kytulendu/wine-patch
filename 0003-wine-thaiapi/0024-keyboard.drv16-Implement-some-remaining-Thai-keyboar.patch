@@ -1,0 +1,151 @@
+From 14216264f2a4f6c4d6f32ceb560979560938b7b4 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Thu, 24 May 2018 08:55:33 +0700
+Subject: [PATCH 24/25] keyboard.drv16: Implement some remaining Thai keyboard
+ functions.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/keyboard.drv16/keyboard.drv16.spec | 21 ++++--
+ dlls/keyboard.drv16/thai.c              | 90 ++++++++++++++++++++++++-
+ 2 files changed, 103 insertions(+), 8 deletions(-)
+
+diff --git a/dlls/keyboard.drv16/keyboard.drv16.spec b/dlls/keyboard.drv16/keyboard.drv16.spec
+index 6135807136..e94eb94334 100644
+--- a/dlls/keyboard.drv16/keyboard.drv16.spec
++++ b/dlls/keyboard.drv16/keyboard.drv16.spec
+@@ -5,14 +5,21 @@
+ 5   pascal -ret16 AnsiToOem(str ptr) AnsiToOem16
+ 6   pascal -ret16 OemToAnsi(str ptr) OemToAnsi16
+ 7   pascal -ret16 SetSpeed(word) SetSpeed16
+-#8   stub WEP
+-9   stub INQUIREEX
+-10  stub TOASCIIEX
+-11  stub VKKEYSCANEX
+-12  stub MAPVIRTUALKEYEX
+-13  stub NEWTABLEEX
+-14  stub __EXPORTEDSTUB
++#9   stub INQUIREEX
++#10  stub TOASCIIEX
++#11  stub VKKEYSCANEX
++#12  stub MAPVIRTUALKEYEX
++#13  stub NEWTABLEEX
++#14  stub __EXPORTEDSTUB
++
+ # Thai API
++8   pascal -ret16 TkEnable() TkEnable16
++9   pascal TkDisable() TkDisable16
++10  pascal -ret16 IsThaiExist() IsThaiExist16
++11  pascal -ret16 GetThaiStatus() GetThaiStatus16               # Windows 3.0a Thai is GETTHAISTATUS, Windows 3.11 Thai is WEP
++12  pascal -ret16 SetThaiStatus(word) SetThaiStatus16           # Windows 3.0a Thai is SETTHAISTATUS
++13  pascal -ret16 SetCheckSequence(word) SetCheckSequence16     # Windows 3.0a Thai is SETCHECKSEQUENCE, Windows 3.11 Thai is __EXPORTEDSTUB
++#14   stub WEP
+ 15  pascal SetThaiKbdLayout(s_word) SetThaiKbdLayout16
+ 16  pascal -ret16 GetThaiKbdLayout() GetThaiKbdLayout16
+ 17  pascal lstrKbdThaiToEng(segptr segptr word s_word) lstrKbdThaiToEng16
+diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
+index 3115a2fb40..4878479148 100644
+--- a/dlls/keyboard.drv16/thai.c
++++ b/dlls/keyboard.drv16/thai.c
+@@ -28,8 +28,96 @@
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(keyboard);
+ 
+-/* Thai API */
++/* Thai API variables */
+ static INT16 THAI_KbdLayout = KL_KESMANEE;  /* Thai keyboard layout flags */
++static BOOL16 THAI_Status = FALSE;
++
++/**********************************************************************
++ *      TkEnable (KEYBOARD.8)
++ * 
++ * Enable Thai keyboard.
++ * 
++ * RETURN
++ *    0x30 On both Windows 3.0a and Windows 3.11 Thai Edition
++ * 
++ */
++INT16 WINAPI TkEnable16(void)
++{
++    FIXME("stub\n");
++    return 0x30;
++}
++
++/**********************************************************************
++ *      TkDisable (KEYBOARD.9)
++ * 
++ * Disable Thai keyboard.
++ * 
++ */
++VOID WINAPI TkDisable16(void)
++{
++    FIXME("stub\n");
++}
++
++/**********************************************************************
++ *      IsThaiExist (KEYBOARD.10)
++ * 
++ * Check if Thai system is active at the moment.
++ * 
++ * RETURN
++ *    TRUE = exist, FALSE = not exist
++ * 
++ */
++BOOL16 WINAPI IsThaiExist16(void)
++{
++    return TRUE;
++}
++
++/**********************************************************************
++ *      GetThaiStatus (KEYBOARD.11)
++ * 
++ * Get ...
++ * 
++ * RETURNS
++ *    ...
++ * 
++ */
++BOOL16 WINAPI GetThaiStatus16(void)
++{
++    return THAI_Status;
++}
++
++/**********************************************************************
++ *      SetThaiStatus/NotifyLanguage (KEYBOARD.12)
++ * 
++ * SetThaiStatus in Windows 3.0, NotifyLanguage in Windows 3.1
++ * 
++ * RETURNS
++ *    ...
++ * 
++ */
++BOOL16 WINAPI SetThaiStatus16(BOOL16 bFlag)
++{
++    THAI_Status = bFlag;
++    return TRUE;
++}
++
++/**********************************************************************
++ *      SetCheckSequence (KEYBOARD.13)
++ * 
++ * Set if the thai keyboard driver will check for character sequence.
++ * 
++ * PARAMS
++ *    bFlag[I]     Specifies checking keyboard input sequence
++ * 
++ * RETURNS
++ *    Old flag.
++ * 
++ */
++BOOL16 WINAPI SetCheckSequence16(BOOL16 bFlag)
++{
++    FIXME("stub\n");
++    return TRUE;
++}
+ 
+ /**********************************************************************
+  *      SetThaiKbdLayout (KEYBOARD.15)
+-- 
+2.17.1
+

@@ -1,0 +1,29 @@
+From 58bcd4c6c456f9f31147e4b3eb423b9c8f950f38 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Wed, 11 Apr 2018 23:02:49 +0700
+Subject: [PATCH 22/25] user.exe16: Fix SetThaiKbdSeqCheck return value.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index 683d2f4dee..99cf791e78 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -715,8 +715,9 @@ BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
+  */
+ BOOL16 WINAPI SetThaiKbdSeqCheck16( BOOL16 fCheck )
+ {
++    BOOL16 oldFlag = THAI_KbdSeqCheck;
+     THAI_KbdSeqCheck = fCheck;
+-    return TRUE;
++    return oldFlag;
+ }
+ 
+ 
+-- 
+2.17.1
+

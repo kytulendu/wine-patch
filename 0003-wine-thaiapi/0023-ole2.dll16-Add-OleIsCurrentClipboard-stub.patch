@@ -1,0 +1,49 @@
+From db6ec81179546cd8f9c4732da2dbb8310fa8f5d3 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Thu, 12 Apr 2018 00:04:21 +0700
+Subject: [PATCH 23/25] ole2.dll16: Add OleIsCurrentClipboard stub.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/ole2.dll16/ole2.c          | 10 ++++++++++
+ dlls/ole2.dll16/ole2.dll16.spec |  2 +-
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/ole2.dll16/ole2.c b/dlls/ole2.dll16/ole2.c
+index bd9cf45d6d..9a9725cc2e 100644
+--- a/dlls/ole2.dll16/ole2.c
++++ b/dlls/ole2.dll16/ole2.c
+@@ -274,6 +274,16 @@ HRESULT WINAPI OleFlushClipboard16(void)
+   return OleFlushClipboard();
+ }
+ 
++/***********************************************************************
++ *           OleIsCurrentClipboard   [OLE2.77]
++ */
++
++HRESULT WINAPI OleIsCurrentClipboard16(IDataObject* pDataObj)
++{
++  FIXME("(%p): stub\n", pDataObj);
++  return S_FALSE;
++}
++
+ #define GET_SEGPTR_METHOD_ADDR(ifacename,segptr,methodname) \
+     ((SEGPTR)((const ifacename##Vtbl*)MapSL((SEGPTR)((ifacename*)MapSL(segptr))->lpVtbl))->methodname)
+ 
+diff --git a/dlls/ole2.dll16/ole2.dll16.spec b/dlls/ole2.dll16/ole2.dll16.spec
+index 108c3ee8f3..81f396666c 100644
+--- a/dlls/ole2.dll16/ole2.dll16.spec
++++ b/dlls/ole2.dll16/ole2.dll16.spec
+@@ -72,7 +72,7 @@
+ 74 stub READFMTUSERTYPESTG
+ 75 stub WRITEFMTUSERTYPESTG
+ 76 pascal -ret16 OleFlushClipboard() OleFlushClipboard16
+-77 stub OLEISCURRENTCLIPBOARD
++77 pascal -ret16 OleIsCurrentClipboard(ptr) OleIsCurrentClipboard16
+ 78 stub OLETRANSLATEACCELERATOR
+ 79 pascal OleDoAutoConvert(ptr ptr) OleDoAutoConvert16
+ 80 stub OLEGETAUTOCONVERT
+-- 
+2.17.1
+

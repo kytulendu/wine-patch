@@ -1,0 +1,112 @@
+From ac6efcd88204af821561c7c0b2c3748b79a03f52 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 09:23:21 +0700
+Subject: [PATCH 08/25] keyboard.drv16: Implement lstrNumArabicToThai and
+ lstrNumThaiToArabic.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/keyboard.drv16/thai.c | 74 ++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 71 insertions(+), 3 deletions(-)
+
+diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
+index 19cc0a5514..a4a911de55 100644
+--- a/dlls/keyboard.drv16/thai.c
++++ b/dlls/keyboard.drv16/thai.c
+@@ -1,5 +1,5 @@
+ /*
+- * Thai KEYBOARD driver
++ * Win16 Thai API functions
+  *
+  * Copyright 2018 Nakarin Khankham
+  *
+@@ -72,7 +72,41 @@ VOID WINAPI lstrKbdEngToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, INT16 n
+  */
+ VOID WINAPI lstrNumThaiToArabic16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
+ {
+-    FIXME("(%p, %p, %04x) stub\n", (void*)&lpSrc, (void*)&lpDest, nCount);
++    int i = 0;
++    BOOL samePtr;
++    char *src = MapSL(lpSrc);
++    char *dest = MapSL(lpDest);
++
++    TRACE("in (\"%s\", %u)\n", src, nCount);
++
++    /* Have to check for same pointer usage
++     * since some program use same pointer to do this */
++    if (src == dest)
++        samePtr = TRUE;
++    else
++        samePtr = FALSE;
++
++    while ( (*src != '\0') && (i < nCount) )
++    {
++        /* If the character is Thai number */
++        if ( ((unsigned char)*src >= THAIZERO) && ((unsigned char)*src <= THAININE) )
++        {
++            /* Convert it to Arabic number */
++            if (samePtr)
++                *src -= 0xC0;
++            else
++                *dest = (unsigned char)*src - 0xC0;
++        }
++        else
++            if (!samePtr)
++                *dest = *src;
++
++        src++;
++        if (!samePtr)
++            dest++;
++        i++;
++    }
++    TRACE("out (\"%s\", %d)\n", dest, i);
+ }
+ 
+ /**********************************************************************
+@@ -80,7 +114,41 @@ VOID WINAPI lstrNumThaiToArabic16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
+  */
+ VOID WINAPI lstrNumArabicToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
+ {
+-    FIXME("(%p, %p, %04x) stub\n", (void*)&lpSrc, (void*)&lpDest, nCount);
++    int i = 0;
++    BOOL samePtr;
++    char *src = MapSL(lpSrc);
++    char *dest = MapSL(lpDest);
++
++    TRACE("in (\"%s\", %u)\n", src, nCount);
++
++    /* Have to check for same pointer usage
++     * since some program use same pointer to do this */
++    if (src == dest)
++        samePtr = TRUE;
++    else
++        samePtr = FALSE;
++
++    while ( (*src != '\0') && (i < nCount) )
++    {
++        /* If the character is Arabic number */
++        if ( ((unsigned char)*src >= 0x30) && ((unsigned char)*src <= 0x39) )
++        {
++            /* Convert it to Thai number */
++            if (samePtr)
++                *src += 0xC0;
++            else
++                *dest = (unsigned char)*src + 0xC0;
++        }
++        else
++            if (!samePtr)
++                *dest = *src;
++
++        src++;
++        if (!samePtr)
++            dest++;
++        i++;
++    }
++    TRACE("out (\"%s\", %d)\n", dest, i);
+ }
+ 
+ /**********************************************************************
+-- 
+2.17.1
+

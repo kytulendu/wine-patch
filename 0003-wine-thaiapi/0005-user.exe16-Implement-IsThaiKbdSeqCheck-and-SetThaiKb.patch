@@ -1,0 +1,48 @@
+From cee0feb1a7bec786abc5c227a18f0015a25f9e89 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 09:17:23 +0700
+Subject: [PATCH 05/25] user.exe16: Implement IsThaiKbdSeqCheck and
+ SetThaiKbdSeqCheck.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index e2d8aae520..575a23d008 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -32,6 +32,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(user);
+ 
+ /* Thai API */
+ static WORD THAI_Interface = 0;         /* Thai API interface flags */
++static BOOL16 THAI_KbdSeqCheck = TRUE;  /* Thai API keyboard sequence check flags */
+ 
+ /***********************************************************************
+  *           GetTaskInterface (USER.474)
+@@ -297,8 +298,7 @@ SEGPTR WINAPI lstrYearNumber16( WORD nYear, SEGPTR lpDest, WORD nFormat )
+  */
+ BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
+ {
+-    FIXME("stub\n");
+-    return 0;
++    return THAI_KbdSeqCheck;
+ }
+ 
+ 
+@@ -307,8 +307,8 @@ BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
+  */
+ BOOL16 WINAPI SetThaiKbdSeqCheck16( BOOL16 fCheck )
+ {
+-    FIXME("(%04x), stub\n", fCheck);
+-    return 0;
++    THAI_KbdSeqCheck = fCheck;
++    return TRUE;
+ }
+ 
+ 
+-- 
+2.17.1
+

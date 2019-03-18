@@ -1,0 +1,33 @@
+From 4cd7515fad2f97b7ac61334e33bb0d7d9332e2b8 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 17:56:50 +0700
+Subject: [PATCH 11/25] user.exe16: Fix warning.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index 99f6192f6c..e0cc8598ef 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -19,13 +19,13 @@
+  */
+ 
+ #include <stdarg.h>
++#include <stdio.h>
+ #include <string.h>
+ 
+ #include "windef.h"
+ #include "winbase.h"
+ #include "winuser.h"
+ #include "wine/winuser16.h"
+-
+ #include "wine/debug.h"
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(user);
+-- 
+2.17.1
+

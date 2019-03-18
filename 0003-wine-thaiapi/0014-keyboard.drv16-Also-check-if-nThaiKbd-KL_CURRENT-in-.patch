@@ -1,0 +1,29 @@
+From 38ef78b73402ee4a2b24c8ceadd62085628b7700 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Wed, 4 Apr 2018 11:55:23 +0700
+Subject: [PATCH 14/25] keyboard.drv16: Also check if nThaiKbd == KL_CURRENT in
+ SetThaiKbdLayout.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/keyboard.drv16/thai.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
+index 739ad89cf1..f69123eefa 100644
+--- a/dlls/keyboard.drv16/thai.c
++++ b/dlls/keyboard.drv16/thai.c
+@@ -40,7 +40,8 @@ VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
+     if ( (nThaiKbd == KL_KESMANEE) || (nThaiKbd == KL_PATTACHOTE) )
+         THAI_KbdLayout = nThaiKbd;
+     else
+-        FIXME("invaliad parameter! (%04x)\n", nThaiKbd);
++        if ( nThaiKbd != KL_CURRENT )
++            FIXME("invaliad parameter! (%04x)\n", nThaiKbd);
+ }
+ 
+ /**********************************************************************
+-- 
+2.17.1
+

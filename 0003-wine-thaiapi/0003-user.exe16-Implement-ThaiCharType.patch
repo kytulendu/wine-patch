@@ -1,0 +1,261 @@
+From f6d4835900c92d17480cc53a8ceb6953ca8e700c Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 09:13:49 +0700
+Subject: [PATCH 03/25] user.exe16: Implement ThaiCharType.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c   | 113 ++++++++++++++++++++++++++++++++++++++-
+ include/wine/winuser16.h | 111 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 222 insertions(+), 2 deletions(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index b24eeeb4ee..f409eb2d69 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -85,8 +85,117 @@ void WINAPI FindThaiWordBreak16( SEGPTR lpString, WORD nCount, SEGPTR lpWordBrea
+  */
+ WORD WINAPI ThaiCharType16( BYTE cCh )
+ {
+-    FIXME("(%04x), stub\n", cCh);
+-    return 0;
++    /* TC_CONTROL 0x00-0x1F, 0x7F-0x84, 0x86-0x90, 0x98-0x9F, 0xFF */
++    if (( cCh <= 0x1F ) ||
++        (( cCh >= 0x7F ) && ( cCh <= 0x84 )) ||
++        (( cCh >= 0x86 ) && ( cCh <= 0x90 )) ||
++        ( cCh == 0xFF ))
++        return TC_CONTROL;
++
++    /* TC_SYMBOL 0x20-0x2F, 0x3A-0x40, 0x5B-0x60, 0x7B-0x7E, 0x85, 0x91-0x97 */
++    if ((( cCh >= 0x20 ) && ( cCh <= 0x2F )) ||
++        (( cCh >= 0x3A ) && ( cCh <= 0x40 )) ||
++        (( cCh >= 0x5B ) && ( cCh <= 0x60 )) ||
++        (( cCh >= 0x7B ) && ( cCh <= 0x7E )) ||
++        ( cCh == 0x85 ) ||
++        (( cCh >= 0x91 ) && ( cCh <= 0x97 )))
++        return TC_SYMBOL;
++
++    if (isdigit(cCh))
++        return TC_NUMERAL;
++
++    if (isupper(cCh))
++        return TC_UPPERCASE;
++
++    if (islower(cCh))
++        return TC_LOWERCASE;
++
++    /* Test for Thai character */
++    switch (cCh)
++    {
++        /* 0xA1-0xC3, 0xC5, 0xC7-0xCE */
++        case KOKAI:         case KHOKHAI:       case KHOKHUAT:  case KHOKHWAI:
++        case KHOKHON:       case KHORAKHANG:    case NGONGU:    case CHOCHAN:
++        case CHOCHING:      case CHOCHANG:      case SOSO:      case CHOCHOE:
++        case YOYING:        case DOCHADA:       case TOPATAK:   case THOTHAN:
++        case THONANGMONTHO: case THOPHUTHAO:    case NONEN:     case DODEK:
++        case TOTAO:         case THOTHUNG:      case THOTHAHAN: case THOTHONG:
++        case NONU:          case BOBAIMAI:      case POPLA:     case PHOPHUNG:
++        case FOFA:          case PHOPHAN:       case FOFAN:     case PHOSAMPHAO:
++        case MOMA:          case YOYAK:         case RORUA:
++        case LOLING:
++        case WOWAEN:        case SOSALA:        case SORUSI:    case SOSUA:
++        case HOHIP:         case LOCHULA:       case OANG:      case HONOKHUK:
++            return TC_CONSONANT;
++
++        /* 0xCF, 0xDB-0xDF, 0xEF, 0xFA-0xFE */
++        case PAIYANNOI:     case 0xDB:          case 0xDE:      case BAHT:
++        case MAIYAMOK:      case FONGMAN:       case ANGKHANKHU:case KHOMUT:
++        case 0xFC:          case 0xFE:
++            return TC_THAISYMBOL;
++
++        /* 0xE0-0xE4 */
++        case SARA_E:        case SARA_AE:       case SARA_O:    case MAIMUAN:
++        case MAIMALAI:
++            return TC_LEADVOWEL;
++
++        /* 0xC4, 0xC6, 0xD0, 0xD2, 0xE5 */
++        case RU:            case LU:            case SARA_A:    case SARA_AA:
++        case LAKKHANGYAO:
++            return TC_FOLLOWVOWEL;
++
++        /* 0xD1, 0xD4-0xD7 */
++        case MAIHUNAKAT:    case SARA_I:        case SARA_II:   case SARA_UE:
++        case SARA_UEE:
++            return TC_ABOVEVOWEL;
++
++        /* 0xD8, 0xD9 */
++        case SARA_U:        case SARA_UU:
++            return TC_BELOWVOWEL;
++
++        /* 0xD3, 0xE7, 0xED, 0xEE */
++        case MAITAIKHU:     case NIKHAHIT:      case YAMAKKAN:
++            return TC_ABOVEDIACRITIC1;
++
++        /* 0xEC */
++        case THANTHAKHAT:
++            return TC_ABOVEDIACRITIC2;
++
++        /* 0xDA */
++        case PHINTHU:
++            return TC_BELOWDIACRITIC;
++
++        /* 0xE7, 0xED, 0xEE */
++        case MAIEK:         case MAITHO:        case MAITRI:    case MAICHATTAWA:
++            return TC_TONEMARK;
++
++        /* 0xF0-0xF9 */
++        case THAIZERO:
++        case THAIONE:
++        case THAITWO:
++        case THAITHREE:
++        case THAIFOUR:
++        case THAIFIVE:
++        case THAISIX:
++        case THAISEVEN:
++        case THAIEIGHT:
++        case THAININE:
++            return TC_THAINUMERAL;
++
++        /* According to the Windows 3.1 Thai Edition SDK document.
++         * Sara Am is TC_FOLLOWVOWEL, but on Windows 3.1 Thai Edition it also TC_ABOVEDIACRITIC1 */
++        case SARA_AM:
++            return TC_FOLLOWVOWEL | TC_ABOVEDIACRITIC1;
++
++        /* On Windows 3.1 Thai Edition, These character are TC_THAISYMBOL */
++        case 0xA0:
++        case 0xDC:
++        case 0xDD:
++        case 0xFD:
++            return TC_THAISYMBOL;
++    }
++
++    return 1;
+ }
+ 
+ 
+diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
+index 3dc984254c..e44f0ccfe5 100644
+--- a/include/wine/winuser16.h
++++ b/include/wine/winuser16.h
+@@ -563,6 +563,117 @@ typedef struct tagCOPYDATASTRUCT16 {
+ #define CN_TRANSMIT	0x0002
+ #define CN_EVENT	0x0004
+ 
++/* Thai Windows API flags */
++#define TC_CONTROL          0x0001
++#define TC_SYMBOL           0x0002
++#define TC_NUMERAL          0x0004
++#define TC_UPPERCASE        0x0008
++#define TC_LOWERCASE        0x0010
++#define TC_CONSONANT        0x0020
++#define TC_THAISYMBOL       0x0040
++#define TC_LEADVOWEL        0x0080
++#define TC_FOLLOWVOWEL      0x0100
++#define TC_ABOVEVOWEL       0x0200
++#define TC_BELOWVOWEL       0x0400
++#define TC_ABOVEDIACRITIC1  0x0800
++#define TC_ABOVEDIACRITIC2  0x1000
++#define TC_BELOWDIACRITIC   0x2000
++#define TC_TONEMARK         0x4000
++#define TC_THAINUMERAL      0x8000
++#define TC_ZEROWIDTH (TC_ABOVEVOWEL|TC_BELOWVOWEL|TC_ABOVEDIACRITIC1| \
++                      TC_ABOVEDIACRITIC2|TC_BELOWDIACRITIC|TC_TONEMARK)
++#define TC_NONZEROWIDTH  (~(TC_ZEROWIDTH))
++
++/* Thai character */
++/* TODO: change the value to hex? */
++#define KOKAI           161  /* ก  A1 */
++#define KHOKHAI         162  /* ข  A2 */
++#define KHOKHUAT        163  /* ฃ  A3 */
++#define KHOKHWAI        164  /* ค  A4 */
++#define KHOKHON         165  /* ต  A5 */
++#define KHORAKHANG      166  /* ฆ  A6 */
++#define NGONGU          167  /* ง  A7 */
++#define CHOCHAN         168  /* จ  A8 */
++#define CHOCHING        169  /* ฉ  A9 */
++#define CHOCHANG        170  /* ช  AA */
++#define SOSO            171  /* ซ  AB */
++#define CHOCHOE         172  /* ฌ  AC */
++#define YOYING          173  /* ญ  AD */
++#define DOCHADA         174  /* ฎ  AE */
++#define TOPATAK         175  /* ฏ  AF */
++#define THOTHAN         176  /* ฐ  BO */
++#define THONANGMONTHO   177  /* ฒ  B1 */
++#define THOPHUTHAO      178  /* ฑ  B2 */
++#define NONEN           179  /* ณ  B3 */
++#define DODEK           180  /* ด  B4 */
++#define TOTAO           181  /* ต  B5 */
++#define THOTHUNG        182  /* ถ  B6 */
++#define THOTHAHAN       183  /* ท  B7 */
++#define THOTHONG        184  /* ธ  B8 */
++#define NONU            185  /* น  B9 */
++#define BOBAIMAI        186  /* บ  BA */
++#define POPLA           187  /* ป  BB */
++#define PHOPHUNG        188  /* ผ  BC */
++#define FOFA            189  /* ฝ  BD */
++#define PHOPHAN         190  /* พ  BE */
++#define FOFAN           191  /* ฟ  BF */
++#define PHOSAMPHAO      192  /* ภ  CO */
++#define MOMA            193  /* ม  C1 */
++#define YOYAK           194  /* ย  C2 */
++#define RORUA           195  /* ร  C3 */
++#define RU              196  /* ฤ  C4 */
++#define LOLING          197  /* ล  C5 */
++#define LU              198  /* ฦ  C6 */
++#define WOWAEN          199  /* ว  C7 */
++#define SOSALA          200  /* ศ  C8 */
++#define SORUSI          201  /* ษ  C9 */
++#define SOSUA           202  /* ส  CA */
++#define HOHIP           203  /* ห  CB */
++#define LOCHULA         204  /* ฬ  CC */
++#define OANG            205  /* อ  CD */
++#define HONOKHUK        206  /* ฮ  CE */
++#define PAIYANNOI       207  /* ฯ  CF */
++#define SARA_A          208  /* ะ  DO */
++#define MAIHUNAKAT      209  /* ั  D1 */
++#define SARA_AA         210  /* า  D2 */
++#define SARA_AM         211  /* ำ  D3 */
++#define SARA_I          212  /* ิ  D4 */
++#define SARA_II         213  /* ี  D5 */
++#define SARA_UE         214  /* ึ  D6 */
++#define SARA_UEE        215  /* ื  D7 */
++#define SARA_U          216  /* ุ  D8 */
++#define SARA_UU         217  /* ู  D9 */
++#define PHINTHU         218  /* ฺ  DA */
++#define BAHT            223  /* ฿  DF */
++#define SARA_E          224  /* เ  EO */
++#define SARA_AE         225  /* แ  E1 */
++#define SARA_O          226  /* โ  E2 */
++#define MAIMUAN         227  /* ใ  E3 */
++#define MAIMALAI        228  /* ไ  E4 */
++#define LAKKHANGYAO     229  /* ๅ  E5 */
++#define MAIYAMOK        230  /* ๆ  E6 */
++#define MAITAIKHU       231  /* ็  E7 */
++#define MAIEK           232  /* ่  E8 */
++#define MAITHO          233  /* ้  E9 */
++#define MAITRI          234  /* ๊  EA */
++#define MAICHATTAWA     235  /* ๋  EB */
++#define THANTHAKHAT     236  /* ์  EC */
++#define NIKHAHIT        237  /* ํ  ED */
++#define YAMAKKAN        238  /* ๎  EE */
++#define FONGMAN         239  /* ๏  EF */
++#define THAIZERO        240  /* ๐  FO */
++#define THAIONE         241  /* ๑  F1 */
++#define THAITWO         242  /* ๒  F2 */
++#define THAITHREE       243  /* ๓  F3 */
++#define THAIFOUR        244  /* ๔  F4 */
++#define THAIFIVE        245  /* ๕  F5 */
++#define THAISIX         246  /* ๖  F6 */
++#define THAISEVEN       247  /* ๗  F7 */
++#define THAIEIGHT       248  /* ๘  F8 */
++#define THAININE        249  /* ๙  F9 */
++#define ANGKHANKHU      250  /* ๚  FA */
++#define KHOMUT          251  /* ๛  FB */
++
+ BOOL16      WINAPI CheckMenuRadioItem16(HMENU16,UINT16,UINT16,UINT16,UINT16);
+ HICON16     WINAPI CopyImage16(HANDLE16,UINT16,INT16,INT16,UINT16);
+ HICON16     WINAPI CreateIconFromResource16(LPBYTE,UINT16,BOOL16,DWORD);
+-- 
+2.17.1
+

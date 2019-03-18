@@ -1,0 +1,102 @@
+From 881cc8f8a4509bfae52442d0a7710ddb5823adc7 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Wed, 11 Apr 2018 20:16:29 +0700
+Subject: [PATCH 19/25] gdi.exe16: Implement IsThaiFont.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/gdi.exe16/Makefile.in    |  3 ++-
+ dlls/gdi.exe16/gdi.exe16.spec |  4 ++-
+ dlls/gdi.exe16/thai.c         | 51 +++++++++++++++++++++++++++++++++++
+ 3 files changed, 56 insertions(+), 2 deletions(-)
+ create mode 100644 dlls/gdi.exe16/thai.c
+
+diff --git a/dlls/gdi.exe16/Makefile.in b/dlls/gdi.exe16/Makefile.in
+index 312641cd51..1fb2f121c4 100644
+--- a/dlls/gdi.exe16/Makefile.in
++++ b/dlls/gdi.exe16/Makefile.in
+@@ -8,6 +8,7 @@ C_SRCS = \
+ 	env.c \
+ 	gdi.c \
+ 	metafile.c \
+-	printdrv.c
++	printdrv.c \
++	thai.c
+ 
+ RC_SRCS = version.rc
+diff --git a/dlls/gdi.exe16/gdi.exe16.spec b/dlls/gdi.exe16/gdi.exe16.spec
+index cade1c24b4..e333d3d546 100644
+--- a/dlls/gdi.exe16/gdi.exe16.spec
++++ b/dlls/gdi.exe16/gdi.exe16.spec
+@@ -331,7 +331,9 @@
+ 485 pascal -ret16 ScaleWindowExtEx(word s_word s_word s_word s_word ptr) ScaleWindowExtEx16
+ 486 pascal -ret16 GetAspectRatioFilterEx(word ptr) GetAspectRatioFilterEx16
+ 489 pascal -ret16 CreateDIBSection(word ptr word ptr long long) CreateDIBSection16
+-490 stub CloseEnhMetafile
++# Thai API
++490 pascal -ret16 IsThaiFont(ptr) IsThaiFont16                     # conflicts with CloseEnhMetaFile
++#490 stub CloseEnhMetafile
+ #490 stub POLYLINEWOW # conflicts with CloseEnhMetaFile !!
+ 491 stub CopyEnhMetafile
+ 492 stub CreateEnhMetafile
+diff --git a/dlls/gdi.exe16/thai.c b/dlls/gdi.exe16/thai.c
+new file mode 100644
+index 0000000000..7f36c62c25
+--- /dev/null
++++ b/dlls/gdi.exe16/thai.c
+@@ -0,0 +1,51 @@
++/*
++ * Win16 Thai API functions
++ *
++ * Copyright 2018 Nakarin Khankham
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#include <stdarg.h>
++
++#include "windef.h"
++#include "winbase.h"
++#include "wine/wingdi16.h"
++#include "wine/debug.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(gdi);
++
++/***********************************************************************
++ *           IsThaiFont (GDI.490)
++ * 
++ * Check if given font is Thai font
++ * 
++ * PARAMS
++ *    lpTextMetric [I]  Pointer to text metric
++ *
++ * RETURNS
++ *    TRUE if lpTextMetric is Thai font
++ * 
++ */
++BOOL16 WINAPI IsThaiFont16(TEXTMETRIC16* lpTextMetric)
++{
++    TRACE("(%p)\n", (void*)&lpTextMetric);
++    TRACE("lpTextMetric->tmCharSet %u\n", (unsigned int)lpTextMetric->tmCharSet);
++
++    if(lpTextMetric->tmCharSet == THAI_CHARSET)
++        return TRUE;
++    else
++        return FALSE;
++}
+-- 
+2.17.1
+

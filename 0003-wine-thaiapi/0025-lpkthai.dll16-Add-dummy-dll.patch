@@ -1,0 +1,65 @@
+From c313a7aa2fd14aab3267361fe45e53996b0c2faa Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Fri, 15 Mar 2019 03:42:06 +0700
+Subject: [PATCH 25/25] lpkthai.dll16: Add dummy dll.
+To: wine-devel <wine-devel@winehq.org>
+
+This dll was required by Microsoft Office 97 Thai Edition
+Language Switcher.
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ configure.ac                          |  1 +
+ dlls/lpkthai.dll16/Makefile.in        |  2 ++
+ dlls/lpkthai.dll16/lpkthai.dll16.spec | 18 ++++++++++++++++++
+ 3 files changed, 21 insertions(+)
+ create mode 100644 dlls/lpkthai.dll16/Makefile.in
+ create mode 100644 dlls/lpkthai.dll16/lpkthai.dll16.spec
+
+diff --git a/configure.ac b/configure.ac
+index a55d2f825a..3c64a95d1a 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -3430,6 +3430,7 @@ WINE_CONFIG_MAKEFILE(dlls/localspl)
+ WINE_CONFIG_MAKEFILE(dlls/localspl/tests)
+ WINE_CONFIG_MAKEFILE(dlls/localui)
+ WINE_CONFIG_MAKEFILE(dlls/localui/tests)
++WINE_CONFIG_MAKEFILE(dlls/lpkthai.dll16,enable_win16)
+ WINE_CONFIG_MAKEFILE(dlls/lz32)
+ WINE_CONFIG_MAKEFILE(dlls/lz32/tests)
+ WINE_CONFIG_MAKEFILE(dlls/lzexpand.dll16,enable_win16)
+diff --git a/dlls/lpkthai.dll16/Makefile.in b/dlls/lpkthai.dll16/Makefile.in
+new file mode 100644
+index 0000000000..bd0b0d3312
+--- /dev/null
++++ b/dlls/lpkthai.dll16/Makefile.in
+@@ -0,0 +1,2 @@
++MODULE    = lpkthai.dll16
++EXTRADLLFLAGS = -m16
+diff --git a/dlls/lpkthai.dll16/lpkthai.dll16.spec b/dlls/lpkthai.dll16/lpkthai.dll16.spec
+new file mode 100644
+index 0000000000..a3c0ff22fa
+--- /dev/null
++++ b/dlls/lpkthai.dll16/lpkthai.dll16.spec
+@@ -0,0 +1,18 @@
++#1   WEP
++2   stub THAIENABLE
++3   stub THAIGETCHARPLACEMENT
++4   stub THAIDELETEFONT
++5   stub THAISELECTFONT
++6   stub THAIGETTEXTEXTENT
++7   stub THAIEXTTEXTOUT
++8   stub THAIGETCHARWIDTH
++9   stub THAINETASKNOTIFYCALLBACK
++10  stub REGISTERNETASKCALLBACK
++11  stub UNREGISTERNETASKCALLBACK
++20  stub THAIEDITWNDPROC
++21  stub THAITABBEDTEXT
++22  stub THAIDRAWTEXT
++23  stub THAIPSMTEXTOUT
++#30  stub DLLENTRYPOINT
++#31  stub THK_THUNKDATA16
++104 stub FINDTHAIWORDBREAK
+-- 
+2.17.1
+

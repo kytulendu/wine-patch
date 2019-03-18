@@ -1,0 +1,154 @@
+From 3ccb133fa315fe4a5e9512c394b5fffc34d3d236 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 08:23:15 +0700
+Subject: [PATCH 01/25] keyboard.drv16: Add Thai API stubs.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/keyboard.drv16/Makefile.in         |   3 +-
+ dlls/keyboard.drv16/keyboard.drv16.spec |   9 +++
+ dlls/keyboard.drv16/thai.c              | 100 ++++++++++++++++++++++++
+ 3 files changed, 111 insertions(+), 1 deletion(-)
+ create mode 100644 dlls/keyboard.drv16/thai.c
+
+diff --git a/dlls/keyboard.drv16/Makefile.in b/dlls/keyboard.drv16/Makefile.in
+index 91c82f75b5..cafa128f48 100644
+--- a/dlls/keyboard.drv16/Makefile.in
++++ b/dlls/keyboard.drv16/Makefile.in
+@@ -2,4 +2,5 @@ MODULE    = keyboard.drv16
+ IMPORTS   = user32
+ EXTRADLLFLAGS = -m16
+ 
+-C_SRCS = keyboard.c
++C_SRCS = keyboard.c \
++	thai.c
+diff --git a/dlls/keyboard.drv16/keyboard.drv16.spec b/dlls/keyboard.drv16/keyboard.drv16.spec
+index 88dc7a74b6..6135807136 100644
+--- a/dlls/keyboard.drv16/keyboard.drv16.spec
++++ b/dlls/keyboard.drv16/keyboard.drv16.spec
+@@ -12,6 +12,15 @@
+ 12  stub MAPVIRTUALKEYEX
+ 13  stub NEWTABLEEX
+ 14  stub __EXPORTEDSTUB
++# Thai API
++15  pascal SetThaiKbdLayout(s_word) SetThaiKbdLayout16
++16  pascal -ret16 GetThaiKbdLayout() GetThaiKbdLayout16
++17  pascal lstrKbdThaiToEng(segptr segptr word s_word) lstrKbdThaiToEng16
++18  pascal lstrKbdEngToThai(segptr segptr word s_word) lstrKbdEngToThai16
++19  pascal lstrNumThaiToArabic(segptr segptr word) lstrNumThaiToArabic16
++20  pascal lstrNumArabicToThai(segptr segptr word) lstrNumArabicToThai16
++21  pascal SetBahtKey(word) SetBahtKey16
++23  pascal SetThaiCapsLockEffect(word) SetThaiCapsLockEffect16
+ 
+ 100	pascal	ScreenSwitchEnable(word) ScreenSwitchEnable16
+ #126	pascal	GetTableSeg
+diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
+new file mode 100644
+index 0000000000..19cc0a5514
+--- /dev/null
++++ b/dlls/keyboard.drv16/thai.c
+@@ -0,0 +1,100 @@
++/*
++ * Thai KEYBOARD driver
++ *
++ * Copyright 2018 Nakarin Khankham
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#include <stdarg.h>
++#include <stdlib.h>
++#include <string.h>
++#include <ctype.h>
++
++#include "windef.h"
++#include "winbase.h"
++#include "wingdi.h"
++#include "winuser.h"
++#include "winerror.h"
++#include "wine/winuser16.h"
++#include "wine/debug.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(keyboard);
++
++/**********************************************************************
++ *      SetThaiKbdLayout (KEYBOARD.15)
++ */
++VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
++{
++    FIXME("(%04x) stub\n", nThaiKbd);
++}
++
++/**********************************************************************
++ *      GetThaiKbdLayout (KEYBOARD.16)
++ */
++INT16 WINAPI GetThaiKbdLayout16(void)
++{
++    FIXME("stub\n");
++    /* Return Kedmanee keyboard layout */
++    return 0;
++}
++
++/**********************************************************************
++ *      lstrKbdThaiToEng (KEYBOARD.17)
++ */
++VOID WINAPI lstrKbdThaiToEng16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, INT16 nThaiKbd)
++{
++    FIXME("(%p, %p, %04x, %04x) stub\n", (void*)&lpSrc, (void*)&lpDest, nCount, nThaiKbd);
++}
++
++/**********************************************************************
++ *      lstrKbdEngToThai (KEYBOARD.18)
++ */
++VOID WINAPI lstrKbdEngToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, INT16 nThaiKbd)
++{
++    FIXME("(%p, %p, %04x, %04x) stub\n", (void*)&lpSrc, (void*)&lpDest, nCount, nThaiKbd);
++}
++
++/**********************************************************************
++ *      lstrNumThaiToArabic (KEYBOARD.19)
++ */
++VOID WINAPI lstrNumThaiToArabic16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
++{
++    FIXME("(%p, %p, %04x) stub\n", (void*)&lpSrc, (void*)&lpDest, nCount);
++}
++
++/**********************************************************************
++ *      lstrNumArabicToThai (KEYBOARD.20)
++ */
++VOID WINAPI lstrNumArabicToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
++{
++    FIXME("(%p, %p, %04x) stub\n", (void*)&lpSrc, (void*)&lpDest, nCount);
++}
++
++/**********************************************************************
++ *      SetBahtKey (KEYBOARD.21)
++ */
++VOID WINAPI SetBahtKey16(BOOL16 fBaht)
++{
++    FIXME("(%04x) stub\n", fBaht);
++}
++
++/**********************************************************************
++ *      SetThaiCapsLockEffect (KEYBOARD.23)
++ */
++VOID WINAPI SetThaiCapsLockEffect16(BOOL16 fCaps)
++{
++    FIXME("(%04x) stub\n", fCaps);
++}
+-- 
+2.17.1
+

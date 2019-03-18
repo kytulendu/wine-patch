@@ -1,0 +1,70 @@
+From c2b56654b3bb86d624120f12a2df8348fabb5f0c Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 09:16:00 +0700
+Subject: [PATCH 04/25] user.exe16: Implement SetTaskInterface and
+ GetTaskInterface.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c   | 12 ++++++++----
+ include/wine/winuser16.h | 10 +++++++++-
+ 2 files changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index f409eb2d69..e2d8aae520 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -30,13 +30,16 @@
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(user);
+ 
++/* Thai API */
++static WORD THAI_Interface = 0;         /* Thai API interface flags */
++
+ /***********************************************************************
+  *           GetTaskInterface (USER.474)
+  */
+ WORD WINAPI GetTaskInterface16( HTASK16 hTask )
+ {
+-    FIXME("(%p) stub\n", (void*)&hTask);
+-    return 0;
++    FIXME("(%p) semi-stub\n", (void*)&hTask);
++    return THAI_Interface;
+ }
+ 
+ 
+@@ -314,6 +317,7 @@ BOOL16 WINAPI SetThaiKbdSeqCheck16( BOOL16 fCheck )
+  */
+ WORD WINAPI SetTaskInterface16( HTASK16 hTask, WORD dwFlags )
+ {
+-    FIXME("(%p, %04x), stub\n", (void*)&hTask, dwFlags);
+-    return 0;
++    FIXME("(%p, %04x), semi-stub\n", (void*)&hTask, dwFlags);
++    THAI_Interface = dwFlags;
++    return 1;
+ }
+diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
+index e44f0ccfe5..a4e8a5d799 100644
+--- a/include/wine/winuser16.h
++++ b/include/wine/winuser16.h
+@@ -584,7 +584,15 @@ typedef struct tagCOPYDATASTRUCT16 {
+                       TC_ABOVEDIACRITIC2|TC_BELOWDIACRITIC|TC_TONEMARK)
+ #define TC_NONZEROWIDTH  (~(TC_ZEROWIDTH))
+ 
+-/* Thai character */
++/* Thai bilingual flags */
++#define STANDARD_INTERFACE       0
++#define THAI_INTERFACE           1
++#define THAI_MENU_ACCESS        16
++
++#define lGetWindowTask(hwnd)  ( (hwnd==0) ? GetCurrentTask() :\
++                                GetWindowTask(hwnd) )
++
++/* Thai characters */
+ /* TODO: change the value to hex? */
+ #define KOKAI           161  /* ก  A1 */
+ #define KHOKHAI         162  /* ข  A2 */
+-- 
+2.17.1
+

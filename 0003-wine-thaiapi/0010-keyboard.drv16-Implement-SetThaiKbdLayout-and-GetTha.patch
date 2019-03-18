@@ -1,0 +1,83 @@
+From 17b308129930a2a4614c4a8a46af11c587a35b3c Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 17:39:06 +0700
+Subject: [PATCH 10/25] keyboard.drv16: Implement SetThaiKbdLayout and
+ GetThaiKbdLayout.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/keyboard.drv16/thai.c | 19 ++++++++++---------
+ include/wine/winuser16.h   |  5 +++++
+ 2 files changed, 15 insertions(+), 9 deletions(-)
+
+diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
+index a4a911de55..739ad89cf1 100644
+--- a/dlls/keyboard.drv16/thai.c
++++ b/dlls/keyboard.drv16/thai.c
+@@ -19,26 +19,28 @@
+  */
+ 
+ #include <stdarg.h>
+-#include <stdlib.h>
+-#include <string.h>
+-#include <ctype.h>
+ 
+ #include "windef.h"
+ #include "winbase.h"
+-#include "wingdi.h"
+ #include "winuser.h"
+-#include "winerror.h"
+ #include "wine/winuser16.h"
+ #include "wine/debug.h"
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(keyboard);
+ 
++/* Thai API */
++static INT16 THAI_KbdLayout = KL_KESMANEE;  /* Thai keyboard layout flags */
++
+ /**********************************************************************
+  *      SetThaiKbdLayout (KEYBOARD.15)
+  */
+ VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
+ {
+-    FIXME("(%04x) stub\n", nThaiKbd);
++    TRACE("(%04x)\n", nThaiKbd);
++    if ( (nThaiKbd == KL_KESMANEE) || (nThaiKbd == KL_PATTACHOTE) )
++        THAI_KbdLayout = nThaiKbd;
++    else
++        FIXME("invaliad parameter! (%04x)\n", nThaiKbd);
+ }
+ 
+ /**********************************************************************
+@@ -46,9 +48,8 @@ VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
+  */
+ INT16 WINAPI GetThaiKbdLayout16(void)
+ {
+-    FIXME("stub\n");
+-    /* Return Kedmanee keyboard layout */
+-    return 0;
++    TRACE("return (%04x)\n", THAI_KbdLayout);
++    return THAI_KbdLayout;
+ }
+ 
+ /**********************************************************************
+diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
+index 10651f1e1d..615ae3de7c 100644
+--- a/include/wine/winuser16.h
++++ b/include/wine/winuser16.h
+@@ -592,6 +592,11 @@ typedef struct tagCOPYDATASTRUCT16 {
+ #define lGetWindowTask(hwnd)  ( (hwnd==0) ? GetCurrentTask() :\
+                                 GetWindowTask(hwnd) )
+ 
++/* Thai keyboard layout flags */
++#define KL_KESMANEE              0
++#define KL_PATTACHOTE            1
++#define KL_CURRENT              -1
++
+ /* Date formats */
+ #define TS_LONG             0x0004
+ #define TS_SHORT            0x000C
+-- 
+2.17.1
+

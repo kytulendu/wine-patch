@@ -1,0 +1,400 @@
+From e8060162c65dcc2438c69f00fc0314d0792110e7 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 09:09:46 +0700
+Subject: [PATCH 02/25] user.exe16: Add Thai API stubs.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/Makefile.in     |   1 +
+ dlls/user.exe16/thai.c          | 210 ++++++++++++++++++++++++++++++++
+ dlls/user.exe16/user.c          |  15 ++-
+ dlls/user.exe16/user.exe16.spec |  36 ++++--
+ dlls/user.exe16/window.c        |   5 +-
+ 5 files changed, 253 insertions(+), 14 deletions(-)
+ create mode 100644 dlls/user.exe16/thai.c
+
+diff --git a/dlls/user.exe16/Makefile.in b/dlls/user.exe16/Makefile.in
+index 5a82b7590c..c2d1ed76af 100644
+--- a/dlls/user.exe16/Makefile.in
++++ b/dlls/user.exe16/Makefile.in
+@@ -9,6 +9,7 @@ C_SRCS = \
+ 	hook.c \
+ 	message.c \
+ 	network.c \
++	thai.c \
+ 	user.c \
+ 	window.c
+ 
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+new file mode 100644
+index 0000000000..b24eeeb4ee
+--- /dev/null
++++ b/dlls/user.exe16/thai.c
+@@ -0,0 +1,210 @@
++/*
++ * Win16 Thai API functions
++ *
++ * Copyright 2018 Nakarin Khankham
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
++ */
++
++#include <stdarg.h>
++#include <string.h>
++
++#include "windef.h"
++#include "winbase.h"
++#include "winuser.h"
++#include "wine/winuser16.h"
++
++#include "wine/debug.h"
++
++WINE_DEFAULT_DEBUG_CHANNEL(user);
++
++/***********************************************************************
++ *           GetTaskInterface (USER.474)
++ */
++WORD WINAPI GetTaskInterface16( HTASK16 hTask )
++{
++    FIXME("(%p) stub\n", (void*)&hTask);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           GetKeyboardLanguage (USER.475)
++ */
++WORD WINAPI GetKeyboardLanguage16(void)
++{
++    FIXME("stub\n");
++    return 0;
++}
++
++
++/***********************************************************************
++ *           SetKeyboardLanguage (USER.476)
++ */
++INT16 WINAPI SetKeyboardLanguage16( INT16 nKey )
++{
++    FIXME("(%d) stub\n", nKey);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           SetLanguageToggleKey (USER.477)
++ */
++WORD WINAPI SetLanguageToggleKey16( INT16 nScan )
++{
++    FIXME("(%d) stub\n", nScan);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           FindThaiWordBreak (USER.485)
++ */
++void WINAPI FindThaiWordBreak16( SEGPTR lpString, WORD nCount, SEGPTR lpWordBreak, WORD nWordCount )
++{
++    FIXME("(%p), (%u), (%p), (%u), stub\n",
++            (void*)&lpString, nCount, (void*)&lpWordBreak, nWordCount);
++}
++
++
++/***********************************************************************
++ *           ThaiCharType (USER.486)
++ */
++WORD WINAPI ThaiCharType16( BYTE cCh )
++{
++    FIXME("(%04x), stub\n", cCh);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           IsInvalidKbdSeqBeep (USER.487)
++ */
++BOOL16 WINAPI IsInvalidKbdSeqBeep16(void)
++{
++    FIXME("stub\n");
++    return 0;
++}
++
++
++/***********************************************************************
++ *           SetInvalidKbdSeqBeep (USER.488)
++ */
++BOOL16 WINAPI SetInvalidKbdSeqBeep16( BOOL16 fBeep )
++{
++    FIXME("(%04x), stub\n", fBeep);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           IsThaiCharCombinable (USER.489)
++ */
++BOOL WINAPI IsThaiCharCombinable16( BYTE char1, BYTE char2 )
++{
++    FIXME("(%04x, %04x), stub\n", char1, char2);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           ThaiStrValid (USER.490)
++ */
++SEGPTR WINAPI ThaiStrValid16( SEGPTR lpString, WORD nCount )
++{
++    FIXME("(%p, %d), stub\n", (void*)&lpString, nCount);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           ValidateThaiStr (USER.492)
++ */
++WORD WINAPI ValidateThaiStr16( SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, BYTE cCh )
++{
++    FIXME("(%p, %p, %d, %04x), stub\n", (void*)&lpSrc, (void*)&lpDest, nCount, cCh);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           CountThaiCharType (USER.492)
++ */
++WORD WINAPI CountThaiCharType16( SEGPTR lpString, WORD nCount, WORD Ntype )
++{
++    FIXME("(%p, %u, %04x), stub\n", (void*)&lpString, nCount, Ntype);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           lstrDayName (USER.493)
++ */
++SEGPTR WINAPI lstrDayName16( WORD nDay, SEGPTR lpDest, WORD nFormat )
++{
++    FIXME("(%u, %p, %04x), stub\n", nDay, (void*)&lpDest, nFormat);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           lstrMonthName (USER.494)
++ */
++SEGPTR WINAPI lstrMonthName16( WORD nMonth, SEGPTR lpDest, WORD nFormat )
++{
++    FIXME("(%u, %p, %04x), stub\n", nMonth, (void*)&lpDest, nFormat);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           lstrYearNumber (USER.495)
++ */
++SEGPTR WINAPI lstrYearNumber16( WORD nYear, SEGPTR lpDest, WORD nFormat )
++{
++    FIXME("(%u, %p, %04x), stub\n", nYear, (void*)&lpDest, nFormat);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           IsThaiKbdSeqCheck (USER.496)
++ */
++BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
++{
++    FIXME("stub\n");
++    return 0;
++}
++
++
++/***********************************************************************
++ *           SetThaiKbdSeqCheck (USER.497)
++ */
++BOOL16 WINAPI SetThaiKbdSeqCheck16( BOOL16 fCheck )
++{
++    FIXME("(%04x), stub\n", fCheck);
++    return 0;
++}
++
++
++/***********************************************************************
++ *           SetTaskInterface (USER.498)
++ */
++WORD WINAPI SetTaskInterface16( HTASK16 hTask, WORD dwFlags )
++{
++    FIXME("(%p, %04x), stub\n", (void*)&hTask, dwFlags);
++    return 0;
++}
+diff --git a/dlls/user.exe16/user.c b/dlls/user.exe16/user.c
+index 27b9279383..15b64d2132 100644
+--- a/dlls/user.exe16/user.c
++++ b/dlls/user.exe16/user.c
+@@ -2994,11 +2994,12 @@ SEGPTR WINAPI AnsiPrev16( LPCSTR start, SEGPTR current )
+ /****************************************************************************
+  *		GetKeyboardLayoutName (USER.477)
+  */
++/*
+ INT16 WINAPI GetKeyboardLayoutName16( LPSTR name )
+ {
+     return GetKeyboardLayoutNameA( name );
+ }
+-
++*/
+ 
+ /***********************************************************************
+  *		SystemParametersInfo (USER.483)
+@@ -3115,42 +3116,46 @@ BOOL16 WINAPI SystemParametersInfo16( UINT16 uAction, UINT16 uParam,
+ /***********************************************************************
+  *		USER_489 (USER.489)
+  */
++/*
+ LONG WINAPI stub_USER_489(void)
+ {
+     FIXME("stub\n");
+     return 0;
+ }
+-
++*/
+ 
+ /***********************************************************************
+  *		USER_490 (USER.490)
+  */
++/*
+ LONG WINAPI stub_USER_490(void)
+ {
+     FIXME("stub\n");
+     return 0;
+ }
+-
++*/
+ 
+ /***********************************************************************
+  *		USER_492 (USER.492)
+  */
++/*
+ LONG WINAPI stub_USER_492(void)
+ {
+     FIXME("stub\n");
+     return 0;
+ }
+-
++*/
+ 
+ /***********************************************************************
+  *		USER_496 (USER.496)
+  */
++/*
+ LONG WINAPI stub_USER_496(void)
+ {
+     FIXME("stub\n");
+     return 0;
+ }
+-
++*/
+ 
+ /***********************************************************************
+  *           FormatMessage   (USER.606)
+diff --git a/dlls/user.exe16/user.exe16.spec b/dlls/user.exe16/user.exe16.spec
+index ec571800e7..6caf2763a0 100644
+--- a/dlls/user.exe16/user.exe16.spec
++++ b/dlls/user.exe16/user.exe16.spec
+@@ -430,9 +430,14 @@
+ 471 pascal -ret16 lstrcmpi(str str) lstrcmpiA
+ 472 pascal   AnsiNext(segptr) AnsiNext16
+ 473 pascal   AnsiPrev(str segptr) AnsiPrev16
+-475 pascal -ret16 SetScrollInfo(word s_word ptr word) SetScrollInfo16
+-476 pascal -ret16 GetScrollInfo(word s_word ptr) GetScrollInfo16
+-477 pascal -ret16 GetKeyboardLayoutName(ptr) GetKeyboardLayoutName16
++# Thai API
++474 pascal -ret16 GetTaskInterface(word) GetTaskInterface16
++475 pascal -ret16 GetKeyboardLanguage() GetKeyboardLanguage16           # Conflicts with SetScrollInfo
++476 pascal -ret16 SetKeyboardLanguage(s_word) SetKeyboardLanguage16     # Conflicts with GetScrollInfo
++477 pascal -ret16 SetLanguageToggleKey(s_word) SetLanguageToggleKey16   # Conflicts with GetKeyboardLayoutName
++#475 pascal -ret16 SetScrollInfo(word s_word ptr word) SetScrollInfo16
++#476 pascal -ret16 GetScrollInfo(word s_word ptr) GetScrollInfo16
++#477 pascal -ret16 GetKeyboardLayoutName(ptr) GetKeyboardLayoutName16
+ 478 stub LoadKeyboardLayout
+ 479 stub MenuItemFromPoint
+ 480 stub GetUserLocalObjType
+@@ -440,12 +445,27 @@
+ 482 pascal -ret16 EnableScrollBar(word word word) EnableScrollBar16
+ 483 pascal -ret16 SystemParametersInfo(word word ptr word) SystemParametersInfo16
+ #484 __GP
++# Thai API
++485 pascal   FindThaiWordBreak(segptr word segptr word) FindThaiWordBreak16
++486 pascal -ret16 ThaiCharType(word) ThaiCharType16
++487 pascal -ret16 IsInvalidKbdSeqBeep() IsInvalidKbdSeqBeep16
++488 pascal -ret16 SetInvalidKbdSeqBeep(word) SetInvalidKbdSeqBeep16
++489 pascal -ret16 IsThaiCharCombinable(word word) IsThaiCharCombinable16
++490 pascal   ThaiStrValid(segptr word) ThaiStrValid16
++491 pascal -ret16 ValidateThaiStr(segptr segptr word word) ValidateThaiStr16
++492 pascal -ret16 CountThaiCharType(segptr word word) CountThaiCharType16
++493 pascal   lstrDayName(word segptr word) lstrDayName16
++494 pascal   lstrMonthName(word segptr word) lstrMonthName16
++495 pascal   lstrYearNumber(word segptr word) lstrYearNumber16
++496 pascal -ret16 IsThaiKbdSeqCheck() IsThaiKbdSeqCheck16
++497 pascal -ret16 SetThaiKbdSeqCheck(word) SetThaiKbdSeqCheck16
++498 pascal -ret16 SetTaskInterface(word word) SetTaskInterface16
+ # Stubs for Hebrew version
+-489 pascal -ret16 USER_489() stub_USER_489
+-490 pascal -ret16 USER_490() stub_USER_490
+-492 pascal -ret16 USER_492() stub_USER_492
+-496 pascal -ret16 USER_496() stub_USER_496
+-498 stub BEAR498
++#489 pascal -ret16 USER_489() stub_USER_489
++#490 pascal -ret16 USER_490() stub_USER_490
++#492 pascal -ret16 USER_492() stub_USER_492
++#496 pascal -ret16 USER_496() stub_USER_496
++#498 stub BEAR498
+ 499 pascal -ret16 WNetErrorText(word ptr word) WNetErrorText16
+ 500 stub FARCALLNETDRIVER 			# Undocumented Windows
+ 501 pascal -ret16 WNetOpenJob(ptr ptr word ptr)  WNetOpenJob16
+diff --git a/dlls/user.exe16/window.c b/dlls/user.exe16/window.c
+index 10f1389f0a..203cd09446 100644
+--- a/dlls/user.exe16/window.c
++++ b/dlls/user.exe16/window.c
+@@ -2011,20 +2011,23 @@ BOOL16 WINAPI DragDetect16( HWND16 hwnd, POINT16 pt )
+ /**************************************************************************
+  *              SetScrollInfo   (USER.475)
+  */
++/*
+ INT16 WINAPI SetScrollInfo16( HWND16 hwnd, INT16 nBar, const SCROLLINFO *info, BOOL16 redraw )
+ {
+     return SetScrollInfo( WIN_Handle32(hwnd), nBar, info, redraw );
+ }
++*/
+ 
+ 
+ /**************************************************************************
+  *              GetScrollInfo   (USER.476)
+  */
++/*
+ BOOL16 WINAPI GetScrollInfo16( HWND16 hwnd, INT16 nBar, LPSCROLLINFO info )
+ {
+     return GetScrollInfo( WIN_Handle32(hwnd), nBar, info );
+ }
+-
++*/
+ 
+ /**************************************************************************
+  *              EnableScrollBar   (USER.482)
+-- 
+2.17.1
+

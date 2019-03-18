@@ -1,0 +1,211 @@
+From 9ad29e88bc04aa1af0b42495281ee777a3d32f8e Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Wed, 11 Apr 2018 23:00:55 +0700
+Subject: [PATCH 21/25] user.exe16: Add some documentation.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c | 114 ++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 113 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index 8ae1bf112e..683d2f4dee 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -37,6 +37,15 @@ static BOOL16 THAI_KbdSeqCheck = TRUE;  /* Thai API keyboard sequence check flag
+ 
+ /***********************************************************************
+  *           GetTaskInterface (USER.474)
++ * 
++ * Get user interface mode of specified task
++ * 
++ * PARAMS
++ *    hTask   [I]  Handle of specified task
++ *
++ * RETURNS
++ *    User interface mode
++ * 
+  */
+ WORD WINAPI GetTaskInterface16( HTASK16 hTask )
+ {
+@@ -47,6 +56,12 @@ WORD WINAPI GetTaskInterface16( HTASK16 hTask )
+ 
+ /***********************************************************************
+  *           GetKeyboardLanguage (USER.475)
++ * 
++ * Get current keyboard language
++ * 
++ * RETURNS
++ *    Current keyboard language
++ * 
+  */
+ WORD WINAPI GetKeyboardLanguage16(void)
+ {
+@@ -56,6 +71,19 @@ WORD WINAPI GetKeyboardLanguage16(void)
+ 
+ /***********************************************************************
+  *           SetKeyboardLanguage (USER.476)
++ * 
++ * Set keyboard language to nKey
++ * 
++ * PARAMS
++ *    nKey    [I]  Keyboard language
++ *
++ * RETURNS
++ *    Old keyboard language or -1 if able to set
++ * 
++ * NOTE
++ *    This function send WM_LANGUAGE_CHANGE to window that have focus
++ *    FIXME: Properly implement this function
++ * 
+  */
+ INT16 WINAPI SetKeyboardLanguage16( INT16 nKey )
+ {
+@@ -81,6 +109,16 @@ INT16 WINAPI SetKeyboardLanguage16( INT16 nKey )
+ 
+ /***********************************************************************
+  *           SetLanguageToggleKey (USER.477)
++ * 
++ * Set language toggle key using given scan code
++ * 
++ * PARAMS
++ *    nScan   [I]  Scan code to be use as language toggle key
++ *                 nScan = 0 If not want a toggle key
++ *
++ * RETURNS
++ *    Old toggle key scan code
++ * 
+  */
+ WORD WINAPI SetLanguageToggleKey16( INT16 nScan )
+ {
+@@ -91,6 +129,30 @@ WORD WINAPI SetLanguageToggleKey16( INT16 nScan )
+ 
+ /***********************************************************************
+  *           FindThaiWordBreak (USER.485)
++ * 
++ * Find Thai word lenght in lpString for nCount and output the lenght
++ * of each words in lpWordBreak
++ * 
++ * PARAMS
++ *    lpString    [I]  Null terminated string to find word break position
++ *    nCount      [I]  Specifies number of characters in lpString to process,
++ *                     if encounter null, the function exit
++ *    lpWordBreak [O]  Null terminated string contain word lenght of each words
++ *                     in lpString
++ *    nWordCount  [I]  Specifies number of words to find for word break,
++ *                     should not greather than lenght of lpWordBreak
++ * 
++ * NOTE
++ *    This function will only find wordbreak for Thai string.
++ *    If there is English string, the word lenght in lpWordBreak will include
++ *    the lenght of English string.
++ * 
++ *    BYTE str1[] = "สวัสดีครับคุณครู";
++ *    BYTE wbreak[100];
++ *    FindThaiWordBreak(str1, lstrlen(str1), wbreak, 100);
++ * 
++ *    wbreak will contain { 6, 4, 3, 0 }
++ * 
+  */
+ void WINAPI FindThaiWordBreak16( SEGPTR lpString, WORD nCount, SEGPTR lpWordBreak, WORD nWordCount )
+ {
+@@ -101,6 +163,15 @@ void WINAPI FindThaiWordBreak16( SEGPTR lpString, WORD nCount, SEGPTR lpWordBrea
+ 
+ /***********************************************************************
+  *           ThaiCharType (USER.486)
++ * 
++ * Find character type of given character
++ * 
++ * PARAMS
++ *    cCh     [I]  Character that you want to find it's type
++ *
++ * RETURNS
++ *    Type of given character
++ * 
+  */
+ WORD WINAPI ThaiCharType16( BYTE cCh )
+ {
+@@ -220,16 +291,32 @@ WORD WINAPI ThaiCharType16( BYTE cCh )
+ 
+ /***********************************************************************
+  *           IsInvalidKbdSeqBeep (USER.487)
++ * 
++ * Get status if invalid keyboard sequence was pressed the system will beep
++ * 
++ * RETURNS
++ *    TRUE = beep
++ *    FALSE = not beep
++ * 
+  */
+ BOOL16 WINAPI IsInvalidKbdSeqBeep16(void)
+ {
+     FIXME("stub\n");
+-    return 0;
++    return FALSE;
+ }
+ 
+ 
+ /***********************************************************************
+  *           SetInvalidKbdSeqBeep (USER.488)
++ * 
++ * Set status if invalid keyboard sequence was pressed the system will beep
++ * 
++ * PARAMS
++ *    fBeep   [I]  Beep flag, TRUE = beep, FALSE = not beep
++ *
++ * RETURNS
++ *    Old flag
++ * 
+  */
+ BOOL16 WINAPI SetInvalidKbdSeqBeep16( BOOL16 fBeep )
+ {
+@@ -601,6 +688,13 @@ SEGPTR WINAPI lstrYearNumber16( WORD nYear, SEGPTR lpDest, WORD nFormat )
+ 
+ /***********************************************************************
+  *           IsThaiKbdSeqCheck (USER.496)
++ * 
++ * Get status if the system check for keyboard input sequence
++ * 
++ * RETURNS
++ *    TRUE = check
++ *    FALSE = not check
++ * 
+  */
+ BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
+ {
+@@ -610,6 +704,14 @@ BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
+ 
+ /***********************************************************************
+  *           SetThaiKbdSeqCheck (USER.497)
++ * 
++ * Set checking for keyboard input sequence
++ * 
++ * PARAMS
++ *    fCheck  [I]  TRUE = check, FALSE = not check
++ *
++ * RETURNS
++ *    Old flag
+  */
+ BOOL16 WINAPI SetThaiKbdSeqCheck16( BOOL16 fCheck )
+ {
+@@ -620,6 +722,16 @@ BOOL16 WINAPI SetThaiKbdSeqCheck16( BOOL16 fCheck )
+ 
+ /***********************************************************************
+  *           SetTaskInterface (USER.498)
++ * 
++ * Set user interface mode of specified task
++ * 
++ * PARAMS
++ *    hTask   [I]  Handle of specified task
++ *    wMode   [I]  User interface mode
++ *
++ * RETURNS
++ *    Old user interface mode
++ * 
+  */
+ WORD WINAPI SetTaskInterface16( HTASK16 hTask, WORD wMode )
+ {
+-- 
+2.17.1
+

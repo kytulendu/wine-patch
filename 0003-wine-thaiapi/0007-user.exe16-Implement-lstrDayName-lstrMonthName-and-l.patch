@@ -1,0 +1,340 @@
+From b03f976cd75870bdeca523f8b6697c0534b69866 Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Mon, 2 Apr 2018 09:22:11 +0700
+Subject: [PATCH 07/25] user.exe16: Implement lstrDayName, lstrMonthName and
+ lstrYearNumber.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/user.exe16/thai.c   | 282 ++++++++++++++++++++++++++++++++++++++-
+ include/wine/winuser16.h |   6 +
+ 2 files changed, 282 insertions(+), 6 deletions(-)
+
+diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
+index f19fd95ad1..eb32634dbe 100644
+--- a/dlls/user.exe16/thai.c
++++ b/dlls/user.exe16/thai.c
+@@ -289,8 +289,108 @@ WORD WINAPI CountThaiCharType16( SEGPTR lpString, WORD nCount, WORD Ntype )
+  */
+ SEGPTR WINAPI lstrDayName16( WORD nDay, SEGPTR lpDest, WORD nFormat )
+ {
+-    FIXME("(%u, %p, %04x), stub\n", nDay, (void*)&lpDest, nFormat);
+-    return 0;
++    static const char *engLongDay[] = {
++        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
++    };
++    static const char *engShortDay[] =  {
++        "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
++    };
++    static const char *thaiLongDay[] = {
++        "\xC7\xD1\xB9\xCD\xD2\xB7\xD4\xB5\xC2\xEC",     /* วันอาทิตย์ */
++        "\xC7\xD1\xB9\xA8\xD1\xB9\xB7\xC3\xEC",         /* วันจันทร์ */
++        "\xC7\xD1\xB9\xCD\xD1\xA7\xA4\xD2\xC3",         /* วันอังคาร */
++        "\xC7\xD1\xB9\xBE\xD8\xB7\xB8",                 /* วันพุทธ */
++        "\xC7\xD1\xB9\xBE\xC4\xCB\xD1\xCA\xBA\xB4\xD5", /* วันพฤหัสบดี */
++        "\xC7\xD1\xB9\xC8\xD8\xA1\xC3\xEC",             /* วันศุกร์ */
++        "\xC7\xD1\xB9\xE0\xCA\xD2\xC3\xEC"              /* วันเสาร์ */
++    };
++    static const char *thaiShortDay[] = {
++        "\xCD\xD2",     /* อา */
++        "\xA8",         /* จ */
++        "\xCD",         /* อ */
++        "\xBE",         /* พ */
++        "\xBE\xC4",     /* พฤ */
++        "\xC8",         /* ศ */
++        "\xCA"          /* ส */
++    };
++
++    char *dest = MapSL(lpDest);
++    char szDateForm[60];
++    int i;
++    int iLenght = 0;
++    int iCounter = 0;
++    int iThaiDate = 0;
++
++    TRACE("(%u, %p, %04x)\n", nDay, (void*)&lpDest, nFormat);
++
++    switch ( nFormat )
++    {
++        case ( TS_ENG | TS_LONG ):
++            TRACE("Format: TS_ENG | TS_LONG\n");
++            strcpy(dest, engLongDay[nDay]);
++            break;
++        case ( TS_ENG | TS_SHORT ):
++            TRACE("Format: TS_ENG | TS_SHORT\n");
++            strcpy(dest, engShortDay[nDay]);
++            break;
++        case ( TS_THAI | TS_LONG ):
++            TRACE("Format: TS_THAI | TS_LONG\n");
++            strcpy(dest, thaiLongDay[nDay]);
++            break;
++        case ( TS_THAI | TS_SHORT ):
++            TRACE("Format: TS_THAI | TS_SHORT\n");
++            strcpy(dest, thaiShortDay[nDay]);
++            break;
++        default:
++            iThaiDate = GetProfileIntA( "Thai", "iThaiDate", 1 );
++            if(iThaiDate)
++                /* load setting from WIN.INI
++                * Default is "dddd'ที่ 'd' 'MMMM' พ.ศ. 'yyyy" */
++                iLenght = GetProfileStringA( "Thai", "sLongDate", "dddd'\xB8\xD5\xE8 'd' 'MMMM' \xBE.\xC8. 'yyyy",
++                                            (LPSTR)szDateForm, sizeof(szDateForm) );
++            else
++                iLenght = GetProfileStringA( "intl", "sLongDate", "dd MMMM yyyy",
++                                            (LPSTR)szDateForm, sizeof(szDateForm) );
++
++            for ( i = 0; i < iLenght && szDateForm[i] != '\0'; i++ )
++            {
++                switch(szDateForm[i])
++                {
++                    case 'd':
++                        iCounter = 1;
++                        while( szDateForm[i+1] == 'd' )
++                        {
++                            iCounter++;
++                            i++;
++                        }
++                        switch(iCounter)
++                        {
++                            case 1:
++                            case 2:
++                                break;
++                            case 3:
++                                if(iThaiDate)
++                                    strcpy(dest, thaiShortDay[nDay]);
++                                else
++                                    strcpy(dest, engShortDay[nDay]);
++                                break;
++                            case 4:
++                            default:
++                                if(iThaiDate)
++                                    strcpy(dest, thaiLongDay[nDay]);
++                                else
++                                    strcpy(dest, engLongDay[nDay]);
++                                break;
++                        }
++                    default:
++                        break;
++                }
++            }
++    }
++
++    TRACE("%s\n", dest);
++
++    return lpDest;
+ }
+ 
+ 
+@@ -299,8 +399,110 @@ SEGPTR WINAPI lstrDayName16( WORD nDay, SEGPTR lpDest, WORD nFormat )
+  */
+ SEGPTR WINAPI lstrMonthName16( WORD nMonth, SEGPTR lpDest, WORD nFormat )
+ {
+-    FIXME("(%u, %p, %04x), stub\n", nMonth, (void*)&lpDest, nFormat);
+-    return 0;
++    static const char *engLongMonth[] = {
++        "January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
++    };
++    static const char *engShortMonth[] =  {
++        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
++    };
++    static const char *thaiLongMonth[] = {
++        "\xC1\xA1\xC3\xD2\xA4\xC1",                 /* มกราคม */
++        "\xA1\xD8\xC1\xC0\xD2\xBE\xD1\xB9\xB8\xEC", /* กุมภาพันธ์ */
++        "\xC1\xD5\xB9\xD2\xA4\xC1",                 /* มีนาคม */
++        "\xE0\xC1\xC9\xD2\xC2\xB9",                 /* เมษายน */
++        "\xBE\xC4\xC9\xC0\xD2\xA4\xC1",             /* พฤษภาคม */
++        "\xC1\xD4\xB6\xD8\xB9\xD2\xC2\xB9",         /* มิถุนายน */
++        "\xA1\xC3\xA1\xAE\xD2\xA4\xC1",             /* กรกฏาคม */
++        "\xCA\xD4\xA7\xCB\xD2\xA4\xC1",             /* สิงหาคม */
++        "\xA1\xD1\xB9\xC2\xD2\xC2\xB9",             /* กันยายน */
++        "\xB5\xD8\xC5\xD2\xA4\xC1",                 /* ตุลาคม */
++        "\xBE\xC4\xC8\xA8\xD4\xA1\xD2\xC2\xB9",     /* พฤศจิกายน */
++        "\xB8\xD1\xB9\xC7\xD2\xA4\xC1",             /* ธันวาคม */
++    };
++    static const char *thaiShortMonth[] = {
++        "\xC1\x2E\xA4\x2E",     /* ม.ค. */
++        "\xA1\x2E\xBE\x2E",     /* ก.พ. */
++        "\xC1\xD5\x2E\xA4\x2E", /* มี.ค. */
++        "\xE0\xC1\x2E\xC2\x2E", /* เม.ย. */
++        "\xBE\x2E\xA4\x2E",     /* พ.ค. */
++        "\xC1\xD4\x2E\xC2\x2E", /* มิ.ย. */
++        "\xA1\x2E\xA4\x2E",     /* ก.ค. */
++        "\xCA\x2E\xA4\x2E",     /* ส.ค. */
++        "\xA1\x2E\xC2\x2E",     /* ก.ย. */
++        "\xB5\x2E\xA4\x2E",     /* ต.ค. */
++        "\xBE\x2E\xC2\x2E",     /* พ.ย. */
++        "\xB8\x2E\xA4\x2E",     /* ธ.ค. */
++    };
++
++    char *dest = MapSL(lpDest);
++    char szDateForm[60];
++    int i;
++    int iLenght = 0;
++    int iCounter = 0;
++    int iThaiDate = 0;
++
++    TRACE("(%u, %p, %04x)\n", nMonth, (void*)&lpDest, nFormat);
++
++    switch ( nFormat )
++    {
++        case ( TS_ENG | TS_LONG ):
++            TRACE("Format: TS_ENG | TS_LONG\n");
++            strcpy(dest, engLongMonth[nMonth]);
++            break;
++        case ( TS_ENG | TS_SHORT ):
++            TRACE("Format: TS_ENG | TS_SHORT\n");
++            strcpy(dest, engShortMonth[nMonth]);
++            break;
++        case ( TS_THAI | TS_LONG ):
++            TRACE("Format: TS_THAI | TS_LONG\n");
++            strcpy(dest, thaiLongMonth[nMonth]);
++            break;
++        case ( TS_THAI | TS_SHORT ):
++            TRACE("Format: TS_THAI | TS_SHORT\n");
++            strcpy(dest, thaiShortMonth[nMonth]);
++            break;
++        default:
++            iThaiDate = GetProfileIntA( "Thai", "iThaiDate", 1 );
++            if(iThaiDate)
++                /* load setting from WIN.INI
++                * Default is "dddd'ที่ 'd' 'MMMM' พ.ศ. 'yyyy" */
++                iLenght = GetProfileStringA( "Thai", "sLongDate", "dddd'\xB8\xD5\xE8 'd' 'MMMM' \xBE.\xC8. 'yyyy",
++                                            (LPSTR)szDateForm, sizeof(szDateForm) );
++            else
++                iLenght = GetProfileStringA( "intl", "sLongDate", "dd MMMM yyyy",
++                                            (LPSTR)szDateForm, sizeof(szDateForm) );
++
++            for ( i = 0; i < iLenght && szDateForm[i] != '\0'; i++ )
++            {
++                switch(szDateForm[i])
++                {
++                    case 'M':
++                        iCounter = 1;
++                        while( szDateForm[i+1] == 'M' )
++                        {
++                            iCounter++;
++                            i++;
++                        }
++                        if (iCounter > 2)
++                            if(iThaiDate)
++                                strcpy(dest, thaiLongMonth[nMonth]);
++                            else
++                                strcpy(dest, engLongMonth[nMonth]);
++                        else
++                            if(iThaiDate)
++                                strcpy(dest, thaiShortMonth[nMonth]);
++                            else
++                                strcpy(dest, engShortMonth[nMonth]);
++                        break;
++                    default:
++                        break;
++                }
++            }
++    }
++
++    TRACE("%s\n", dest);
++
++    return lpDest;
+ }
+ 
+ 
+@@ -309,8 +511,76 @@ SEGPTR WINAPI lstrMonthName16( WORD nMonth, SEGPTR lpDest, WORD nFormat )
+  */
+ SEGPTR WINAPI lstrYearNumber16( WORD nYear, SEGPTR lpDest, WORD nFormat )
+ {
+-    FIXME("(%u, %p, %04x), stub\n", nYear, (void*)&lpDest, nFormat);
+-    return 0;
++    char *dest = MapSL(lpDest);
++    char szDateForm[60];
++    int i;
++    int iLenght = 0;
++    int iCounter = 0;
++    int iThaiDate = 0;
++
++    TRACE("(%u, %p, %04x), not-complete\n", nYear, (void*)&lpDest, nFormat);
++
++    /* Ignore short (two digits) year format */
++    switch ( nFormat )
++    {
++        case ( TS_ENG | TS_LONG ):
++            TRACE("Format: TS_ENG | TS_LONG\n");
++            sprintf(dest, "%u", nYear );
++            break;
++        case ( TS_ENG | TS_SHORT ):
++            TRACE("Format: TS_ENG | TS_SHORT\n");
++            sprintf(dest, "%u", nYear % 100 );
++            break;
++        case ( TS_THAI | TS_LONG ):
++            TRACE("Format: TS_THAI | TS_LONG\n");
++            sprintf(dest, "%u", nYear + 543 );  /* Convert Christian era to Buddhist era */
++            break;
++        case ( TS_THAI | TS_SHORT ):
++            TRACE("Format: TS_THAI | TS_SHORT\n");
++            sprintf(dest, "%2u", ( nYear + 543 ) % 100 );  /* Convert Christian era to Buddhist era, display only 2 digits */
++            break;
++        default:
++            iThaiDate = GetProfileIntA( "Thai", "iThaiDate", 1 );
++            if(iThaiDate)
++                /* load setting from WIN.INI
++                * Default is "dddd'ที่ 'd' 'MMMM' พ.ศ. 'yyyy" */
++                iLenght = GetProfileStringA( "Thai", "sLongDate", "dddd'\xB8\xD5\xE8 'd' 'MMMM' \xBE.\xC8. 'yyyy",
++                                            (LPSTR)szDateForm, sizeof(szDateForm) );
++            else
++                iLenght = GetProfileStringA( "intl", "sLongDate", "dd MMMM yyyy",
++                                            (LPSTR)szDateForm, sizeof(szDateForm) );
++
++            for ( i = 0; i < iLenght && szDateForm[i] != '\0'; i++ )
++            {
++                switch(szDateForm[i])
++                {
++                    case 'y':
++                        iCounter = 1;
++                        while( szDateForm[i+1] == 'y' )
++                        {
++                            iCounter++;
++                            i++;
++                        }
++                        if (iCounter > 2)
++                            if(iThaiDate)
++                                sprintf(dest, "%u", nYear + 543);
++                            else
++                                sprintf(dest, "%u", nYear);
++                        else
++                            if(iThaiDate)
++                                sprintf(dest, "%2u", ( nYear + 543 ) % 100);
++                            else
++                                sprintf(dest, "%2u", nYear % 100);
++                        break;
++                    default:
++                        break;
++                }
++            }
++    }
++
++    TRACE("%s\n", dest);
++
++    return lpDest;
+ }
+ 
+ 
+diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
+index a4e8a5d799..10651f1e1d 100644
+--- a/include/wine/winuser16.h
++++ b/include/wine/winuser16.h
+@@ -592,6 +592,12 @@ typedef struct tagCOPYDATASTRUCT16 {
+ #define lGetWindowTask(hwnd)  ( (hwnd==0) ? GetCurrentTask() :\
+                                 GetWindowTask(hwnd) )
+ 
++/* Date formats */
++#define TS_LONG             0x0004
++#define TS_SHORT            0x000C
++#define TS_ENG              0x0001
++#define TS_THAI             0x0003
++
+ /* Thai characters */
+ /* TODO: change the value to hex? */
+ #define KOKAI           161  /* ก  A1 */
+-- 
+2.17.1
+

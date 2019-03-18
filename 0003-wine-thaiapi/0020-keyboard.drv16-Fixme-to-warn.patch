@@ -1,0 +1,27 @@
+From c661bfcd084929dc6fe7fba7755eedabda4701de Mon Sep 17 00:00:00 2001
+From: Khral Steelforge <garuda2550@gmail.com>
+Date: Wed, 11 Apr 2018 21:14:17 +0700
+Subject: [PATCH 20/25] keyboard.drv16: Fixme to warn.
+To: wine-devel <wine-devel@winehq.org>
+
+Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/keyboard.drv16/thai.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
+index 81dfe71474..3115a2fb40 100644
+--- a/dlls/keyboard.drv16/thai.c
++++ b/dlls/keyboard.drv16/thai.c
+@@ -47,7 +47,7 @@ VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
+         THAI_KbdLayout = nThaiKbd;
+     else
+         if ( nThaiKbd != KL_CURRENT )
+-            FIXME("invaliad parameter! (%04x)\n", nThaiKbd);
++            WARN("invaliad parameter! (%04x)\n", nThaiKbd);
+ }
+ 
+ /**********************************************************************
+-- 
+2.17.1
+
