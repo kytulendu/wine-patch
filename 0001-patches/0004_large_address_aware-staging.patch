@@ -1,15 +1,20 @@
-From dbd7d4d87a89f8064e764389066c92f4fe3b4135 Mon Sep 17 00:00:00 2001
-From: Tk-Glitch <ti3nou@gmail.com>
-Date: Sat, 22 Dec 2018 14:13:05 +0100
-Subject: ntdll/loader: add support for overriding
+From 62c9478e4768e94e841da2ef75eb778ed346e3ab Mon Sep 17 00:00:00 2001
+From: Steven Noonan <steven@valvesoftware.com>
+Date: Wed, 17 Oct 2018 04:13:37 -0700
+Subject: [PATCH] ntdll/loader: add support for overriding
  IMAGE_FILE_LARGE_ADDRESS_AWARE
 
-Staging version.
-
-From Steven Noonan <steven@valvesoftware.com>
+Signed-off-by: Steven Noonan <steven@valvesoftware.com>
+---
+ dlls/kernel32/heap.c    |   9 ++-
+ dlls/ntdll/loader.c     | 123 +++++++++++++++++++++++++++++++++++++++-
+ dlls/ntdll/ntdll.spec   |   1 +
+ dlls/ntdll/ntdll_misc.h |   2 +-
+ dlls/ntdll/virtual.c    |   5 +-
+ 5 files changed, 135 insertions(+), 5 deletions(-)
 
 diff --git a/dlls/kernel32/heap.c b/dlls/kernel32/heap.c
-index e68420a55b..3aa65a212a 100644
+index e68420a55bb..3aa65a212aa 100644
 --- a/dlls/kernel32/heap.c
 +++ b/dlls/kernel32/heap.c
 @@ -75,6 +75,8 @@ WINE_DECLARE_DEBUG_CHANNEL(globalmem);
@@ -43,46 +48,10 @@ index e68420a55b..3aa65a212a 100644
          if (lpBuffer->dwTotalPhys > MAXLONG) lpBuffer->dwTotalPhys = MAXLONG;
          if (lpBuffer->dwAvailPhys > MAXLONG) lpBuffer->dwAvailPhys = MAXLONG;
 diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
-index 734df39a1d..60d13078ff 100644
+index d7dbe573a4f..e03335a2709 100644
 --- a/dlls/ntdll/loader.c
 +++ b/dlls/ntdll/loader.c
-@@ -643,7 +643,7 @@ static FARPROC find_ordinal_export( HMODULE module, const IMAGE_EXPORT_DIRECTORY
-     proc = get_rva( module, functions[ordinal] );
- 
-     /* if the address falls into the export dir, it's a forward */
--    if (((const char *)proc >= (const char *)exports) && 
-+    if (((const char *)proc >= (const char *)exports) &&
-         ((const char *)proc < (const char *)exports + exp_size))
-         return find_forwarded_export( module, (const char *)proc, load_path );
- 
-@@ -1443,7 +1443,7 @@ static void process_detach(void)
-     {
-         for (entry = mark->Blink; entry != mark; entry = entry->Blink)
-         {
--            mod = CONTAINING_RECORD(entry, LDR_MODULE, 
-+            mod = CONTAINING_RECORD(entry, LDR_MODULE,
-                                     InInitializationOrderModuleList);
-             /* Check whether to detach this DLL */
-             if ( !(mod->Flags & LDR_PROCESS_ATTACHED) )
-@@ -1453,7 +1453,7 @@ static void process_detach(void)
- 
-             /* Call detach notification */
-             mod->Flags &= ~LDR_PROCESS_ATTACHED;
--            MODULE_InitDLL( CONTAINING_RECORD(mod, WINE_MODREF, ldr), 
-+            MODULE_InitDLL( CONTAINING_RECORD(mod, WINE_MODREF, ldr),
-                             DLL_PROCESS_DETACH, ULongToPtr(process_detaching) );
-             call_ldr_notifications( LDR_DLL_NOTIFICATION_REASON_UNLOADED, mod );
- 
-@@ -1479,7 +1479,7 @@ static void thread_attach(void)
-     mark = &NtCurrentTeb()->Peb->LdrData->InInitializationOrderModuleList;
-     for (entry = mark->Flink; entry != mark; entry = entry->Flink)
-     {
--        mod = CONTAINING_RECORD(entry, LDR_MODULE, 
-+        mod = CONTAINING_RECORD(entry, LDR_MODULE,
-                                 InInitializationOrderModuleList);
-         if ( !(mod->Flags & LDR_PROCESS_ATTACHED) )
-             continue;
-@@ -2135,6 +2135,127 @@ static BOOL is_valid_binary( HMODULE module, const pe_image_info_t *info )
+@@ -1985,6 +1985,127 @@ static BOOL is_valid_binary( HMODULE module, const pe_image_info_t *info )
  #endif
  }
  
@@ -210,58 +179,20 @@ index 734df39a1d..60d13078ff 100644
  
  /******************************************************************************
   *	load_native_dll  (internal)
-@@ -2921,7 +3042,7 @@ IMAGE_BASE_RELOCATION * WINAPI LdrProcessRelocationBlock( void *page, UINT count
-  *		LdrQueryProcessModuleInformation
-  *
-  */
--NTSTATUS WINAPI LdrQueryProcessModuleInformation(PSYSTEM_MODULE_INFORMATION smi, 
-+NTSTATUS WINAPI LdrQueryProcessModuleInformation(PSYSTEM_MODULE_INFORMATION smi,
-                                                  ULONG buf_size, ULONG* req_size)
- {
-     SYSTEM_MODULE*      sm = &smi->Modules[0];
-@@ -3204,14 +3325,14 @@ void WINAPI LdrShutdownThread(void)
-     mark = &NtCurrentTeb()->Peb->LdrData->InInitializationOrderModuleList;
-     for (entry = mark->Blink; entry != mark; entry = entry->Blink)
-     {
--        mod = CONTAINING_RECORD(entry, LDR_MODULE, 
-+        mod = CONTAINING_RECORD(entry, LDR_MODULE,
-                                 InInitializationOrderModuleList);
-         if ( !(mod->Flags & LDR_PROCESS_ATTACHED) )
-             continue;
-         if ( mod->Flags & LDR_NO_DLL_CALLS )
-             continue;
- 
--        MODULE_InitDLL( CONTAINING_RECORD(mod, WINE_MODREF, ldr), 
-+        MODULE_InitDLL( CONTAINING_RECORD(mod, WINE_MODREF, ldr),
-                         DLL_THREAD_DETACH, NULL );
-     }
- 
-@@ -3722,6 +3843,7 @@ void __wine_process_init(void)
-     UNICODE_STRING nt_name;
-     void * (CDECL *init_func)(void);
-     DWORD i;
-+    BOOL force_large_address_aware = FALSE;
- 
-     thread_init();
- 
-@@ -3774,7 +3896,11 @@ void __wine_process_init(void)
+@@ -3550,7 +3671,7 @@ void __wine_process_init(void)
      version_init( wm->ldr.FullDllName.Buffer );
      user_shared_data_init();
      hidden_exports_init( wm->ldr.FullDllName.Buffer );
 -    virtual_set_large_address_space();
-+
-+    if (needs_override_large_address_aware(NtCurrentTeb()->Peb->ProcessParameters->ImagePathName.Buffer) > 0)
-+        force_large_address_aware = TRUE;
-+
-+    virtual_set_large_address_space(force_large_address_aware);
++    virtual_set_large_address_space(needs_override_large_address_aware(NtCurrentTeb()->Peb->ProcessParameters->ImagePathName.Buffer));
  
      LdrQueryImageFileExecutionOptions( &wm->ldr.FullDllName, globalflagW, REG_DWORD,
                                         &NtCurrentTeb()->Peb->NtGlobalFlag, sizeof(DWORD), NULL );
 diff --git a/dlls/ntdll/ntdll.spec b/dlls/ntdll/ntdll.spec
-index 33e63fca04..ec57b9d0d7 100644
+index fe96472cb86..42f6ee2576d 100644
 --- a/dlls/ntdll/ntdll.spec
 +++ b/dlls/ntdll/ntdll.spec
-@@ -1509,6 +1509,7 @@
+@@ -1507,6 +1507,7 @@
  
  # Virtual memory
  @ cdecl __wine_locked_recvmsg(long ptr long)
@@ -270,10 +201,10 @@ index 33e63fca04..ec57b9d0d7 100644
  # Token
  @ cdecl __wine_create_default_token(long)
 diff --git a/dlls/ntdll/ntdll_misc.h b/dlls/ntdll/ntdll_misc.h
-index 5900278236..4a3b7aa61c 100644
+index cf0d50de720..0acf2784669 100644
 --- a/dlls/ntdll/ntdll_misc.h
 +++ b/dlls/ntdll/ntdll_misc.h
-@@ -196,7 +196,7 @@ extern SIZE_T virtual_uninterrupted_read_memory( const void *addr, void *buffer,
+@@ -189,7 +189,7 @@ extern SIZE_T virtual_uninterrupted_read_memory( const void *addr, void *buffer,
  extern NTSTATUS virtual_uninterrupted_write_memory( void *addr, const void *buffer, SIZE_T size ) DECLSPEC_HIDDEN;
  extern void VIRTUAL_SetForceExec( BOOL enable ) DECLSPEC_HIDDEN;
  extern void virtual_release_address_space(void) DECLSPEC_HIDDEN;
@@ -283,10 +214,10 @@ index 5900278236..4a3b7aa61c 100644
                                              SECTION_IMAGE_INFORMATION *info ) DECLSPEC_HIDDEN;
  extern struct _KUSER_SHARED_DATA *user_shared_data DECLSPEC_HIDDEN;
 diff --git a/dlls/ntdll/virtual.c b/dlls/ntdll/virtual.c
-index 83b8a2987b..aad421527e 100644
+index c008db78066..6163761a466 100644
 --- a/dlls/ntdll/virtual.c
 +++ b/dlls/ntdll/virtual.c
-@@ -2531,11 +2531,12 @@ void virtual_release_address_space(void)
+@@ -2442,11 +2442,12 @@ void virtual_release_address_space(void)
   *
   * Enable use of a large address space when allowed by the application.
   */
