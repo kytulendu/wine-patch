@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 4.6.
+Support wine-staging 4.8
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
@@ -34,6 +34,31 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
 
     - 0002-winevdm/*.patch
     Patches ported from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
+    Remaining component to port:
+        commdlg.dll16
+        dispdib.dll16
+        haxmvm
+        gdi.exe16
+        krnl386.exe16
+        shell.dll16
+        system.drv16
+        toolhelp.dll16
+        user.exe16
+        vm86
+        win87em.dll16
+        winnls.dll16
+        winoldap
+        winspool (winspool.drv)
+        wow32
+        widl
+        compobj.dll16
+        ole2.dll16
+        ole2disp.dll16
+        ole2nls.dll16
+        olecli.dll16
+        olesvr.dll16
+        storage.dll16
+        typelib.dll16
 
     - 0003-wine-thaiapi/*.patch
     Patch set to add Thai language API from Windows 3.1/9x Thai Edition support to wine.

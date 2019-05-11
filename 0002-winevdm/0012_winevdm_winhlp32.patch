@@ -1,6 +1,6 @@
-From d8fd5d9bcbfcd5e55096975ded5f908f9b2caba7 Mon Sep 17 00:00:00 2001
+From 8140398928b1d2f50c7c9d81a6da26c9732ed264 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
-Date: Tue, 12 Mar 2019 14:09:14 +0700
+Date: Sun, 12 May 2019 00:40:00 +0700
 Subject: winhlp32: Port the patch from winevdm.
 
 https://github.com/otya128/winevdm/tree/master/winhlp32
@@ -8,17 +8,16 @@ https://github.com/otya128/winevdm/tree/master/winhlp32
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/programs/winhlp32/Makefile.in b/programs/winhlp32/Makefile.in
-index 40ce8a1f11..db245dccaa 100644
+index 78e0e5a257..0725df0a93 100644
 --- a/programs/winhlp32/Makefile.in
 +++ b/programs/winhlp32/Makefile.in
-@@ -1,6 +1,6 @@
+@@ -1,5 +1,5 @@
  MODULE    = winhlp32.exe
- APPMODE   = -mwindows
 -IMPORTS   = user32 gdi32
 +IMPORTS   = user32 gdi32 ole32
  DELAYIMPORTS = shell32 comctl32 comdlg32
  
- C_SRCS = \
+ EXTRADLLFLAGS = -mwindows -mno-cygwin
 diff --git a/programs/winhlp32/hlpfile.c b/programs/winhlp32/hlpfile.c
 index 3ade6c1d5d..e75cb19841 100644
 --- a/programs/winhlp32/hlpfile.c
@@ -645,7 +644,7 @@ index 280e618236..8009afd94b 100644
      {"ShortCut",            "SH", 0, "SSUUS",  MACRO_ShortCut},
      {"TCard",               NULL, 0, "U",      MACRO_TCard},
 diff --git a/programs/winhlp32/winhelp.c b/programs/winhlp32/winhelp.c
-index 7ce5d4a0a8..e72b140a58 100644
+index a98a76003b..d650197cca 100644
 --- a/programs/winhlp32/winhelp.c
 +++ b/programs/winhlp32/winhelp.c
 @@ -27,6 +27,7 @@
