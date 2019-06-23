@@ -1,13 +1,20 @@
-From a9c1ac8f6cc16164a70876dc2593253b34d9e52e Mon Sep 17 00:00:00 2001
+From 61f8a34297b7f6e27c5769740ccf2019edb118c4 Mon Sep 17 00:00:00 2001
 From: Martin Payne <development@martinpayne.me.uk>
 Date: Sun, 17 Sep 2017 21:21:36 +0100
 Subject: Added support for Windows 1.x and 2.x applications.
 
+---
+ dlls/krnl386.exe16/ne_module.c  |  66 ++++++++++++++-
+ dlls/krnl386.exe16/ne_segment.c |  42 +++++++++
+ dlls/user.exe16/user.c          | 105 ++++++++++++++++++++---
+ dlls/user32/cursoricon.c        | 145 +++++++++++++++++++++++++++++++-
+ 4 files changed, 340 insertions(+), 18 deletions(-)
+
 diff --git a/dlls/krnl386.exe16/ne_module.c b/dlls/krnl386.exe16/ne_module.c
-index 14f8075166..f27a4f3211 100644
+index 4b0b6a0b11..ce88d6b9b1 100644
 --- a/dlls/krnl386.exe16/ne_module.c
 +++ b/dlls/krnl386.exe16/ne_module.c
-@@ -597,11 +597,10 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -569,11 +569,10 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
  
      /* We now have a valid NE header */
  
@@ -22,7 +29,7 @@ index 14f8075166..f27a4f3211 100644
          return ERROR_BAD_FORMAT;
  
      size = sizeof(NE_MODULE) +
-@@ -649,6 +648,11 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -621,6 +620,11 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
  
      pModule->ne_flags &= ~(NE_FFLAGS_BUILTIN | NE_FFLAGS_WIN32);
  
@@ -34,7 +41,7 @@ index 14f8075166..f27a4f3211 100644
      /* Get the segment table */
  
      pModule->ne_segtab = pData - (BYTE *)pModule;
-@@ -658,6 +662,24 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -630,6 +634,24 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
      for (i = ne_header->ne_cseg; i > 0; i--, pSeg++)
      {
          memcpy( pData, pSeg, sizeof(*pSeg) );
@@ -59,7 +66,7 @@ index 14f8075166..f27a4f3211 100644
          pData += sizeof(SEGTABLEENTRY);
      }
  
-@@ -697,6 +719,42 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -669,6 +691,42 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
                         ne_header->ne_enttab - ne_header->ne_imptab )) goto failed;
      pData += ne_header->ne_enttab - ne_header->ne_imptab;
  
@@ -103,7 +110,7 @@ index 14f8075166..f27a4f3211 100644
  
      pModule->ne_enttab = pData - (BYTE *)pModule;
 diff --git a/dlls/krnl386.exe16/ne_segment.c b/dlls/krnl386.exe16/ne_segment.c
-index 1ceb714358..b2e163c3dc 100644
+index 30ace05e57..68a0499be5 100644
 --- a/dlls/krnl386.exe16/ne_segment.c
 +++ b/dlls/krnl386.exe16/ne_segment.c
 @@ -337,6 +337,45 @@ unknown:
@@ -163,7 +170,7 @@ index 1ceb714358..b2e163c3dc 100644
          return TRUE;  /* No relocation data, we are done */
  
 diff --git a/dlls/user.exe16/user.c b/dlls/user.exe16/user.c
-index 27b9279383..66bc805966 100644
+index deec596f76..bf65694650 100644
 --- a/dlls/user.exe16/user.c
 +++ b/dlls/user.exe16/user.c
 @@ -459,6 +459,67 @@ static void free_module_icons( HINSTANCE16 inst )
@@ -302,10 +309,10 @@ index 27b9279383..66bc805966 100644
  
          if (hIcon && (flags & LR_SHARED)) add_shared_icon( hinst, hRsrc, hGroupRsrc, hIcon );
 diff --git a/dlls/user32/cursoricon.c b/dlls/user32/cursoricon.c
-index 0adb73bf56..4928decd2a 100644
+index 1f3b1282ec..bfd131d8ab 100644
 --- a/dlls/user32/cursoricon.c
 +++ b/dlls/user32/cursoricon.c
-@@ -1435,6 +1435,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
+@@ -1457,6 +1457,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
  }
  
  
@@ -440,7 +447,7 @@ index 0adb73bf56..4928decd2a 100644
  /*
   * .ANI layout:
   *
-@@ -1654,8 +1782,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
+@@ -1676,8 +1804,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
  
      if (dwVersion == 0x00020000)
      {
@@ -464,3 +471,5 @@ index 0adb73bf56..4928decd2a 100644
      }
  
      /* Check if the resource is an animated icon/cursor */
+-- 
+2.22.0

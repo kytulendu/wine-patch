@@ -1,24 +1,32 @@
-From 176ce9294cfb6c7fe5e32d61984f9fed285e7dae Mon Sep 17 00:00:00 2001
+From 9b4494ba9cc1eb0b5ecf05e6a608c30d3cafb424 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Fri, 19 Apr 2019 00:32:33 +0700
 Subject: winex11.drv: Fix system tray on KDE Plasma.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+---
+ dlls/winex11.drv/Makefile.in    |    3 +-
+ dlls/winex11.drv/systray.c      |   56 +-
+ dlls/winex11.drv/systray.h      |   79 ++
+ dlls/winex11.drv/systray_dbus.c | 1830 +++++++++++++++++++++++++++++++
+ 4 files changed, 1937 insertions(+), 31 deletions(-)
+ create mode 100644 dlls/winex11.drv/systray.h
+ create mode 100644 dlls/winex11.drv/systray_dbus.c
 
 diff --git a/dlls/winex11.drv/Makefile.in b/dlls/winex11.drv/Makefile.in
-index 747f509b44..5a30a892ad 100644
+index 3e2d7ef895..ae950d58c6 100644
 --- a/dlls/winex11.drv/Makefile.in
 +++ b/dlls/winex11.drv/Makefile.in
 @@ -1,7 +1,7 @@
  MODULE    = winex11.drv
- IMPORTS   = uuid user32 gdi32 advapi32
+ IMPORTS   = uuid setupapi rpcrt4 user32 gdi32 advapi32
  DELAYIMPORTS = comctl32 ole32 shell32 imm32
 -EXTRAINCL = $(X_CFLAGS)
 +EXTRAINCL = $(X_CFLAGS) $(DBUS_CFLAGS)
  EXTRALIBS = $(X_LIBS) $(X_EXTRA_LIBS)
  
  C_SRCS = \
-@@ -20,6 +20,7 @@ C_SRCS = \
+@@ -21,6 +21,7 @@ C_SRCS = \
  	pen.c \
  	settings.c \
  	systray.c \
@@ -2035,3 +2043,5 @@ index 0000000000..d49ffb5e6d
 +    return FALSE;
 +#endif
 +}
+-- 
+2.22.0
