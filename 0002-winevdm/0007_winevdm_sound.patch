@@ -14,7 +14,7 @@ index 8e9b04bfa8..542063d903 100644
 @@ -1,4 +1,5 @@
  MODULE    = sound.drv16
 +IMPORTS   = winmm
- EXTRADLLFLAGS = -m16 -Wb,--main-module,winmm.dll
+ EXTRADLLFLAGS = -m16 -mno-cygwin -Wb,--main-module,winmm.dll
  
  C_SRCS = sound.c
 diff --git a/dlls/sound.drv16/sound.c b/dlls/sound.drv16/sound.c
