@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 4.8
+Support wine-staging 4.12
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
@@ -18,15 +18,25 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     - 0001-patches/0003_enable_stg_shared_mem_def.patch
     ntdll: Enable STAGING_SHARED_MEMORY by default.
 
-    - 0001-patches/0004_large_address_aware-staging.patch
-    ntdll/loader: add support for overriding IMAGE_FILE_LARGE_ADDRESS_AWARE Staging version.
+    - 0001-patches/0004_use_clock_monotonic-2.patch
+    kernel32: Never use CLOCK_MONOTONIC_RAW
 
     - 0001-patches/0005_plasma_systray_fix.patch
     winex11.drv: Fix system tray on KDE Plasma.
-    from https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/plasma_systray_fix.patch
+    From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/plasma_systray_fix.patch
+
+    - 0001-patches/0006_LAA-staging.patch
+    ntdll/loader: add support for overriding IMAGE_FILE_LARGE_ADDRESS_AWARE
+
+    - 0007_path_of_exile.patch
+    ole32: Fix WIC error in Path of Exile.
+    From https://bugs.winehq.org/show_bug.cgi?id=42695
 
     - 0001-patches/0008_FS_bypass_compositor.patch
     Proton's Bypass compositor patch.
+
+    - 0001-patches/0009_Support-child-window-rendering-for-vulkan.patch
+    winex11.drv: Support child window rendering for vulkan.
 
     - 0001-patches/0010-Added-support-for-Win-1-and-2-applications.patch
     Add support for Windows 1.x and 2.x applications.

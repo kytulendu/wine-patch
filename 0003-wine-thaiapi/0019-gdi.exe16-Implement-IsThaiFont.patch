@@ -77,15 +77,15 @@ index 0000000000..7f36c62c25
 +
 +/***********************************************************************
 + *           IsThaiFont (GDI.490)
-+ * 
++ *
 + * Check if given font is Thai font
-+ * 
++ *
 + * PARAMS
 + *    lpTextMetric [I]  Pointer to text metric
 + *
 + * RETURNS
 + *    TRUE if lpTextMetric is Thai font
-+ * 
++ *
 + */
 +BOOL16 WINAPI IsThaiFont16(TEXTMETRIC16* lpTextMetric)
 +{

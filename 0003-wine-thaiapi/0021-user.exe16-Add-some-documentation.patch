@@ -17,15 +17,15 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           GetTaskInterface (USER.474)
-+ * 
++ *
 + * Get user interface mode of specified task
-+ * 
++ *
 + * PARAMS
 + *    hTask   [I]  Handle of specified task
 + *
 + * RETURNS
 + *    User interface mode
-+ * 
++ *
   */
  WORD WINAPI GetTaskInterface16( HTASK16 hTask )
  {
@@ -33,12 +33,12 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           GetKeyboardLanguage (USER.475)
-+ * 
++ *
 + * Get current keyboard language
-+ * 
++ *
 + * RETURNS
 + *    Current keyboard language
-+ * 
++ *
   */
  WORD WINAPI GetKeyboardLanguage16(void)
  {
@@ -46,19 +46,19 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           SetKeyboardLanguage (USER.476)
-+ * 
++ *
 + * Set keyboard language to nKey
-+ * 
++ *
 + * PARAMS
 + *    nKey    [I]  Keyboard language
 + *
 + * RETURNS
 + *    Old keyboard language or -1 if able to set
-+ * 
++ *
 + * NOTE
 + *    This function send WM_LANGUAGE_CHANGE to window that have focus
 + *    FIXME: Properly implement this function
-+ * 
++ *
   */
  INT16 WINAPI SetKeyboardLanguage16( INT16 nKey )
  {
@@ -66,16 +66,16 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           SetLanguageToggleKey (USER.477)
-+ * 
++ *
 + * Set language toggle key using given scan code
-+ * 
++ *
 + * PARAMS
 + *    nScan   [I]  Scan code to be use as language toggle key
 + *                 nScan = 0 If not want a toggle key
 + *
 + * RETURNS
 + *    Old toggle key scan code
-+ * 
++ *
   */
  WORD WINAPI SetLanguageToggleKey16( INT16 nScan )
  {
@@ -83,10 +83,10 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           FindThaiWordBreak (USER.485)
-+ * 
++ *
 + * Find Thai word lenght in lpString for nCount and output the lenght
 + * of each words in lpWordBreak
-+ * 
++ *
 + * PARAMS
 + *    lpString    [I]  Null terminated string to find word break position
 + *    nCount      [I]  Specifies number of characters in lpString to process,
@@ -95,18 +95,18 @@ index 8ae1bf112e..683d2f4dee 100644
 + *                     in lpString
 + *    nWordCount  [I]  Specifies number of words to find for word break,
 + *                     should not greather than lenght of lpWordBreak
-+ * 
++ *
 + * NOTE
 + *    This function will only find wordbreak for Thai string.
 + *    If there is English string, the word lenght in lpWordBreak will include
 + *    the lenght of English string.
-+ * 
++ *
 + *    BYTE str1[] = "สวัสดีครับคุณครู";
 + *    BYTE wbreak[100];
 + *    FindThaiWordBreak(str1, lstrlen(str1), wbreak, 100);
-+ * 
++ *
 + *    wbreak will contain { 6, 4, 3, 0 }
-+ * 
++ *
   */
  void WINAPI FindThaiWordBreak16( SEGPTR lpString, WORD nCount, SEGPTR lpWordBreak, WORD nWordCount )
  {
@@ -114,15 +114,15 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           ThaiCharType (USER.486)
-+ * 
++ *
 + * Find character type of given character
-+ * 
++ *
 + * PARAMS
 + *    cCh     [I]  Character that you want to find it's type
 + *
 + * RETURNS
 + *    Type of given character
-+ * 
++ *
   */
  WORD WINAPI ThaiCharType16( BYTE cCh )
  {
@@ -130,13 +130,13 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           IsInvalidKbdSeqBeep (USER.487)
-+ * 
++ *
 + * Get status if invalid keyboard sequence was pressed the system will beep
-+ * 
++ *
 + * RETURNS
 + *    TRUE = beep
 + *    FALSE = not beep
-+ * 
++ *
   */
  BOOL16 WINAPI IsInvalidKbdSeqBeep16(void)
  {
@@ -148,15 +148,15 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           SetInvalidKbdSeqBeep (USER.488)
-+ * 
++ *
 + * Set status if invalid keyboard sequence was pressed the system will beep
-+ * 
++ *
 + * PARAMS
 + *    fBeep   [I]  Beep flag, TRUE = beep, FALSE = not beep
 + *
 + * RETURNS
 + *    Old flag
-+ * 
++ *
   */
  BOOL16 WINAPI SetInvalidKbdSeqBeep16( BOOL16 fBeep )
  {
@@ -164,13 +164,13 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           IsThaiKbdSeqCheck (USER.496)
-+ * 
++ *
 + * Get status if the system check for keyboard input sequence
-+ * 
++ *
 + * RETURNS
 + *    TRUE = check
 + *    FALSE = not check
-+ * 
++ *
   */
  BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
  {
@@ -178,9 +178,9 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           SetThaiKbdSeqCheck (USER.497)
-+ * 
++ *
 + * Set checking for keyboard input sequence
-+ * 
++ *
 + * PARAMS
 + *    fCheck  [I]  TRUE = check, FALSE = not check
 + *
@@ -193,16 +193,16 @@ index 8ae1bf112e..683d2f4dee 100644
  
  /***********************************************************************
   *           SetTaskInterface (USER.498)
-+ * 
++ *
 + * Set user interface mode of specified task
-+ * 
++ *
 + * PARAMS
 + *    hTask   [I]  Handle of specified task
 + *    wMode   [I]  User interface mode
 + *
 + * RETURNS
 + *    Old user interface mode
-+ * 
++ *
   */
  WORD WINAPI SetTaskInterface16( HTASK16 hTask, WORD wMode )
  {

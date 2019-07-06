@@ -59,12 +59,12 @@ index 3115a2fb40..4878479148 100644
 +
 +/**********************************************************************
 + *      TkEnable (KEYBOARD.8)
-+ * 
++ *
 + * Enable Thai keyboard.
-+ * 
++ *
 + * RETURN
 + *    0x30 On both Windows 3.0a and Windows 3.11 Thai Edition
-+ * 
++ *
 + */
 +INT16 WINAPI TkEnable16(void)
 +{
@@ -74,9 +74,9 @@ index 3115a2fb40..4878479148 100644
 +
 +/**********************************************************************
 + *      TkDisable (KEYBOARD.9)
-+ * 
++ *
 + * Disable Thai keyboard.
-+ * 
++ *
 + */
 +VOID WINAPI TkDisable16(void)
 +{
@@ -85,12 +85,12 @@ index 3115a2fb40..4878479148 100644
 +
 +/**********************************************************************
 + *      IsThaiExist (KEYBOARD.10)
-+ * 
++ *
 + * Check if Thai system is active at the moment.
-+ * 
++ *
 + * RETURN
 + *    TRUE = exist, FALSE = not exist
-+ * 
++ *
 + */
 +BOOL16 WINAPI IsThaiExist16(void)
 +{
@@ -99,12 +99,12 @@ index 3115a2fb40..4878479148 100644
 +
 +/**********************************************************************
 + *      GetThaiStatus (KEYBOARD.11)
-+ * 
++ *
 + * Get ...
-+ * 
++ *
 + * RETURNS
 + *    ...
-+ * 
++ *
 + */
 +BOOL16 WINAPI GetThaiStatus16(void)
 +{
@@ -113,12 +113,12 @@ index 3115a2fb40..4878479148 100644
 +
 +/**********************************************************************
 + *      SetThaiStatus/NotifyLanguage (KEYBOARD.12)
-+ * 
++ *
 + * SetThaiStatus in Windows 3.0, NotifyLanguage in Windows 3.1
-+ * 
++ *
 + * RETURNS
 + *    ...
-+ * 
++ *
 + */
 +BOOL16 WINAPI SetThaiStatus16(BOOL16 bFlag)
 +{
@@ -128,15 +128,15 @@ index 3115a2fb40..4878479148 100644
 +
 +/**********************************************************************
 + *      SetCheckSequence (KEYBOARD.13)
-+ * 
++ *
 + * Set if the thai keyboard driver will check for character sequence.
-+ * 
++ *
 + * PARAMS
 + *    bFlag[I]     Specifies checking keyboard input sequence
-+ * 
++ *
 + * RETURNS
 + *    Old flag.
-+ * 
++ *
 + */
 +BOOL16 WINAPI SetCheckSequence16(BOOL16 bFlag)
 +{
