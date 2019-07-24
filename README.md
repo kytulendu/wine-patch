@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 4.12
+Support wine-staging 4.12.1
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
@@ -15,15 +15,15 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     ntdll, server: Never use CLOCK_MONOTONIC_RAW
     Using CLOCK_MONOTONIC avoids a kernel call.
 
-    - 0001-patches/0003_enable_stg_shared_mem_def.patch
-    ntdll: Enable STAGING_SHARED_MEMORY by default.
-
-    - 0001-patches/0004_use_clock_monotonic-2.patch
+    - 0001-patches/0003_use_clock_monotonic-2.patch
     kernel32: Never use CLOCK_MONOTONIC_RAW
+
+    - 0001-patches/0004_enable_stg_shared_mem_def.patch
+    ntdll: Enable STAGING_SHARED_MEMORY by default.
 
     - 0001-patches/0005_plasma_systray_fix.patch
     winex11.drv: Fix system tray on KDE Plasma.
-    From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/plasma_systray_fix.patch
+    From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/misc/plasma_systray_fix.patch
 
     - 0001-patches/0006_LAA-staging.patch
     ntdll/loader: add support for overriding IMAGE_FILE_LARGE_ADDRESS_AWARE
@@ -36,11 +36,19 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     Proton's Bypass compositor patch.
 
     - 0001-patches/0009_Support-child-window-rendering-for-vulkan.patch
-    winex11.drv: Support child window rendering for vulkan.
+    winex11.drv: Support child window rendering for Vulkan via XComposite
+    From https://bugs.winehq.org/show_bug.cgi?id=45277
 
     - 0001-patches/0010-Added-support-for-Win-1-and-2-applications.patch
     Add support for Windows 1.x and 2.x applications.
     This is a patch file version of https://github.com/TransmissionZero/Wine
+
+    - 0011_winevulkan-1.1.113.patch
+    winevulkan: Update vk.xml to 1.1.113.
+    From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/misc/winevulkan-1.1.113.patch
+
+    - 0012_sims_2-fix.patch
+    From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/game-specific/sims_2-fix.patch
 
     - 0002-winevdm/*.patch
     Patches ported from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
