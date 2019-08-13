@@ -2,8 +2,7 @@ From 8140398928b1d2f50c7c9d81a6da26c9732ed264 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Sun, 12 May 2019 00:40:00 +0700
 Subject: winhlp32: Port the patch from winevdm.
-
-https://github.com/otya128/winevdm/tree/master/winhlp32
+from https://github.com/otya128/winevdm/tree/v0.7.0/winhlp32
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 

@@ -2,8 +2,7 @@ From 024167eebaec1ffdc43c56702db30650cb0de3b8 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 22:30:18 +0700
 Subject: ddeml.dll16: Port the patch from winevdm.
-
-https://github.com/otya128/winevdm/tree/master/ddeml
+from https://github.com/otya128/winevdm/tree/v0.7.0/ddeml
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 

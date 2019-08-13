@@ -2,8 +2,7 @@ From 86490608494eb62a67a4c22b09fff40c9ddcc8d0 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 13:19:46 +0700
 Subject: commctrl.dll16: Port the patch from winevdm.
-
-https://github.com/otya128/winevdm/tree/master/commctrl
+from https://github.com/otya128/winevdm/tree/v0.7.0/commctrl
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 

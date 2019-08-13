@@ -2,8 +2,7 @@ From d2ffde1f92c9586082421f8d60fc94f6d9993a85 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 25 Feb 2019 01:13:59 +0700
 Subject: wifeman.dll16: Port the patch from winevdm.
-
-https://github.com/otya128/winevdm/tree/master/wifeman
+from https://github.com/otya128/winevdm/tree/v0.7.0/wifeman
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 

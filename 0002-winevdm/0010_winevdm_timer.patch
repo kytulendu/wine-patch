@@ -2,8 +2,7 @@ From b963aafeeed3538c74f5f2dcfd64c927c6e42cba Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 25 Feb 2019 00:45:04 +0700
 Subject: timer.drv16: Port the patch from winevdm.
-
-https://github.com/otya128/winevdm/tree/master/timer
+from https://github.com/otya128/winevdm/tree/v0.7.0/timer
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 

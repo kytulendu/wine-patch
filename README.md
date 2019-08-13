@@ -53,7 +53,6 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     - 0002-winevdm/*.patch
     Patches ported from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
     Remaining component to port:
-        commdlg.dll16
         dispdib.dll16
         haxmvm
         gdi.exe16

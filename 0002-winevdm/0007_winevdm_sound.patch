@@ -2,8 +2,7 @@ From 42c4ecceda647304d0337c9b20cc4d43f3d4df01 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Tue, 19 Feb 2019 00:55:20 +0700
 Subject: sound.drv16: Port the patch from winevdm.
-
-https://github.com/otya128/winevdm/tree/master/sound
+from https://github.com/otya128/winevdm/tree/v0.7.0/sound
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 

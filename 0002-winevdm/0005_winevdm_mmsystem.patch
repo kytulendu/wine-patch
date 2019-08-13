@@ -2,8 +2,7 @@ From 312aadf0744661678ea24b5d860e1cafad569ee7 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 23:11:30 +0700
 Subject: mmsystem.dll16: Port the patch from winevdm.
-
-https://github.com/otya128/winevdm/tree/master/mmsystem
+from https://github.com/otya128/winevdm/tree/v0.7.0/mmsystem
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
