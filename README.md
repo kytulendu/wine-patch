@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 4.12.1
+Support wine-staging 4.14
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
@@ -52,6 +52,7 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
 
     - 0002-winevdm/*.patch
     Patches ported from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
+    Note: OLE stuff might not get ported, as wine's OLE support is limited.
     Remaining component to port:
         dispdib.dll16
         haxmvm
