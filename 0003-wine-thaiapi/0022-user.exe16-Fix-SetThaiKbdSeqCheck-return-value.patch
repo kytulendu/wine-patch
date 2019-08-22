@@ -1,4 +1,4 @@
-From 58bcd4c6c456f9f31147e4b3eb423b9c8f950f38 Mon Sep 17 00:00:00 2001
+From fff50eafa1febac068def815879f2d421fcd9e0f Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 23:02:49 +0700
 Subject: [PATCH 22/25] user.exe16: Fix SetThaiKbdSeqCheck return value.
@@ -10,7 +10,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index 683d2f4dee..99cf791e78 100644
+index 12def7e4b0..ea63b750d5 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -715,8 +715,9 @@ BOOL16 WINAPI IsThaiKbdSeqCheck16(void)
@@ -25,5 +25,5 @@ index 683d2f4dee..99cf791e78 100644
  
  
 -- 
-2.17.1
+2.22.0
 

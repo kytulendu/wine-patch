@@ -1,4 +1,4 @@
-From 5161964885228e8e948d790f2f25c6d81132c54c Mon Sep 17 00:00:00 2001
+From 737fee8b6191ef00ecfb141c40600762f8c16477 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Tue, 10 Apr 2018 22:37:39 +0700
 Subject: [PATCH 17/25] keyboard.drv16: Correct variable cast for array index.
@@ -10,7 +10,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
-index 8e4de1ad24..de93435e5f 100644
+index d9ca8ecbb4..f412f2c55e 100644
 --- a/dlls/keyboard.drv16/thai.c
 +++ b/dlls/keyboard.drv16/thai.c
 @@ -137,7 +137,7 @@ VOID WINAPI lstrKbdThaiToEng16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, INT16 n
@@ -32,5 +32,5 @@ index 8e4de1ad24..de93435e5f 100644
              if (samePtr)
                  *src = temp;
 -- 
-2.17.1
+2.22.0
 

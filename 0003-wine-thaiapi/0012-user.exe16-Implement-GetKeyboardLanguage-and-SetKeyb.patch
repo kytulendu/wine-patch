@@ -1,4 +1,4 @@
-From e838085b547c192ccb881d6abc39db55f182c63a Mon Sep 17 00:00:00 2001
+From 48c0408f2b2b592df9086ff7784d998d7b2e11f5 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 4 Apr 2018 11:45:38 +0700
 Subject: [PATCH 12/25] user.exe16: Implement GetKeyboardLanguage and
@@ -90,5 +90,5 @@ index 615ae3de7c..bb0e6162f3 100644
  #define KL_KESMANEE              0
  #define KL_PATTACHOTE            1
 -- 
-2.17.1
+2.22.0
 

@@ -1,4 +1,4 @@
-From f6d4835900c92d17480cc53a8ceb6953ca8e700c Mon Sep 17 00:00:00 2001
+From 99e9e6207778c58bbba8b857ae89a7f03846c535 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:13:49 +0700
 Subject: [PATCH 03/25] user.exe16: Implement ThaiCharType.
@@ -257,5 +257,5 @@ index 3dc984254c..e44f0ccfe5 100644
  HICON16     WINAPI CopyImage16(HANDLE16,UINT16,INT16,INT16,UINT16);
  HICON16     WINAPI CreateIconFromResource16(LPBYTE,UINT16,BOOL16,DWORD);
 -- 
-2.17.1
+2.22.0
 

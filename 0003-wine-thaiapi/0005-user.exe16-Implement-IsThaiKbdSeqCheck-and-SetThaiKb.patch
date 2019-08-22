@@ -1,4 +1,4 @@
-From cee0feb1a7bec786abc5c227a18f0015a25f9e89 Mon Sep 17 00:00:00 2001
+From 41f77ffe23c19e1b51691d2df84ce2195fe72844 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:17:23 +0700
 Subject: [PATCH 05/25] user.exe16: Implement IsThaiKbdSeqCheck and
@@ -44,5 +44,5 @@ index e2d8aae520..575a23d008 100644
  
  
 -- 
-2.17.1
+2.22.0
 

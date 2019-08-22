@@ -1,4 +1,4 @@
-From 24856abe90c7007a3c0c25ca2690d3b0a2f2954e Mon Sep 17 00:00:00 2001
+From 5c043e2038317b9c608b89cec667d0be973daa67 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 09:29:50 +0700
 Subject: [PATCH 18/25] keyboard.drv16: Add function documentation.
@@ -10,7 +10,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 36 insertions(+)
 
 diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
-index de93435e5f..81dfe71474 100644
+index f412f2c55e..c7a53a1cc8 100644
 --- a/dlls/keyboard.drv16/thai.c
 +++ b/dlls/keyboard.drv16/thai.c
 @@ -33,6 +33,12 @@ static INT16 THAI_KbdLayout = KL_KESMANEE;  /* Thai keyboard layout flags */
@@ -78,5 +78,5 @@ index de93435e5f..81dfe71474 100644
  VOID WINAPI lstrNumArabicToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
  {
 -- 
-2.17.1
+2.22.0
 

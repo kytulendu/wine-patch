@@ -1,4 +1,4 @@
-From db6ec81179546cd8f9c4732da2dbb8310fa8f5d3 Mon Sep 17 00:00:00 2001
+From 1ab01b6a2d1fcc742061abff461de15876c9057e Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Thu, 12 Apr 2018 00:04:21 +0700
 Subject: [PATCH 23/25] ole2.dll16: Add OleIsCurrentClipboard stub.
@@ -11,10 +11,10 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  2 files changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/dlls/ole2.dll16/ole2.c b/dlls/ole2.dll16/ole2.c
-index bd9cf45d6d..9a9725cc2e 100644
+index 5e6142fc96..5f3caa39ed 100644
 --- a/dlls/ole2.dll16/ole2.c
 +++ b/dlls/ole2.dll16/ole2.c
-@@ -274,6 +274,16 @@ HRESULT WINAPI OleFlushClipboard16(void)
+@@ -272,6 +272,16 @@ HRESULT WINAPI OleFlushClipboard16(void)
    return OleFlushClipboard();
  }
  
@@ -45,5 +45,5 @@ index 108c3ee8f3..81f396666c 100644
  79 pascal OleDoAutoConvert(ptr ptr) OleDoAutoConvert16
  80 stub OLEGETAUTOCONVERT
 -- 
-2.17.1
+2.22.0
 

@@ -1,4 +1,4 @@
-From 14216264f2a4f6c4d6f32ceb560979560938b7b4 Mon Sep 17 00:00:00 2001
+From b79684501253c66745159ebca787eae087c6dc32 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Thu, 24 May 2018 08:55:33 +0700
 Subject: [PATCH 24/25] keyboard.drv16: Implement some remaining Thai keyboard
@@ -45,7 +45,7 @@ index 6135807136..e94eb94334 100644
  16  pascal -ret16 GetThaiKbdLayout() GetThaiKbdLayout16
  17  pascal lstrKbdThaiToEng(segptr segptr word s_word) lstrKbdThaiToEng16
 diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
-index 3115a2fb40..4878479148 100644
+index 3f1f7a377f..d8981c810e 100644
 --- a/dlls/keyboard.drv16/thai.c
 +++ b/dlls/keyboard.drv16/thai.c
 @@ -28,8 +28,96 @@
@@ -147,5 +147,5 @@ index 3115a2fb40..4878479148 100644
  /**********************************************************************
   *      SetThaiKbdLayout (KEYBOARD.15)
 -- 
-2.17.1
+2.22.0
 

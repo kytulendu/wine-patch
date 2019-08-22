@@ -1,4 +1,4 @@
-From 881cc8f8a4509bfae52442d0a7710ddb5823adc7 Mon Sep 17 00:00:00 2001
+From 0b0b06c8cdf120bbafa87fd3615ab60b828596b8 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 20:16:29 +0700
 Subject: [PATCH 19/25] gdi.exe16: Implement IsThaiFont.
@@ -42,7 +42,7 @@ index cade1c24b4..e333d3d546 100644
  492 stub CreateEnhMetafile
 diff --git a/dlls/gdi.exe16/thai.c b/dlls/gdi.exe16/thai.c
 new file mode 100644
-index 0000000000..7f36c62c25
+index 0000000000..5d44d01293
 --- /dev/null
 +++ b/dlls/gdi.exe16/thai.c
 @@ -0,0 +1,51 @@
@@ -98,5 +98,5 @@ index 0000000000..7f36c62c25
 +        return FALSE;
 +}
 -- 
-2.17.1
+2.22.0
 

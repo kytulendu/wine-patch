@@ -1,4 +1,4 @@
-From c2b56654b3bb86d624120f12a2df8348fabb5f0c Mon Sep 17 00:00:00 2001
+From 925daeb98ceab72b564fbe8b6cb6071bc3d149d7 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:16:00 +0700
 Subject: [PATCH 04/25] user.exe16: Implement SetTaskInterface and
@@ -66,5 +66,5 @@ index e44f0ccfe5..a4e8a5d799 100644
  #define KOKAI           161  /* ก  A1 */
  #define KHOKHAI         162  /* ข  A2 */
 -- 
-2.17.1
+2.22.0
 

@@ -1,4 +1,4 @@
-From e4ff6d234375af2ac506e3540918746a1ad661f5 Mon Sep 17 00:00:00 2001
+From 11e19044efff6808d98bf637f2e8d35681a75365 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:18:58 +0700
 Subject: [PATCH 06/25] user.exe16: Implement CountThaiCharType.
@@ -46,5 +46,5 @@ index 575a23d008..f19fd95ad1 100644
  
  
 -- 
-2.17.1
+2.22.0
 

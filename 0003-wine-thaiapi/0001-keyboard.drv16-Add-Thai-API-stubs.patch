@@ -1,4 +1,4 @@
-From 3ccb133fa315fe4a5e9512c394b5fffc34d3d236 Mon Sep 17 00:00:00 2001
+From 746b91933a8daf4dda62ce5512132f6b1c22e862 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 08:23:15 +0700
 Subject: [PATCH 01/25] keyboard.drv16: Add Thai API stubs.
@@ -13,7 +13,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  create mode 100644 dlls/keyboard.drv16/thai.c
 
 diff --git a/dlls/keyboard.drv16/Makefile.in b/dlls/keyboard.drv16/Makefile.in
-index 91c82f75b5..cafa128f48 100644
+index 91b7c87134..6944f58f10 100644
 --- a/dlls/keyboard.drv16/Makefile.in
 +++ b/dlls/keyboard.drv16/Makefile.in
 @@ -2,4 +2,5 @@ MODULE    = keyboard.drv16
@@ -150,5 +150,5 @@ index 0000000000..19cc0a5514
 +    FIXME("(%04x) stub\n", fCaps);
 +}
 -- 
-2.17.1
+2.22.0
 

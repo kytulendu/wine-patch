@@ -1,4 +1,4 @@
-From ac6efcd88204af821561c7c0b2c3748b79a03f52 Mon Sep 17 00:00:00 2001
+From a90a4afc2b73ddaa3131660fd8b5c94f9a83697f Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:23:21 +0700
 Subject: [PATCH 08/25] keyboard.drv16: Implement lstrNumArabicToThai and
@@ -108,5 +108,5 @@ index 19cc0a5514..a4a911de55 100644
  
  /**********************************************************************
 -- 
-2.17.1
+2.22.0
 
