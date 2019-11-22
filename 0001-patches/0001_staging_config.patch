@@ -1,4 +1,4 @@
-From 0f28a8c89219c61ef7e983ef7ae8e3847eca5417 Mon Sep 17 00:00:00 2001
+From 19b3738f245aa0bf08efa0c3612a19fe56660272 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 26 Nov 2018 10:22:50 +0700
 Subject: winecfg: Toggle upstream CSMT implementation patch.
@@ -6,11 +6,6 @@ Subject: winecfg: Toggle upstream CSMT implementation patch.
 from https://github.com/wine-staging/wine-staging/pull/60
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
----
- programs/winecfg/resource.h |  2 +-
- programs/winecfg/staging.c  | 22 +++++++++++++++++-----
- programs/winecfg/winecfg.rc |  2 +-
- 3 files changed, 19 insertions(+), 7 deletions(-)
 
 diff --git a/programs/winecfg/resource.h b/programs/winecfg/resource.h
 index 96f2429090..9b57abf00d 100644
@@ -90,5 +85,3 @@ index 332520b156..f9d0112293 100644
      CONTROL     "Enable &VAAPI as backend for DXVA2 GPU decoding",IDC_ENABLE_VAAPI,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,55,230,8
      CONTROL     "Enable Environmental Audio E&xtensions (EAX)",IDC_ENABLE_EAX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,70,230,8
      CONTROL     "&Hide Wine version from applications",IDC_ENABLE_HIDEWINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,85,230,8
--- 
-2.22.0

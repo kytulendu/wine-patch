@@ -1,14 +1,8 @@
-From 61f8a34297b7f6e27c5769740ccf2019edb118c4 Mon Sep 17 00:00:00 2001
+From 5ae660f5c4cd53420d979428df5afa039d96b725 Mon Sep 17 00:00:00 2001
 From: Martin Payne <development@martinpayne.me.uk>
 Date: Sun, 17 Sep 2017 21:21:36 +0100
 Subject: Added support for Windows 1.x and 2.x applications.
 
----
- dlls/krnl386.exe16/ne_module.c  |  66 ++++++++++++++-
- dlls/krnl386.exe16/ne_segment.c |  42 +++++++++
- dlls/user.exe16/user.c          | 105 ++++++++++++++++++++---
- dlls/user32/cursoricon.c        | 145 +++++++++++++++++++++++++++++++-
- 4 files changed, 340 insertions(+), 18 deletions(-)
 
 diff --git a/dlls/krnl386.exe16/ne_module.c b/dlls/krnl386.exe16/ne_module.c
 index 4b0b6a0b11..ce88d6b9b1 100644
@@ -309,10 +303,10 @@ index deec596f76..bf65694650 100644
  
          if (hIcon && (flags & LR_SHARED)) add_shared_icon( hinst, hRsrc, hGroupRsrc, hIcon );
 diff --git a/dlls/user32/cursoricon.c b/dlls/user32/cursoricon.c
-index 1f3b1282ec..bfd131d8ab 100644
+index 6241fb49d5..6676dec376 100644
 --- a/dlls/user32/cursoricon.c
 +++ b/dlls/user32/cursoricon.c
-@@ -1457,6 +1457,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
+@@ -1459,6 +1459,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
  }
  
  
@@ -447,7 +441,7 @@ index 1f3b1282ec..bfd131d8ab 100644
  /*
   * .ANI layout:
   *
-@@ -1676,8 +1804,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
+@@ -1678,8 +1806,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
  
      if (dwVersion == 0x00020000)
      {
@@ -471,5 +465,3 @@ index 1f3b1282ec..bfd131d8ab 100644
      }
  
      /* Check if the resource is an animated icon/cursor */
--- 
-2.22.0

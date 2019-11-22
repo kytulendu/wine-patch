@@ -1,18 +1,15 @@
-From 60e00fea3621d07681ffdde0f8d7a11f16681289 Mon Sep 17 00:00:00 2001
+From b7233cc029b2589084b9ec1c57d15c1eb0e4c835 Mon Sep 17 00:00:00 2001
 From: Kai Krakow <kai@kaishome.de>
 Date: Wed, 26 Sep 2018 21:06:07 +0200
-Subject: [PATCH] [local] ntdll: Enable STAGING_SHARED_MEMORY by default
+Subject: ntdll: Enable STAGING_SHARED_MEMORY by default
 
 Signed-off-by: Kai Krakow <kai@kaishome.de>
----
- dlls/ntdll/server.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/dlls/ntdll/server.c b/dlls/ntdll/server.c
-index 8e7c52518a..de2e81c56d 100644
+index de621dc9ef..4693323e66 100644
 --- a/dlls/ntdll/server.c
 +++ b/dlls/ntdll/server.c
-@@ -1089,7 +1089,7 @@ static inline BOOL experimental_SHARED_MEMORY( void )
+@@ -1097,7 +1097,7 @@ static inline BOOL experimental_SHARED_MEMORY( void )
      if (enabled == -1)
      {
          const char *str = getenv( "STAGING_SHARED_MEMORY" );
@@ -21,5 +18,3 @@ index 8e7c52518a..de2e81c56d 100644
      }
      return enabled;
  }
--- 
-2.22.0

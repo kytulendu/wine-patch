@@ -1,17 +1,9 @@
-From 9b4494ba9cc1eb0b5ecf05e6a608c30d3cafb424 Mon Sep 17 00:00:00 2001
+From 3ca1a3f89b096e4ac72e7f3c69e66aaf2ab4428c Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Fri, 19 Apr 2019 00:32:33 +0700
 Subject: winex11.drv: Fix system tray on KDE Plasma.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
----
- dlls/winex11.drv/Makefile.in    |    3 +-
- dlls/winex11.drv/systray.c      |   56 +-
- dlls/winex11.drv/systray.h      |   79 ++
- dlls/winex11.drv/systray_dbus.c | 1830 +++++++++++++++++++++++++++++++
- 4 files changed, 1937 insertions(+), 31 deletions(-)
- create mode 100644 dlls/winex11.drv/systray.h
- create mode 100644 dlls/winex11.drv/systray_dbus.c
 
 diff --git a/dlls/winex11.drv/Makefile.in b/dlls/winex11.drv/Makefile.in
 index 3e2d7ef895..ae950d58c6 100644
@@ -35,7 +27,7 @@ index 3e2d7ef895..ae950d58c6 100644
  	window.c \
  	wintab.c \
 diff --git a/dlls/winex11.drv/systray.c b/dlls/winex11.drv/systray.c
-index d4262c43cf..dae3269e99 100644
+index 3be4bd6534..d46ff91554 100644
 --- a/dlls/winex11.drv/systray.c
 +++ b/dlls/winex11.drv/systray.c
 @@ -43,31 +43,10 @@
@@ -2043,5 +2035,3 @@ index 0000000000..d49ffb5e6d
 +    return FALSE;
 +#endif
 +}
--- 
-2.22.0

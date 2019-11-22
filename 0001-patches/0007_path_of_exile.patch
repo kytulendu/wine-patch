@@ -1,4 +1,4 @@
-From c911d55b6f5a33126cf6e67bbe98c4f1c7e35ba3 Mon Sep 17 00:00:00 2001
+From ce73940c59b72bd85b1811c462211bffbf0da96e Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Sun, 19 Aug 2018 15:04:34 +0700
 Subject: ole32: Fix WIC error in Path of Exile.
@@ -6,15 +6,12 @@ Subject: ole32: Fix WIC error in Path of Exile.
 From https://bugs.winehq.org/show_bug.cgi?id=42695
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
----
- dlls/ole32/compobj.c | 18 ++++++++++++------
- 1 file changed, 12 insertions(+), 6 deletions(-)
 
 diff --git a/dlls/ole32/compobj.c b/dlls/ole32/compobj.c
-index a3e84929bd..20d75770ab 100644
+index a91067fcb7..661fcbd9c9 100644
 --- a/dlls/ole32/compobj.c
 +++ b/dlls/ole32/compobj.c
-@@ -3369,17 +3369,23 @@ HRESULT WINAPI DECLSPEC_HOTPATCH CoCreateInstanceEx(
+@@ -3443,17 +3443,23 @@ HRESULT WINAPI DECLSPEC_HOTPATCH CoCreateInstanceEx(
  
      init_multi_qi(cmq, pResults, E_NOINTERFACE);
  
@@ -44,5 +41,3 @@ index a3e84929bd..20d75770ab 100644
      /*
       * The Standard Global Interface Table (GIT) object is a process-wide singleton.
       */
--- 
-2.22.0

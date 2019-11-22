@@ -1,20 +1,16 @@
-From 4cc738f609faff68bf4c67d5618174fa87ab3cdb Mon Sep 17 00:00:00 2001
+From 57443d37bb7a194f9ce45327b7b78378a5cf6529 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Felix=20H=C3=A4dicke?= <felixhaedicke@web.de>
 Date: Wed, 10 Jul 2019 22:19:31 +0200
-Subject: [PATCH] winex11.drv: Support child window rendering for Vulkan via
- XComposite
+Subject: winex11.drv: Support child window rendering for Vulkan via XComposite
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 Wine-Bug: https://bugs.winehq.org/show_bug.cgi?id=45277
 Signed-off-by: Felix Hädicke <felixhaedicke@web.de>
----
- dlls/winex11.drv/vulkan.c | 56 ++++++++++++++++++++++++++++++++-------
- 1 file changed, 47 insertions(+), 9 deletions(-)
 
 diff --git a/dlls/winex11.drv/vulkan.c b/dlls/winex11.drv/vulkan.c
-index 28ae1a9e0e8..3b0bf58c107 100644
+index 9f512705bd..3638848521 100644
 --- a/dlls/winex11.drv/vulkan.c
 +++ b/dlls/winex11.drv/vulkan.c
 @@ -33,6 +33,7 @@
@@ -25,7 +21,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
  
  #define VK_NO_PROTOTYPES
  #define WINE_VK_HOST
-@@ -55,6 +56,7 @@ static CRITICAL_SECTION_DEBUG critsect_debug =
+@@ -57,6 +58,7 @@ static CRITICAL_SECTION_DEBUG critsect_debug =
  static CRITICAL_SECTION context_section = { &critsect_debug, -1, 0, 0, 0, 0 };
  
  static XContext vulkan_hwnd_context;
@@ -33,7 +29,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
  
  #define VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR 1000004000
  
-@@ -62,6 +64,7 @@ struct wine_vk_surface
+@@ -64,6 +66,7 @@ struct wine_vk_surface
  {
      LONG ref;
      Window window;
@@ -41,7 +37,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
      VkSurfaceKHR surface; /* native surface */
  };
  
-@@ -135,6 +138,7 @@ static BOOL WINAPI wine_vk_init(INIT_ONCE *once, void *param, void **context)
+@@ -145,6 +148,7 @@ static BOOL WINAPI wine_vk_init(INIT_ONCE *once, void *param, void **context)
  #undef LOAD_OPTIONAL_FUNCPTR
  
      vulkan_hwnd_context = XUniqueContext();
@@ -49,7 +45,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
  
      return TRUE;
  
-@@ -252,16 +256,24 @@ static VkResult X11DRV_vkCreateSwapchainKHR(VkDevice device,
+@@ -262,16 +266,24 @@ static VkResult X11DRV_vkCreateSwapchainKHR(VkDevice device,
          const VkSwapchainCreateInfoKHR *create_info,
          const VkAllocationCallbacks *allocator, VkSwapchainKHR *swapchain)
  {
@@ -76,7 +72,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
  }
  
  static VkResult X11DRV_vkCreateWin32SurfaceKHR(VkInstance instance,
-@@ -277,13 +289,6 @@ static VkResult X11DRV_vkCreateWin32SurfaceKHR(VkInstance instance,
+@@ -287,13 +299,6 @@ static VkResult X11DRV_vkCreateWin32SurfaceKHR(VkInstance instance,
      if (allocator)
          FIXME("Support for allocation callbacks not implemented yet\n");
  
@@ -90,7 +86,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
      x11_surface = heap_alloc_zero(sizeof(*x11_surface));
      if (!x11_surface)
          return VK_ERROR_OUT_OF_HOST_MEMORY;
-@@ -300,6 +305,23 @@ static VkResult X11DRV_vkCreateWin32SurfaceKHR(VkInstance instance,
+@@ -310,6 +315,23 @@ static VkResult X11DRV_vkCreateWin32SurfaceKHR(VkInstance instance,
          goto err;
      }
  
@@ -114,7 +110,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
      create_info_host.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
      create_info_host.pNext = NULL;
      create_info_host.flags = 0; /* reserved */
-@@ -369,6 +391,7 @@ static void X11DRV_vkDestroySwapchainKHR(VkDevice device, VkSwapchainKHR swapcha
+@@ -379,6 +401,7 @@ static void X11DRV_vkDestroySwapchainKHR(VkDevice device, VkSwapchainKHR swapcha
          FIXME("Support for allocation callbacks not implemented yet\n");
  
      pvkDestroySwapchainKHR(device, swapchain, NULL /* allocator */);
@@ -122,7 +118,7 @@ index 28ae1a9e0e8..3b0bf58c107 100644
  }
  
  static VkResult X11DRV_vkEnumerateInstanceExtensionProperties(const char *layer_name,
-@@ -541,6 +564,21 @@ static VkResult X11DRV_vkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *
+@@ -551,6 +574,21 @@ static VkResult X11DRV_vkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *
          }
      }
  
@@ -143,6 +139,4 @@ index 28ae1a9e0e8..3b0bf58c107 100644
 +
      return res;
  }
-
---
-2.22.0
+ 

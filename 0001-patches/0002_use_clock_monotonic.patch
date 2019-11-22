@@ -1,16 +1,12 @@
-From 88b20e808ae6b8376aa19dea657fb3cc55974a4a Mon Sep 17 00:00:00 2001
+From d0a0f3ea58b43ed4f7d3b717de46eb1bdad9b488 Mon Sep 17 00:00:00 2001
 From: Andrew Eikum <aeikum@codeweavers.com>
 Date: Tue, 28 Aug 2018 12:57:32 -0500
-Subject: [PATCH] ntdll, server: Never use CLOCK_MONOTONIC_RAW
+Subject: ntdll, server: Never use CLOCK_MONOTONIC_RAW
 
 Using CLOCK_MONOTONIC avoids a kernel call.
----
- dlls/ntdll/time.c | 2 +-
- server/request.c  | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/dlls/ntdll/time.c b/dlls/ntdll/time.c
-index 20de627c28..88c55f0b68 100644
+index 91e5887b87..8497e28582 100644
 --- a/dlls/ntdll/time.c
 +++ b/dlls/ntdll/time.c
 @@ -114,7 +114,7 @@ static inline ULONGLONG monotonic_counter(void)
@@ -35,5 +31,3 @@ index f089ccc2d5..b985c712fd 100644
      if (!clock_gettime( CLOCK_MONOTONIC_RAW, &ts ))
          return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
  #endif
--- 
-2.22.0

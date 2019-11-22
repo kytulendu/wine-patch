@@ -1,20 +1,13 @@
-From fd787993407313971efdd9ee99676ff4d25fcf6f Mon Sep 17 00:00:00 2001
+From c9f970700ea3b9e1e1bc828e9894a7c610822551 Mon Sep 17 00:00:00 2001
 From: Steven Noonan <steven@valvesoftware.com>
 Date: Wed, 17 Oct 2018 04:13:37 -0700
-Subject: [PATCH] ntdll/loader: add support for overriding
+Subject: ntdll/loader: add support for overriding
  IMAGE_FILE_LARGE_ADDRESS_AWARE
 
 Signed-off-by: Steven Noonan <steven@valvesoftware.com>
----
- dlls/kernel32/heap.c    |   9 ++-
- dlls/ntdll/loader.c     | 123 +++++++++++++++++++++++++++++++++++++++-
- dlls/ntdll/ntdll.spec   |   1 +
- dlls/ntdll/ntdll_misc.h |   2 +-
- dlls/ntdll/virtual.c    |   5 +-
- 5 files changed, 135 insertions(+), 5 deletions(-)
 
 diff --git a/dlls/kernel32/heap.c b/dlls/kernel32/heap.c
-index 31931afacc..80340b83ad 100644
+index a465ce45d7..bd3688868a 100644
 --- a/dlls/kernel32/heap.c
 +++ b/dlls/kernel32/heap.c
 @@ -75,6 +75,8 @@ WINE_DECLARE_DEBUG_CHANNEL(globalmem);
@@ -26,7 +19,7 @@ index 31931afacc..80340b83ad 100644
  
  /***********************************************************************
   *           HEAP_CreateSystemHeap
-@@ -1375,6 +1377,10 @@ VOID WINAPI GlobalMemoryStatus( LPMEMORYSTATUS lpBuffer )
+@@ -824,6 +826,10 @@ VOID WINAPI GlobalMemoryStatus( LPMEMORYSTATUS lpBuffer )
      MEMORYSTATUSEX memstatus;
      OSVERSIONINFOW osver;
      IMAGE_NT_HEADERS *nt = RtlImageNtHeader( GetModuleHandleW(0) );
@@ -37,7 +30,7 @@ index 31931afacc..80340b83ad 100644
  
      /* Because GlobalMemoryStatus is identical to GlobalMemoryStatusEX save
         for one extra field in the struct, and the lack of a bug, we simply
-@@ -1415,7 +1421,8 @@ VOID WINAPI GlobalMemoryStatus( LPMEMORYSTATUS lpBuffer )
+@@ -864,7 +870,8 @@ VOID WINAPI GlobalMemoryStatus( LPMEMORYSTATUS lpBuffer )
  
      /* values are limited to 2Gb unless the app has the IMAGE_FILE_LARGE_ADDRESS_AWARE flag */
      /* page file sizes are not limited (Adobe Illustrator 8 depends on this) */
@@ -48,10 +41,10 @@ index 31931afacc..80340b83ad 100644
          if (lpBuffer->dwTotalPhys > MAXLONG) lpBuffer->dwTotalPhys = MAXLONG;
          if (lpBuffer->dwAvailPhys > MAXLONG) lpBuffer->dwAvailPhys = MAXLONG;
 diff --git a/dlls/ntdll/loader.c b/dlls/ntdll/loader.c
-index cd5d9a5084..47f6fc6173 100644
+index 902b001f58..e5655a37a6 100644
 --- a/dlls/ntdll/loader.c
 +++ b/dlls/ntdll/loader.c
-@@ -2305,6 +2305,127 @@ static NTSTATUS open_dll_file( UNICODE_STRING *nt_name, WINE_MODREF **pwm,
+@@ -2497,6 +2497,127 @@ static NTSTATUS open_dll_file( UNICODE_STRING *nt_name, WINE_MODREF **pwm,
      return status;
  }
  
@@ -179,20 +172,20 @@ index cd5d9a5084..47f6fc6173 100644
  
  /******************************************************************************
   *	load_native_dll  (internal)
-@@ -4060,7 +4181,7 @@ void __wine_process_init(void)
-     version_init( wm->ldr.FullDllName.Buffer );
+@@ -4560,7 +4681,7 @@ void __wine_process_init(void)
      user_shared_data_init();
      hidden_exports_init( wm->ldr.FullDllName.Buffer );
+ 
 -    virtual_set_large_address_space();
 +    virtual_set_large_address_space(needs_override_large_address_aware(NtCurrentTeb()->Peb->ProcessParameters->ImagePathName.Buffer));
  
-     LdrQueryImageFileExecutionOptions( &wm->ldr.FullDllName, globalflagW, REG_DWORD,
-                                        &NtCurrentTeb()->Peb->NtGlobalFlag, sizeof(DWORD), NULL );
+     /* elevate process if necessary */
+     status = RtlQueryInformationActivationContext( 0, NULL, 0, RunlevelInformationInActivationContext,
 diff --git a/dlls/ntdll/ntdll.spec b/dlls/ntdll/ntdll.spec
-index bad817c96f..a0412b6423 100644
+index 0c3170b789..67cf8bf8cf 100644
 --- a/dlls/ntdll/ntdll.spec
 +++ b/dlls/ntdll/ntdll.spec
-@@ -1519,6 +1519,7 @@
+@@ -1559,6 +1559,7 @@
  
  # Virtual memory
  @ cdecl __wine_locked_recvmsg(long ptr long)
@@ -201,10 +194,10 @@ index bad817c96f..a0412b6423 100644
  # Token
  @ cdecl __wine_create_default_token(long)
 diff --git a/dlls/ntdll/ntdll_misc.h b/dlls/ntdll/ntdll_misc.h
-index 5ca6597d1d..4d15fb7f0b 100644
+index b398fbf0c8..dfd385d1f5 100644
 --- a/dlls/ntdll/ntdll_misc.h
 +++ b/dlls/ntdll/ntdll_misc.h
-@@ -199,7 +199,7 @@ extern SIZE_T virtual_uninterrupted_read_memory( const void *addr, void *buffer,
+@@ -200,7 +200,7 @@ extern SIZE_T virtual_uninterrupted_read_memory( const void *addr, void *buffer,
  extern NTSTATUS virtual_uninterrupted_write_memory( void *addr, const void *buffer, SIZE_T size ) DECLSPEC_HIDDEN;
  extern void VIRTUAL_SetForceExec( BOOL enable ) DECLSPEC_HIDDEN;
  extern void virtual_release_address_space(void) DECLSPEC_HIDDEN;
@@ -214,10 +207,10 @@ index 5ca6597d1d..4d15fb7f0b 100644
                                              SECTION_IMAGE_INFORMATION *info ) DECLSPEC_HIDDEN;
  extern struct _KUSER_SHARED_DATA *user_shared_data DECLSPEC_HIDDEN;
 diff --git a/dlls/ntdll/virtual.c b/dlls/ntdll/virtual.c
-index 4ac9678f3e..ab89cd218a 100644
+index 9666e2051e..1d4ef6a257 100644
 --- a/dlls/ntdll/virtual.c
 +++ b/dlls/ntdll/virtual.c
-@@ -2574,11 +2574,12 @@ void virtual_release_address_space(void)
+@@ -2677,11 +2677,12 @@ void virtual_release_address_space(void)
   *
   * Enable use of a large address space when allowed by the application.
   */
@@ -232,5 +225,3 @@ index 4ac9678f3e..ab89cd218a 100644
      /* no large address space on win9x */
      if (NtCurrentTeb()->Peb->OSPlatformId != VER_PLATFORM_WIN32_NT) return;
  
--- 
-2.22.0

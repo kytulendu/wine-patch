@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 4.14
+Support wine-staging 4.20
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
@@ -46,9 +46,6 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     - 0011_winevulkan-1.1.113.patch
     winevulkan: Update vk.xml to 1.1.113.
     From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/misc/winevulkan-1.1.113.patch
-
-    - 0012_sims_2-fix.patch
-    From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/game-specific/sims_2-fix.patch
 
     - 0002-winevdm/*.patch
     Patches ported from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
