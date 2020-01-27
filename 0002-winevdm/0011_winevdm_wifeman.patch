@@ -16,8 +16,8 @@ index cdcdb5fbb5..cc32e59249 100644
  WINE_CONFIG_MAKEFILE(dlls/wiaservc/tests)
 +WINE_CONFIG_MAKEFILE(dlls/wifeman.dll16,enable_win16)
  WINE_CONFIG_MAKEFILE(dlls/wimgapi)
- WINE_CONFIG_MAKEFILE(dlls/win32s16.dll16,enable_win16)
  WINE_CONFIG_MAKEFILE(dlls/win32k.sys)
+ WINE_CONFIG_MAKEFILE(dlls/win32s16.dll16,enable_win16)
 diff --git a/dlls/wifeman.dll16/Makefile.in b/dlls/wifeman.dll16/Makefile.in
 new file mode 100644
 index 0000000000..3a0d06637c

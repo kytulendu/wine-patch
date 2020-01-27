@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 4.20
+Support wine-staging 5.0
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
@@ -42,10 +42,6 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     - 0001-patches/0010-Added-support-for-Win-1-and-2-applications.patch
     Add support for Windows 1.x and 2.x applications.
     This is a patch file version of https://github.com/TransmissionZero/Wine
-
-    - 0011_winevulkan-1.1.113.patch
-    winevulkan: Update vk.xml to 1.1.113.
-    From https://github.com/Tk-Glitch/PKGBUILDS/blob/master/wine-tkg-git/wine-tkg-patches/misc/winevulkan-1.1.113.patch
 
     - 0002-winevdm/*.patch
     Patches ported from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
