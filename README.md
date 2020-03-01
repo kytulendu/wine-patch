@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 5.0
+Support wine-staging 5.3
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
