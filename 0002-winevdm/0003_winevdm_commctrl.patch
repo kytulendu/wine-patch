@@ -1,16 +1,17 @@
-From 86490608494eb62a67a4c22b09fff40c9ddcc8d0 Mon Sep 17 00:00:00 2001
+From 9e8f74d864f7b9710bb8cdbe72b9ccb43e7baacd Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 13:19:46 +0700
 Subject: commctrl.dll16: Port the patch from winevdm.
+
 from https://github.com/otya128/winevdm/tree/v0.7.0/commctrl
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/configure.ac b/configure.ac
-index 510f78feff..784c2bd7d7 100644
+index 4fa7fbc8810..1113ba22e6e 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3234,6 +3234,7 @@ WINE_CONFIG_MAKEFILE(dlls/comctl32/tests)
+@@ -3184,6 +3184,7 @@ WINE_CONFIG_MAKEFILE(dlls/comctl32/tests)
  WINE_CONFIG_MAKEFILE(dlls/comdlg32)
  WINE_CONFIG_MAKEFILE(dlls/comdlg32/tests)
  WINE_CONFIG_MAKEFILE(dlls/comm.drv16,enable_win16)
@@ -20,7 +21,7 @@ index 510f78feff..784c2bd7d7 100644
  WINE_CONFIG_MAKEFILE(dlls/compstui)
 diff --git a/dlls/commctrl.dll16/Makefile.in b/dlls/commctrl.dll16/Makefile.in
 new file mode 100644
-index 0000000000..7fbf017f42
+index 00000000000..7fbf017f427
 --- /dev/null
 +++ b/dlls/commctrl.dll16/Makefile.in
 @@ -0,0 +1,6 @@
@@ -32,7 +33,7 @@ index 0000000000..7fbf017f42
 +	commctrl.c
 diff --git a/dlls/commctrl.dll16/commctrl.c b/dlls/commctrl.dll16/commctrl.c
 new file mode 100644
-index 0000000000..1e998c081d
+index 00000000000..1e998c081da
 --- /dev/null
 +++ b/dlls/commctrl.dll16/commctrl.c
 @@ -0,0 +1,578 @@
@@ -616,7 +617,7 @@ index 0000000000..1e998c081d
 +}
 diff --git a/dlls/commctrl.dll16/commctrl.dll16.spec b/dlls/commctrl.dll16/commctrl.dll16.spec
 new file mode 100644
-index 0000000000..7dec85e15f
+index 00000000000..7dec85e15fe
 --- /dev/null
 +++ b/dlls/commctrl.dll16/commctrl.dll16.spec
 @@ -0,0 +1,50 @@
@@ -671,7 +672,7 @@ index 0000000000..7dec85e15f
 +338 stub DPA_SORT
 +339 stub DPA_SEARCH
 diff --git a/dlls/user.exe16/user.exe16.spec b/dlls/user.exe16/user.exe16.spec
-index ec571800e7..578e64e790 100644
+index ec571800e71..578e64e7904 100644
 --- a/dlls/user.exe16/user.exe16.spec
 +++ b/dlls/user.exe16/user.exe16.spec
 @@ -569,3 +569,5 @@

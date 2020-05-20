@@ -1,16 +1,17 @@
-From b963aafeeed3538c74f5f2dcfd64c927c6e42cba Mon Sep 17 00:00:00 2001
+From e21a1425b2a3b0e24847f3b24f8f79ae7ffd4887 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 25 Feb 2019 00:45:04 +0700
 Subject: timer.drv16: Port the patch from winevdm.
+
 from https://github.com/otya128/winevdm/tree/v0.7.0/timer
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/configure.ac b/configure.ac
-index 784c2bd7d7..cdcdb5fbb5 100644
+index 1113ba22e6e..8a82e5ffecc 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3842,6 +3842,7 @@ WINE_CONFIG_MAKEFILE(dlls/taskschd)
+@@ -3835,6 +3835,7 @@ WINE_CONFIG_MAKEFILE(dlls/taskschd)
  WINE_CONFIG_MAKEFILE(dlls/taskschd/tests)
  WINE_CONFIG_MAKEFILE(dlls/tdh)
  WINE_CONFIG_MAKEFILE(dlls/tdi.sys)
@@ -19,10 +20,10 @@ index 784c2bd7d7..cdcdb5fbb5 100644
  WINE_CONFIG_MAKEFILE(dlls/traffic)
  WINE_CONFIG_MAKEFILE(dlls/twain.dll16,enable_win16)
 diff --git a/dlls/krnl386.exe16/kernel.c b/dlls/krnl386.exe16/kernel.c
-index 17b0c156c0..a3642af625 100644
+index 89ea5c042e7..ac7e1714970 100644
 --- a/dlls/krnl386.exe16/kernel.c
 +++ b/dlls/krnl386.exe16/kernel.c
-@@ -141,6 +141,7 @@ BOOL WINAPI KERNEL_DllEntryPoint( DWORD reasion, HINSTANCE16 inst, WORD ds,
+@@ -144,6 +144,7 @@ BOOL WINAPI KERNEL_DllEntryPoint( DWORD reasion, HINSTANCE16 inst, WORD ds,
      /* Force loading of some dlls */
      LoadLibrary16( "system.drv" );
      LoadLibrary16( "comm.drv" );
@@ -32,7 +33,7 @@ index 17b0c156c0..a3642af625 100644
  }
 diff --git a/dlls/timer.drv16/Makefile.in b/dlls/timer.drv16/Makefile.in
 new file mode 100644
-index 0000000000..5620d6d93a
+index 00000000000..5620d6d93ae
 --- /dev/null
 +++ b/dlls/timer.drv16/Makefile.in
 @@ -0,0 +1,7 @@
@@ -45,7 +46,7 @@ index 0000000000..5620d6d93a
 +RC_SRCS = timer.rc
 diff --git a/dlls/timer.drv16/timer.c b/dlls/timer.drv16/timer.c
 new file mode 100644
-index 0000000000..1a4323ce6b
+index 00000000000..1a4323ce6be
 --- /dev/null
 +++ b/dlls/timer.drv16/timer.c
 @@ -0,0 +1,15 @@
@@ -66,7 +67,7 @@ index 0000000000..1a4323ce6b
 +}
 diff --git a/dlls/timer.drv16/timer.drv16.spec b/dlls/timer.drv16/timer.drv16.spec
 new file mode 100644
-index 0000000000..8ddce52231
+index 00000000000..8ddce522313
 --- /dev/null
 +++ b/dlls/timer.drv16/timer.drv16.spec
 @@ -0,0 +1,2 @@
@@ -74,7 +75,7 @@ index 0000000000..8ddce52231
 +2 pascal DriverProc(long word word long long) DriverProc16
 diff --git a/dlls/timer.drv16/timer.rc b/dlls/timer.drv16/timer.rc
 new file mode 100644
-index 0000000000..1a38ca6add
+index 00000000000..1a38ca6adda
 --- /dev/null
 +++ b/dlls/timer.drv16/timer.rc
 @@ -0,0 +1,3 @@

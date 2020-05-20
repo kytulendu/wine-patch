@@ -1,16 +1,17 @@
-From 024167eebaec1ffdc43c56702db30650cb0de3b8 Mon Sep 17 00:00:00 2001
+From cf9de2b90da61bfba95cd6dc050ca68ef64efad7 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 22:30:18 +0700
 Subject: ddeml.dll16: Port the patch from winevdm.
+
 from https://github.com/otya128/winevdm/tree/v0.7.0/ddeml
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/dlls/ddeml.dll16/ddeml.c b/dlls/ddeml.dll16/ddeml.c
-index 5ecb35e20a..032c61c970 100644
+index c1ca8f75e1d..75f3f7b9a6a 100644
 --- a/dlls/ddeml.dll16/ddeml.c
 +++ b/dlls/ddeml.dll16/ddeml.c
-@@ -213,6 +213,53 @@ static struct ddeml_thunk*      DDEML_AddThunk(DWORD instId, DWORD pfn16)
+@@ -211,6 +211,53 @@ static struct ddeml_thunk*      DDEML_AddThunk(DWORD instId, DWORD pfn16)
      return NULL;
  }
  
@@ -64,7 +65,7 @@ index 5ecb35e20a..032c61c970 100644
  /******************************************************************************
   *            DdeInitialize   (DDEML.2)
   */
-@@ -221,6 +268,12 @@ UINT16 WINAPI DdeInitialize16(LPDWORD pidInst, PFNCALLBACK16 pfnCallback,
+@@ -219,6 +266,12 @@ UINT16 WINAPI DdeInitialize16(LPDWORD pidInst, PFNCALLBACK16 pfnCallback,
  {
      UINT16 ret;
      struct ddeml_thunk* thunk;
@@ -77,7 +78,7 @@ index 5ecb35e20a..032c61c970 100644
  
      EnterCriticalSection(&ddeml_cs);
      if ((thunk = DDEML_AddThunk(*pidInst, (DWORD)pfnCallback)))
-@@ -269,7 +322,7 @@ HCONVLIST WINAPI DdeConnectList16(DWORD idInst, HSZ hszService, HSZ hszTopic,
+@@ -267,7 +320,7 @@ HCONVLIST WINAPI DdeConnectList16(DWORD idInst, HSZ hszService, HSZ hszTopic,
  
      if (pCC16)
          map1632_conv_context(pCC = &cc, pCC16);
@@ -86,7 +87,7 @@ index 5ecb35e20a..032c61c970 100644
  }
  
  /*****************************************************************
-@@ -306,10 +359,16 @@ HCONV WINAPI DdeConnect16(DWORD idInst, HSZ hszService, HSZ hszTopic,
+@@ -304,10 +357,16 @@ HCONV WINAPI DdeConnect16(DWORD idInst, HSZ hszService, HSZ hszTopic,
  {
      CONVCONTEXT	        cc;
      CONVCONTEXT*	pCC = NULL;
@@ -104,7 +105,7 @@ index 5ecb35e20a..032c61c970 100644
  }
  
  /*****************************************************************
-@@ -385,14 +444,20 @@ HDDEDATA WINAPI DdeClientTransaction16(LPVOID pData, DWORD cbData, HCONV hConv,
+@@ -383,14 +442,20 @@ HDDEDATA WINAPI DdeClientTransaction16(LPVOID pData, DWORD cbData, HCONV hConv,
                                         HSZ hszItem, UINT16 wFmt, UINT16 wType,
                                         DWORD dwTimeout, LPDWORD pdwResult)
  {
@@ -126,7 +127,7 @@ index 5ecb35e20a..032c61c970 100644
  }
  
  /*****************************************************************
-@@ -410,7 +475,7 @@ BOOL16 WINAPI DdeAbandonTransaction16(DWORD idInst, HCONV hConv, DWORD idTransac
+@@ -408,7 +473,7 @@ BOOL16 WINAPI DdeAbandonTransaction16(DWORD idInst, HCONV hConv, DWORD idTransac
   */
  BOOL16 WINAPI DdePostAdvise16(DWORD idInst, HSZ hszTopic, HSZ hszItem)
  {
@@ -135,7 +136,7 @@ index 5ecb35e20a..032c61c970 100644
  }
  
  /*****************************************************************
-@@ -460,7 +525,7 @@ BOOL16 WINAPI DdeEnableCallback16(DWORD idInst, HCONV hConv, UINT16 wCmd)
+@@ -458,7 +523,7 @@ BOOL16 WINAPI DdeEnableCallback16(DWORD idInst, HCONV hConv, UINT16 wCmd)
   */
  HDDEDATA WINAPI DdeNameService16(DWORD idInst, HSZ hsz1, HSZ hsz2, UINT16 afCmd)
  {
@@ -144,7 +145,7 @@ index 5ecb35e20a..032c61c970 100644
  }
  
  /*****************************************************************
-@@ -498,11 +563,11 @@ UINT16 WINAPI DdeQueryConvInfo16(HCONV hConv, DWORD idTransaction,
+@@ -496,11 +561,11 @@ UINT16 WINAPI DdeQueryConvInfo16(HCONV hConv, DWORD idTransaction,
  
      ci16.cb = lpConvInfo->cb;
      ci16.hUser = ci32.hUser;

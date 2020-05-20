@@ -1,16 +1,17 @@
-From 5042c3a969c6ad9903ba5e2489f616a2af98af53 Mon Sep 17 00:00:00 2001
+From 311ffec04450652e758693cfae17970a164d96ce Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 23:27:32 +0700
 Subject: shell.dll16: Port the patch from winevdm.
+
 from https://github.com/otya128/winevdm/tree/v0.7.0/shell
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/dlls/shell.dll16/shell.c b/dlls/shell.dll16/shell.c
-index be8ffeb817..38fc6fd77f 100644
+index 3e7c32a632d..5916b94651d 100644
 --- a/dlls/shell.dll16/shell.c
 +++ b/dlls/shell.dll16/shell.c
-@@ -74,6 +74,7 @@ static UINT	uMsgShellActivate = 0;
+@@ -69,6 +69,7 @@ static UINT	uMsgShellActivate = 0;
  
  static HICON convert_icon_to_32( HICON16 icon16 )
  {
@@ -18,7 +19,7 @@ index be8ffeb817..38fc6fd77f 100644
      CURSORICONINFO *info = GlobalLock16( icon16 );
      void *and_bits = info + 1;
      void *xor_bits = (BYTE *)and_bits + info->nHeight * 2 * ((info->nWidth + 15) / 16);
-@@ -85,6 +86,7 @@ static HICON convert_icon_to_32( HICON16 icon16 )
+@@ -80,6 +81,7 @@ static HICON convert_icon_to_32( HICON16 icon16 )
  
  static HICON16 convert_icon_to_16( HINSTANCE16 inst, HICON icon )
  {

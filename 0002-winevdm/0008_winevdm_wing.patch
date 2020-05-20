@@ -1,16 +1,17 @@
-From 8efacfc378ce5e65ca8d01d016f690d63f706448 Mon Sep 17 00:00:00 2001
+From d71909bbfeddde33b7afada6a24017e25c5c0288 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Tue, 19 Feb 2019 01:34:03 +0700
 Subject: wing.dll16: Port the patch from winevdm.
+
 from https://github.com/otya128/winevdm/tree/v0.7.0/wing
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/dlls/wing.dll16/wing.c b/dlls/wing.dll16/wing.c
-index e1f2c07095..a2f4821cc4 100644
+index 98cee565405..d6197abdb6e 100644
 --- a/dlls/wing.dll16/wing.c
 +++ b/dlls/wing.dll16/wing.c
-@@ -242,6 +242,78 @@ UINT16 WINAPI WinGGetDIBColorTable16(HDC16 hdc, UINT16 start, UINT16 num, RGBQUA
+@@ -240,6 +240,78 @@ UINT16 WINAPI WinGGetDIBColorTable16(HDC16 hdc, UINT16 start, UINT16 num, RGBQUA
      return GetDIBColorTable( HDC_32(hdc), start, num, colors );
  }
  
@@ -89,7 +90,7 @@ index e1f2c07095..a2f4821cc4 100644
  /***********************************************************************
   *  WinGCreateHalfTonePalette   (WING.1007)
   *
-@@ -256,10 +328,8 @@ UINT16 WINAPI WinGGetDIBColorTable16(HDC16 hdc, UINT16 start, UINT16 num, RGBQUA
+@@ -254,10 +326,8 @@ UINT16 WINAPI WinGGetDIBColorTable16(HDC16 hdc, UINT16 start, UINT16 num, RGBQUA
   */
  HPALETTE16 WINAPI WinGCreateHalfTonePalette16(void)
  {

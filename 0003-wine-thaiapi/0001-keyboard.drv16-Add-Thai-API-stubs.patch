@@ -18,7 +18,7 @@ index 91b7c87134..6944f58f10 100644
 +++ b/dlls/keyboard.drv16/Makefile.in
 @@ -2,4 +2,5 @@ MODULE    = keyboard.drv16
  IMPORTS   = user32
- EXTRADLLFLAGS = -m16 -mno-cygwin
+ EXTRADLLFLAGS = -m16
  
 -C_SRCS = keyboard.c
 +C_SRCS = keyboard.c \

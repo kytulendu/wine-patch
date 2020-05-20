@@ -1,4 +1,4 @@
-From 78c63f60b6c205485d21c5a97d52a8a8001ee4fa Mon Sep 17 00:00:00 2001
+From c027321d08ec4cd6f1a3c45c58933cb1ac1b1a5d Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 09:42:55 +0700
 Subject: ctl3dv2.dll16: Add Ctl3dSetStyle stub.
@@ -6,7 +6,7 @@ Subject: ctl3dv2.dll16: Add Ctl3dSetStyle stub.
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/dlls/ctl3dv2.dll16/ctl3d.c b/dlls/ctl3dv2.dll16/ctl3d.c
-index 4232b02c07..0f357485cf 100644
+index 4232b02c073..0f357485cf1 100644
 --- a/dlls/ctl3dv2.dll16/ctl3d.c
 +++ b/dlls/ctl3dv2.dll16/ctl3d.c
 @@ -217,3 +217,11 @@ LRESULT WINAPI Ctl3dDlgProc16(HWND16 hwnd, UINT16 msg, WPARAM16 wparam, LPARAM l
@@ -22,7 +22,7 @@ index 4232b02c07..0f357485cf 100644
 +    return 0;
 +}
 diff --git a/dlls/ctl3dv2.dll16/ctl3dv2.dll16.spec b/dlls/ctl3dv2.dll16/ctl3dv2.dll16.spec
-index ae1e0fde24..a7a8b26640 100644
+index ae1e0fde247..a7a8b26640e 100644
 --- a/dlls/ctl3dv2.dll16/ctl3dv2.dll16.spec
 +++ b/dlls/ctl3dv2.dll16/ctl3dv2.dll16.spec
 @@ -14,7 +14,7 @@

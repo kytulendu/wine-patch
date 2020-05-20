@@ -1,16 +1,17 @@
-From a5a4f73a2a4ec869c7276f09fdec693959522555 Mon Sep 17 00:00:00 2001
+From c4656371fa2b93a8ba9e0e8218e16253db4aa74b Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Sun, 24 Feb 2019 21:41:03 +0700
 Subject: ole2nls.dll16: Port the patch from winevdm.
+
 from https://github.com/otya128/winevdm/tree/v0.7.0/ole2nls
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/dlls/ole2nls.dll16/ole2nls.c b/dlls/ole2nls.dll16/ole2nls.c
-index 68db4498ae..f3ddac5bd2 100644
+index b4b332fefb4..37c39beca2e 100644
 --- a/dlls/ole2nls.dll16/ole2nls.c
 +++ b/dlls/ole2nls.dll16/ole2nls.c
-@@ -40,6 +40,33 @@
+@@ -38,6 +38,33 @@
  
  WINE_DEFAULT_DEBUG_CHANNEL(ole);
  
@@ -44,7 +45,7 @@ index 68db4498ae..f3ddac5bd2 100644
  static LPVOID lpNLSInfo = NULL;
  
  /******************************************************************************
-@@ -92,20 +119,77 @@ LANGID WINAPI GetSystemDefaultLangID16(void)
+@@ -90,20 +117,77 @@ LANGID WINAPI GetSystemDefaultLangID16(void)
      return GetSystemDefaultLangID();
  }
  
@@ -126,7 +127,7 @@ index 68db4498ae..f3ddac5bd2 100644
  }
  
 diff --git a/dlls/ole2nls.dll16/ole2nls.dll16.spec b/dlls/ole2nls.dll16/ole2nls.dll16.spec
-index d3fc613473..616fb0fd64 100644
+index d3fc613473c..616fb0fd641 100644
 --- a/dlls/ole2nls.dll16/ole2nls.dll16.spec
 +++ b/dlls/ole2nls.dll16/ole2nls.dll16.spec
 @@ -3,7 +3,7 @@

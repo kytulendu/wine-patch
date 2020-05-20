@@ -1,14 +1,14 @@
-From 5ae660f5c4cd53420d979428df5afa039d96b725 Mon Sep 17 00:00:00 2001
+From cbafa2850a40cc5783354df05941be3ad99f2fbc Mon Sep 17 00:00:00 2001
 From: Martin Payne <development@martinpayne.me.uk>
 Date: Sun, 17 Sep 2017 21:21:36 +0100
 Subject: Added support for Windows 1.x and 2.x applications.
 
 
 diff --git a/dlls/krnl386.exe16/ne_module.c b/dlls/krnl386.exe16/ne_module.c
-index 4b0b6a0b11..ce88d6b9b1 100644
+index c951a18f869..1728d8ee228 100644
 --- a/dlls/krnl386.exe16/ne_module.c
 +++ b/dlls/krnl386.exe16/ne_module.c
-@@ -569,11 +569,10 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -561,11 +561,10 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
  
      /* We now have a valid NE header */
  
@@ -23,7 +23,7 @@ index 4b0b6a0b11..ce88d6b9b1 100644
          return ERROR_BAD_FORMAT;
  
      size = sizeof(NE_MODULE) +
-@@ -621,6 +620,11 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -613,6 +612,11 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
  
      pModule->ne_flags &= ~(NE_FFLAGS_BUILTIN | NE_FFLAGS_WIN32);
  
@@ -35,7 +35,7 @@ index 4b0b6a0b11..ce88d6b9b1 100644
      /* Get the segment table */
  
      pModule->ne_segtab = pData - (BYTE *)pModule;
-@@ -630,6 +634,24 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -622,6 +626,24 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
      for (i = ne_header->ne_cseg; i > 0; i--, pSeg++)
      {
          memcpy( pData, pSeg, sizeof(*pSeg) );
@@ -60,7 +60,7 @@ index 4b0b6a0b11..ce88d6b9b1 100644
          pData += sizeof(SEGTABLEENTRY);
      }
  
-@@ -669,6 +691,42 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
+@@ -661,6 +683,42 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
                         ne_header->ne_enttab - ne_header->ne_imptab )) goto failed;
      pData += ne_header->ne_enttab - ne_header->ne_imptab;
  
@@ -104,10 +104,10 @@ index 4b0b6a0b11..ce88d6b9b1 100644
  
      pModule->ne_enttab = pData - (BYTE *)pModule;
 diff --git a/dlls/krnl386.exe16/ne_segment.c b/dlls/krnl386.exe16/ne_segment.c
-index 30ace05e57..68a0499be5 100644
+index 70eb3360914..b270aaff0c1 100644
 --- a/dlls/krnl386.exe16/ne_segment.c
 +++ b/dlls/krnl386.exe16/ne_segment.c
-@@ -337,6 +337,45 @@ unknown:
+@@ -329,6 +329,45 @@ unknown:
  }
  
  
@@ -153,7 +153,7 @@ index 30ace05e57..68a0499be5 100644
  /***********************************************************************
   *           NE_LoadSegment
   */
-@@ -437,6 +476,9 @@ BOOL NE_LoadSegment( NE_MODULE *pModule, WORD segnum )
+@@ -429,6 +468,9 @@ BOOL NE_LoadSegment( NE_MODULE *pModule, WORD segnum )
      /* Perform exported function prolog fixups */
      NE_FixupSegmentPrologs( pModule, segnum );
  
@@ -164,7 +164,7 @@ index 30ace05e57..68a0499be5 100644
          return TRUE;  /* No relocation data, we are done */
  
 diff --git a/dlls/user.exe16/user.c b/dlls/user.exe16/user.c
-index deec596f76..bf65694650 100644
+index deec596f766..bf656946502 100644
 --- a/dlls/user.exe16/user.c
 +++ b/dlls/user.exe16/user.c
 @@ -459,6 +459,67 @@ static void free_module_icons( HINSTANCE16 inst )
@@ -303,10 +303,10 @@ index deec596f76..bf65694650 100644
  
          if (hIcon && (flags & LR_SHARED)) add_shared_icon( hinst, hRsrc, hGroupRsrc, hIcon );
 diff --git a/dlls/user32/cursoricon.c b/dlls/user32/cursoricon.c
-index 6241fb49d5..6676dec376 100644
+index 440e9683845..b674c9f2c17 100644
 --- a/dlls/user32/cursoricon.c
 +++ b/dlls/user32/cursoricon.c
-@@ -1459,6 +1459,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
+@@ -1458,6 +1458,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
  }
  
  
@@ -441,7 +441,7 @@ index 6241fb49d5..6676dec376 100644
  /*
   * .ANI layout:
   *
-@@ -1678,8 +1806,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
+@@ -1677,8 +1805,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
  
      if (dwVersion == 0x00020000)
      {

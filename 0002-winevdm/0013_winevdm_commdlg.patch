@@ -1,4 +1,4 @@
-From 6bcc14972ba2bd3776024ebf13ac2f4c8d1bf93c Mon Sep 17 00:00:00 2001
+From 28d722577c4f540db150f03f425350a6463d468f Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 14 Aug 2019 01:05:27 +0700
 Subject: commdlg.dll16: Port the patch from winevdm.
@@ -9,18 +9,18 @@ Subject: commdlg.dll16: Port the patch from winevdm.
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/dlls/commdlg.dll16/Makefile.in b/dlls/commdlg.dll16/Makefile.in
-index b1609dd9f4..0ba66cc82e 100644
+index 69731147d07..e00f640cd4e 100644
 --- a/dlls/commdlg.dll16/Makefile.in
 +++ b/dlls/commdlg.dll16/Makefile.in
 @@ -1,5 +1,5 @@
  MODULE    = commdlg.dll16
 -IMPORTS   = comdlg32 user32 gdi32
 +IMPORTS   = comdlg32 user32 gdi32 dbghelp
- EXTRADLLFLAGS = -m16 -mno-cygwin -Wb,--main-module,comdlg32.dll
+ EXTRADLLFLAGS = -m16 -Wb,--main-module,comdlg32.dll
  
  C_SRCS = \
 diff --git a/dlls/commdlg.dll16/cdlg16.h b/dlls/commdlg.dll16/cdlg16.h
-index bc11b930f6..1f166ed5ec 100644
+index bc11b930f67..1f166ed5ecf 100644
 --- a/dlls/commdlg.dll16/cdlg16.h
 +++ b/dlls/commdlg.dll16/cdlg16.h
 @@ -144,7 +144,7 @@ BOOL16  WINAPI ChooseColor16(LPCHOOSECOLOR16 lpChCol);
@@ -69,7 +69,7 @@ index bc11b930f6..1f166ed5ec 100644
 +
  #endif /* _WINE_DLL_CDLG16_H */
 diff --git a/dlls/commdlg.dll16/commdlg.dll16.spec b/dlls/commdlg.dll16/commdlg.dll16.spec
-index 1654e171c2..40ba5b81dd 100644
+index 1654e171c26..40ba5b81dd9 100644
 --- a/dlls/commdlg.dll16/commdlg.dll16.spec
 +++ b/dlls/commdlg.dll16/commdlg.dll16.spec
 @@ -13,7 +13,7 @@
@@ -82,7 +82,7 @@ index 1654e171c2..40ba5b81dd 100644
  22  pascal   PrintSetupDlgProc(word word word long) PrintSetupDlgProc16
  #23  pascal  EDITINTEGERONLY exported, shared data
 diff --git a/dlls/commdlg.dll16/filedlg.c b/dlls/commdlg.dll16/filedlg.c
-index 050cddb0dd..a4bb2ff79b 100644
+index 050cddb0dd5..a4bb2ff79b8 100644
 --- a/dlls/commdlg.dll16/filedlg.c
 +++ b/dlls/commdlg.dll16/filedlg.c
 @@ -29,10 +29,87 @@
@@ -388,7 +388,7 @@ index 050cddb0dd..a4bb2ff79b 100644
      return ret;
  }
 diff --git a/dlls/commdlg.dll16/fontdlg.c b/dlls/commdlg.dll16/fontdlg.c
-index b7c87fd736..d11e052d2a 100644
+index b7c87fd7361..d11e052d2aa 100644
 --- a/dlls/commdlg.dll16/fontdlg.c
 +++ b/dlls/commdlg.dll16/fontdlg.c
 @@ -69,11 +69,11 @@ BOOL16 WINAPI ChooseFont16(LPCHOOSEFONT16 lpChFont)
@@ -406,7 +406,7 @@ index b7c87fd736..d11e052d2a 100644
      cf32.lCustData = lpChFont->lCustData;
      cf32.lpfnHook = NULL;
 diff --git a/dlls/commdlg.dll16/printdlg.c b/dlls/commdlg.dll16/printdlg.c
-index ac4741ee4e..ee9c0bb583 100644
+index ac4741ee4e9..ee9c0bb5834 100644
 --- a/dlls/commdlg.dll16/printdlg.c
 +++ b/dlls/commdlg.dll16/printdlg.c
 @@ -80,6 +80,24 @@ static HGLOBAL global_handle_from_16( HGLOBAL16 handle )
@@ -506,14 +506,14 @@ index ac4741ee4e..ee9c0bb583 100644
  
 diff --git a/dlls/commdlg.dll16/resource.h b/dlls/commdlg.dll16/resource.h
 new file mode 100644
-index 0000000000..a6817b76f9
+index 00000000000..a6817b76f95
 --- /dev/null
 +++ b/dlls/commdlg.dll16/resource.h
 @@ -0,0 +1,2 @@
 +
 +#define IDB_BITMAP1                     101
 diff --git a/dlls/user.exe16/dialog.c b/dlls/user.exe16/dialog.c
-index 1041638456..87706d6674 100644
+index 10416384562..87706d66747 100644
 --- a/dlls/user.exe16/dialog.c
 +++ b/dlls/user.exe16/dialog.c
 @@ -24,11 +24,18 @@
@@ -798,10 +798,10 @@ index 1041638456..87706d6674 100644
  /***********************************************************************
   *           DIALOG_CreateIndirect16
 diff --git a/dlls/user.exe16/message.c b/dlls/user.exe16/message.c
-index c956c8282b..8b4c869848 100644
+index fa9388ceaa1..f76178f8a77 100644
 --- a/dlls/user.exe16/message.c
 +++ b/dlls/user.exe16/message.c
-@@ -215,7 +215,7 @@ WNDPROC16 WINPROC_GetProc16( WNDPROC proc, BOOL unicode )
+@@ -216,7 +216,7 @@ WNDPROC16 WINPROC_GetProc16( WNDPROC proc, BOOL unicode )
  }
  
  /* call a 16-bit window procedure */
@@ -811,7 +811,7 @@ index c956c8282b..8b4c869848 100644
  {
      DPI_AWARENESS_CONTEXT awareness;
 diff --git a/dlls/user.exe16/user.exe16.spec b/dlls/user.exe16/user.exe16.spec
-index 578e64e790..822d7c921b 100644
+index 578e64e7904..822d7c921b1 100644
 --- a/dlls/user.exe16/user.exe16.spec
 +++ b/dlls/user.exe16/user.exe16.spec
 @@ -569,5 +569,7 @@
@@ -823,7 +823,7 @@ index 578e64e790..822d7c921b 100644
  @ stdcall -arch=win32 LoadBitmap16(long str)
  @ stdcall -arch=win32 LoadString16(long long ptr long)
 diff --git a/dlls/user.exe16/user_private.h b/dlls/user.exe16/user_private.h
-index 336b89102d..d3f92c017e 100644
+index 336b89102d4..d3f92c017e4 100644
 --- a/dlls/user.exe16/user_private.h
 +++ b/dlls/user.exe16/user_private.h
 @@ -126,4 +126,22 @@ extern HICON get_icon_32( HICON16 icon16 ) DECLSPEC_HIDDEN;
@@ -850,10 +850,10 @@ index 336b89102d..d3f92c017e 100644
 +
  #endif /* __WINE_USER_PRIVATE_H */
 diff --git a/dlls/user.exe16/window.c b/dlls/user.exe16/window.c
-index a15bf57e48..65264fa5e2 100644
+index 1f53bdc9540..e371c99cf62 100644
 --- a/dlls/user.exe16/window.c
 +++ b/dlls/user.exe16/window.c
-@@ -36,13 +36,6 @@ WINE_DEFAULT_DEBUG_CHANNEL(win);
+@@ -37,13 +37,6 @@ WINE_DEFAULT_DEBUG_CHANNEL(win);
  
  static HWND16 hwndSysModal;
  
@@ -867,7 +867,7 @@ index a15bf57e48..65264fa5e2 100644
  static struct list class_list = LIST_INIT( class_list );
  
  struct wnd_enum_info
-@@ -1622,6 +1615,77 @@ ATOM WINAPI RegisterClassEx16( const WNDCLASSEX16 *wc )
+@@ -1625,6 +1618,77 @@ ATOM WINAPI RegisterClassEx16( const WNDCLASSEX16 *wc )
      return atom;
  }
  

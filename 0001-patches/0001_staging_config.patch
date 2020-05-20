@@ -1,4 +1,4 @@
-From 19b3738f245aa0bf08efa0c3612a19fe56660272 Mon Sep 17 00:00:00 2001
+From 027b6911ccf561a833e61530b134e1cb84cec72e Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 26 Nov 2018 10:22:50 +0700
 Subject: winecfg: Toggle upstream CSMT implementation patch.
@@ -8,10 +8,10 @@ from https://github.com/wine-staging/wine-staging/pull/60
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/programs/winecfg/resource.h b/programs/winecfg/resource.h
-index 96f2429090..9b57abf00d 100644
+index d77f6a23a5a..93221babe47 100644
 --- a/programs/winecfg/resource.h
 +++ b/programs/winecfg/resource.h
-@@ -214,7 +214,7 @@
+@@ -213,7 +213,7 @@
  #define IDC_SYSPARAMS_MENUBAR           8431
  
  /* Staging tab */
@@ -21,7 +21,7 @@ index 96f2429090..9b57abf00d 100644
  #define IDC_ENABLE_EAX                  9003
  #define IDC_ENABLE_HIDEWINE             9004
 diff --git a/programs/winecfg/staging.c b/programs/winecfg/staging.c
-index b573db7189..59a389f11b 100644
+index e703a6559e3..a6bb058016e 100644
 --- a/programs/winecfg/staging.c
 +++ b/programs/winecfg/staging.c
 @@ -36,13 +36,25 @@
@@ -73,10 +73,10 @@ index b573db7189..59a389f11b 100644
              return TRUE;
          case IDC_ENABLE_VAAPI:
 diff --git a/programs/winecfg/winecfg.rc b/programs/winecfg/winecfg.rc
-index 332520b156..f9d0112293 100644
+index 738c4702aa3..2b6e3e33974 100644
 --- a/programs/winecfg/winecfg.rc
 +++ b/programs/winecfg/winecfg.rc
-@@ -319,7 +319,7 @@ FONT 8, "MS Shell Dlg"
+@@ -317,7 +317,7 @@ FONT 8, "MS Shell Dlg"
  BEGIN
      GROUPBOX    "Staging settings",IDC_STATIC,8,4,244,210
      LTEXT       "The following settings are experimental and may break stuff!\nMake sure to reset them again in case of a problem.",IDC_STATIC,16,16,230,16

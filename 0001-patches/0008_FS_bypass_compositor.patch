@@ -1,4 +1,4 @@
-From 7108ddba13f70514bc81800ccd6b48b2f956869f Mon Sep 17 00:00:00 2001
+From 2130e62ebc6db7cb6cfff8178ea1252cd20c4205 Mon Sep 17 00:00:00 2001
 From: Kai Krakow <kai@kaishome.de>
 Date: Thu, 4 Oct 2018 05:51:20 +0200
 Subject: winex11.drv: Bypass compositor in fullscreen mode
@@ -13,10 +13,10 @@ leaves fullscreen mode.
 Compositors tend to cause severe stutter if the game is GPU-bound.
 
 diff --git a/dlls/winex11.drv/window.c b/dlls/winex11.drv/window.c
-index 589935298b..26b39b8a4e 100644
+index fcfc123f750..5968c50b025 100644
 --- a/dlls/winex11.drv/window.c
 +++ b/dlls/winex11.drv/window.c
-@@ -950,6 +950,7 @@ void update_user_time( Time time )
+@@ -951,6 +951,7 @@ void update_user_time( Time time )
  void update_net_wm_states( struct x11drv_win_data *data )
  {
      DWORD i, style, ex_style, new_state = 0;
@@ -24,7 +24,7 @@ index 589935298b..26b39b8a4e 100644
  
      if (!data->managed) return;
      if (data->whole_window == root_window) return;
-@@ -962,7 +963,10 @@ void update_net_wm_states( struct x11drv_win_data *data )
+@@ -963,7 +964,10 @@ void update_net_wm_states( struct x11drv_win_data *data )
          if ((style & WS_MAXIMIZE) && (style & WS_CAPTION) == WS_CAPTION)
              new_state |= (1 << NET_WM_STATE_MAXIMIZED);
          else if (!(style & WS_MINIMIZE))
@@ -35,7 +35,7 @@ index 589935298b..26b39b8a4e 100644
      }
      else if (style & WS_MAXIMIZE)
          new_state |= (1 << NET_WM_STATE_MAXIMIZED);
-@@ -1023,6 +1027,10 @@ void update_net_wm_states( struct x11drv_win_data *data )
+@@ -1024,6 +1028,10 @@ void update_net_wm_states( struct x11drv_win_data *data )
          }
      }
      data->net_wm_state = new_state;
@@ -47,10 +47,10 @@ index 589935298b..26b39b8a4e 100644
  
  /***********************************************************************
 diff --git a/dlls/winex11.drv/x11drv.h b/dlls/winex11.drv/x11drv.h
-index cca8743326..d5ed3d651f 100644
+index 1e4c3d5f02b..e06e4d59b64 100644
 --- a/dlls/winex11.drv/x11drv.h
 +++ b/dlls/winex11.drv/x11drv.h
-@@ -446,6 +446,7 @@ enum x11drv_atoms
+@@ -447,6 +447,7 @@ enum x11drv_atoms
      XATOM__NET_SYSTEM_TRAY_OPCODE,
      XATOM__NET_SYSTEM_TRAY_S0,
      XATOM__NET_SYSTEM_TRAY_VISUAL,
@@ -59,10 +59,10 @@ index cca8743326..d5ed3d651f 100644
      XATOM__NET_WM_MOVERESIZE,
      XATOM__NET_WM_NAME,
 diff --git a/dlls/winex11.drv/x11drv_main.c b/dlls/winex11.drv/x11drv_main.c
-index 11e4ee2915..1c4b11fb12 100644
+index 7c5515f3b1a..97f49274974 100644
 --- a/dlls/winex11.drv/x11drv_main.c
 +++ b/dlls/winex11.drv/x11drv_main.c
-@@ -159,6 +159,7 @@ static const char * const atom_names[NB_XATOMS - FIRST_XATOM] =
+@@ -160,6 +160,7 @@ static const char * const atom_names[NB_XATOMS - FIRST_XATOM] =
      "_NET_SYSTEM_TRAY_OPCODE",
      "_NET_SYSTEM_TRAY_S0",
      "_NET_SYSTEM_TRAY_VISUAL",
