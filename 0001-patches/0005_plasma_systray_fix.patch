@@ -204,7 +204,7 @@ new file mode 100644
 index 00000000000..1bdb24a58f2
 --- /dev/null
 +++ b/dlls/winex11.drv/systray_dbus.c
-@@ -0,0 +1,1813 @@
+@@ -0,0 +1,1812 @@
 +/*
 + * DBus StatusNotifierItem system tray management,
 + *
@@ -509,18 +509,17 @@ index 00000000000..1bdb24a58f2
 +static BOOL load_dbus_functions(void)
 +{
 +    void *handle;
-+    char error[128];
 +
-+    if (!(handle = wine_dlopen(SONAME_LIBDBUS_1, RTLD_NOW, error, sizeof(error))))
++    if (!(handle = dlopen(SONAME_LIBDBUS_1, RTLD_NOW)))
 +        goto failed;
 +
-+#define DO_FUNC(f) if (!(p_##f = wine_dlsym( handle, #f, error, sizeof(error) ))) goto failed
++#define DO_FUNC(f) if (!(p_##f = dlsym( handle, #f ))) goto failed
 +    DBUS_FUNCS;
 +#undef DO_FUNC
 +    return TRUE;
 +
 +failed:
-+    WARN( "failed to load DBus support: %s\n", error );
++    WARN( "failed to load DBus support\n" );
 +    return FALSE;
 +}
 +
