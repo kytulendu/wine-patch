@@ -25,7 +25,7 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     - 0001-patches/0006_LAA-staging.patch
     ntdll/loader: add support for overriding IMAGE_FILE_LARGE_ADDRESS_AWARE
 
-    - 0007_path_of_exile.patch
+    - 0001-patches/0007_path_of_exile.patch
     ole32: Fix WIC error in Path of Exile.
     From https://bugs.winehq.org/show_bug.cgi?id=42695
 
