@@ -1,9 +1,8 @@
-From 90d5809312c86340b06139e8f2a8cc29176b1143 Mon Sep 17 00:00:00 2001
+From d50c2a39f84a39354718cdcf94cb8b53d71d4ec0 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:22:11 +0700
-Subject: [PATCH 07/25] user.exe16: Implement lstrDayName, lstrMonthName and
+Subject: [PATCH 07/26] user.exe16: Implement lstrDayName, lstrMonthName and
  lstrYearNumber.
-To: wine-devel <wine-devel@winehq.org>
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -336,5 +335,5 @@ index a4e8a5d799..10651f1e1d 100644
  /* TODO: change the value to hex? */
  #define KOKAI           161  /* ก  A1 */
 -- 
-2.22.0
+2.27.0
 

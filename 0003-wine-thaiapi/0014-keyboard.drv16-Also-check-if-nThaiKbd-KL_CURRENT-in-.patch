@@ -1,9 +1,8 @@
-From cb685ffd67eafa78c5a4dce47aabe0b5891ec406 Mon Sep 17 00:00:00 2001
+From 644e8a0bf34caf763ead3b8016d07608343af9c5 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 4 Apr 2018 11:55:23 +0700
-Subject: [PATCH 14/25] keyboard.drv16: Also check if nThaiKbd == KL_CURRENT in
+Subject: [PATCH 14/26] keyboard.drv16: Also check if nThaiKbd == KL_CURRENT in
  SetThaiKbdLayout.
-To: wine-devel <wine-devel@winehq.org>
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -25,5 +24,5 @@ index 739ad89cf1..f69123eefa 100644
  
  /**********************************************************************
 -- 
-2.22.0
+2.27.0
 

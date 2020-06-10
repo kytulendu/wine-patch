@@ -1,9 +1,8 @@
-From 41f77ffe23c19e1b51691d2df84ce2195fe72844 Mon Sep 17 00:00:00 2001
+From 6a728c8cb14015164e33889270d18b6a47b9998c Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:17:23 +0700
-Subject: [PATCH 05/25] user.exe16: Implement IsThaiKbdSeqCheck and
+Subject: [PATCH 05/26] user.exe16: Implement IsThaiKbdSeqCheck and
  SetThaiKbdSeqCheck.
-To: wine-devel <wine-devel@winehq.org>
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -44,5 +43,5 @@ index e2d8aae520..575a23d008 100644
  
  
 -- 
-2.22.0
+2.27.0
 

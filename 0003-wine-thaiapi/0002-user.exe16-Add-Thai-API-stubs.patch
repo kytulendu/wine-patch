@@ -1,8 +1,7 @@
-From ade19d807b7e94576e666befebef13e88bcfa548 Mon Sep 17 00:00:00 2001
+From 74d3815e651ea7bcb7040ebcfae7aeb5590e4592 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:09:46 +0700
-Subject: [PATCH 02/25] user.exe16: Add Thai API stubs.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 02/26] user.exe16: Add Thai API stubs.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -15,7 +14,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  create mode 100644 dlls/user.exe16/thai.c
 
 diff --git a/dlls/user.exe16/Makefile.in b/dlls/user.exe16/Makefile.in
-index 664b8e81e8..f56a4bd844 100644
+index 5a82b7590c..c2d1ed76af 100644
 --- a/dlls/user.exe16/Makefile.in
 +++ b/dlls/user.exe16/Makefile.in
 @@ -9,6 +9,7 @@ C_SRCS = \
@@ -367,10 +366,10 @@ index ec571800e7..6caf2763a0 100644
  500 stub FARCALLNETDRIVER 			# Undocumented Windows
  501 pascal -ret16 WNetOpenJob(ptr ptr word ptr)  WNetOpenJob16
 diff --git a/dlls/user.exe16/window.c b/dlls/user.exe16/window.c
-index 10f1389f0a..203cd09446 100644
+index bf86719325..98c99e6b6f 100644
 --- a/dlls/user.exe16/window.c
 +++ b/dlls/user.exe16/window.c
-@@ -2011,20 +2011,23 @@ BOOL16 WINAPI DragDetect16( HWND16 hwnd, POINT16 pt )
+@@ -2014,20 +2014,23 @@ BOOL16 WINAPI DragDetect16( HWND16 hwnd, POINT16 pt )
  /**************************************************************************
   *              SetScrollInfo   (USER.475)
   */
@@ -396,5 +395,5 @@ index 10f1389f0a..203cd09446 100644
  /**************************************************************************
   *              EnableScrollBar   (USER.482)
 -- 
-2.22.0
+2.27.0
 

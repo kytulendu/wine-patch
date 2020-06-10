@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-Support wine-staging 5.8
+Support wine-staging 5.9
 
 To apply patches use `git apply *.patch` or `git am *.patch`.
 
@@ -14,9 +14,6 @@ To apply patches use `git apply *.patch` or `git am *.patch`.
     - 0001-patches/0002_use_clock_monotonic.patch
     ntdll, server: Never use CLOCK_MONOTONIC_RAW
     Using CLOCK_MONOTONIC avoids a kernel call.
-
-    - 0001-patches/0003_use_clock_monotonic-2.patch
-    kernel32: Never use CLOCK_MONOTONIC_RAW
 
     - 0001-patches/0004_enable_stg_shared_mem_def.patch
     ntdll: Enable STAGING_SHARED_MEMORY by default.

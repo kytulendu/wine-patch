@@ -1,8 +1,7 @@
-From 7a6444ca756800c778b1764e31fd66d43583815a Mon Sep 17 00:00:00 2001
+From 8c0da8474c5cb976fd2fe63b86dc348ba58e7254 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 4 Apr 2018 11:51:46 +0700
-Subject: [PATCH 13/25] user.exe16: Correct return value for SetTaskInterface.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 13/26] user.exe16: Correct return value for SetTaskInterface.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -38,5 +37,5 @@ index cfa3c385a8..8ae1bf112e 100644
 +    return oldInterface;
  }
 -- 
-2.22.0
+2.27.0
 

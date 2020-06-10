@@ -1,8 +1,7 @@
-From 42a52227d857e5f17a95380a8bdbaa29f6137b93 Mon Sep 17 00:00:00 2001
+From c29943265d7532ae5fecf7efa61761a427a679a9 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 10:07:31 +0700
-Subject: [PATCH 09/25] user.exe16: Fix default profile string.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 09/26] user.exe16: Fix default profile string.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -41,5 +40,5 @@ index eb32634dbe..99f6192f6c 100644
              else
                  iLenght = GetProfileStringA( "intl", "sLongDate", "dd MMMM yyyy",
 -- 
-2.22.0
+2.27.0
 

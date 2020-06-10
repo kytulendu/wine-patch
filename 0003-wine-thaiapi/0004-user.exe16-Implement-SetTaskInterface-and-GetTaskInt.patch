@@ -1,9 +1,8 @@
-From 925daeb98ceab72b564fbe8b6cb6071bc3d149d7 Mon Sep 17 00:00:00 2001
+From 83a49780925cb70a497eefa741f8f1fd8bcdb285 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:16:00 +0700
-Subject: [PATCH 04/25] user.exe16: Implement SetTaskInterface and
+Subject: [PATCH 04/26] user.exe16: Implement SetTaskInterface and
  GetTaskInterface.
-To: wine-devel <wine-devel@winehq.org>
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -66,5 +65,5 @@ index e44f0ccfe5..a4e8a5d799 100644
  #define KOKAI           161  /* ก  A1 */
  #define KHOKHAI         162  /* ข  A2 */
 -- 
-2.22.0
+2.27.0
 

@@ -1,8 +1,7 @@
-From 737fee8b6191ef00ecfb141c40600762f8c16477 Mon Sep 17 00:00:00 2001
+From 271cfc1c57e7c69588c9d09f68400d83cd0335cc Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Tue, 10 Apr 2018 22:37:39 +0700
-Subject: [PATCH 17/25] keyboard.drv16: Correct variable cast for array index.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 17/26] keyboard.drv16: Correct variable cast for array index.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -32,5 +31,5 @@ index d9ca8ecbb4..f412f2c55e 100644
              if (samePtr)
                  *src = temp;
 -- 
-2.22.0
+2.27.0
 

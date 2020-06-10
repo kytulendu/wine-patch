@@ -1,8 +1,7 @@
-From 5c043e2038317b9c608b89cec667d0be973daa67 Mon Sep 17 00:00:00 2001
+From 247019f2b14a8e002fe09676eb5821399e4195cd Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 09:29:50 +0700
-Subject: [PATCH 18/25] keyboard.drv16: Add function documentation.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 18/26] keyboard.drv16: Add function documentation.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -78,5 +77,5 @@ index f412f2c55e..c7a53a1cc8 100644
  VOID WINAPI lstrNumArabicToThai16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount)
  {
 -- 
-2.22.0
+2.27.0
 

@@ -1,8 +1,7 @@
-From 3f64b6594244563b188d5330813c1b61b46c72a2 Mon Sep 17 00:00:00 2001
+From 6fc0e8fb4f40c30c04fdc8f5668025a16523b578 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 21:14:17 +0700
-Subject: [PATCH 20/25] keyboard.drv16: Fixme to warn.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 20/26] keyboard.drv16: Fixme to warn.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -23,5 +22,5 @@ index c7a53a1cc8..3f1f7a377f 100644
  
  /**********************************************************************
 -- 
-2.22.0
+2.27.0
 

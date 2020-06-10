@@ -1,8 +1,7 @@
-From 99e9e6207778c58bbba8b857ae89a7f03846c535 Mon Sep 17 00:00:00 2001
+From 830fc67d4d767253a0387997b6213c8f457d76e7 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:13:49 +0700
-Subject: [PATCH 03/25] user.exe16: Implement ThaiCharType.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 03/26] user.exe16: Implement ThaiCharType.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -257,5 +256,5 @@ index 3dc984254c..e44f0ccfe5 100644
  HICON16     WINAPI CopyImage16(HANDLE16,UINT16,INT16,INT16,UINT16);
  HICON16     WINAPI CreateIconFromResource16(LPBYTE,UINT16,BOOL16,DWORD);
 -- 
-2.22.0
+2.27.0
 

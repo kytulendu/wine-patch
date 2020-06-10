@@ -1,8 +1,7 @@
-From 0b0b06c8cdf120bbafa87fd3615ab60b828596b8 Mon Sep 17 00:00:00 2001
+From 265207873a12164ef9d4d2fa06d48826d3eacafd Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 20:16:29 +0700
-Subject: [PATCH 19/25] gdi.exe16: Implement IsThaiFont.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 19/26] gdi.exe16: Implement IsThaiFont.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -98,5 +97,5 @@ index 0000000000..5d44d01293
 +        return FALSE;
 +}
 -- 
-2.22.0
+2.27.0
 

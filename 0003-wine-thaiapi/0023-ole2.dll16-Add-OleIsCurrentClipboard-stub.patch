@@ -1,8 +1,7 @@
-From 1ab01b6a2d1fcc742061abff461de15876c9057e Mon Sep 17 00:00:00 2001
+From 416175cac8f42c43a679ade1fcca394a933f9a00 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Thu, 12 Apr 2018 00:04:21 +0700
-Subject: [PATCH 23/25] ole2.dll16: Add OleIsCurrentClipboard stub.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 23/26] ole2.dll16: Add OleIsCurrentClipboard stub.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -45,5 +44,5 @@ index 108c3ee8f3..81f396666c 100644
  79 pascal OleDoAutoConvert(ptr ptr) OleDoAutoConvert16
  80 stub OLEGETAUTOCONVERT
 -- 
-2.22.0
+2.27.0
 

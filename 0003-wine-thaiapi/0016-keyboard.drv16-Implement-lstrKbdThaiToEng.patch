@@ -1,8 +1,7 @@
-From a74ec952496f934aee650cdf0816ee8208d15696 Mon Sep 17 00:00:00 2001
+From c5b31b94c4dcaef53d78e2ca2a63e8f429a07fde Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Tue, 10 Apr 2018 22:17:47 +0700
-Subject: [PATCH 16/25] keyboard.drv16: Implement lstrKbdThaiToEng.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 16/26] keyboard.drv16: Implement lstrKbdThaiToEng.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -118,5 +117,5 @@ index b4bbf14a4d..d9ca8ecbb4 100644
  
  /**********************************************************************
 -- 
-2.22.0
+2.27.0
 

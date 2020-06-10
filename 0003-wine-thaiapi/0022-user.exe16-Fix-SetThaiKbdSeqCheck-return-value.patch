@@ -1,8 +1,7 @@
-From fff50eafa1febac068def815879f2d421fcd9e0f Mon Sep 17 00:00:00 2001
+From 5b4975660c39cc26855cd4fc20710fc65ff75d9b Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 23:02:49 +0700
-Subject: [PATCH 22/25] user.exe16: Fix SetThaiKbdSeqCheck return value.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 22/26] user.exe16: Fix SetThaiKbdSeqCheck return value.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -25,5 +24,5 @@ index 12def7e4b0..ea63b750d5 100644
  
  
 -- 
-2.22.0
+2.27.0
 

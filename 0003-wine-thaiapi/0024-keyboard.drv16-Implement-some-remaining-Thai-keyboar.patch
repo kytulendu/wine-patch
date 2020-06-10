@@ -1,9 +1,8 @@
-From b79684501253c66745159ebca787eae087c6dc32 Mon Sep 17 00:00:00 2001
+From 1d62ac46e52fe4a94e95cfc4cf46c0f69c77c997 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Thu, 24 May 2018 08:55:33 +0700
-Subject: [PATCH 24/25] keyboard.drv16: Implement some remaining Thai keyboard
+Subject: [PATCH 24/26] keyboard.drv16: Implement some remaining Thai keyboard
  functions.
-To: wine-devel <wine-devel@winehq.org>
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -147,5 +146,5 @@ index 3f1f7a377f..d8981c810e 100644
  /**********************************************************************
   *      SetThaiKbdLayout (KEYBOARD.15)
 -- 
-2.22.0
+2.27.0
 

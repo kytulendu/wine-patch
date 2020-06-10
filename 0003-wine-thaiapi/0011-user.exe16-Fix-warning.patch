@@ -1,8 +1,7 @@
-From 930f4971f556fb0394f9317dd7a7f6dcce1276c3 Mon Sep 17 00:00:00 2001
+From 3b453a90d282c005bb9ae9611bdf7a0848a68cda Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 17:56:50 +0700
-Subject: [PATCH 11/25] user.exe16: Fix warning.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 11/26] user.exe16: Fix warning.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -29,5 +28,5 @@ index 99f6192f6c..e0cc8598ef 100644
  
  WINE_DEFAULT_DEBUG_CHANNEL(user);
 -- 
-2.22.0
+2.27.0
 

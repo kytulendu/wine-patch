@@ -1,9 +1,8 @@
-From 682346075c018591a47529ecf3141b7ff5d18523 Mon Sep 17 00:00:00 2001
+From d31904bf7e05fe763dd45d24ab73badbbb4da437 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 17:39:06 +0700
-Subject: [PATCH 10/25] keyboard.drv16: Implement SetThaiKbdLayout and
+Subject: [PATCH 10/26] keyboard.drv16: Implement SetThaiKbdLayout and
  GetThaiKbdLayout.
-To: wine-devel <wine-devel@winehq.org>
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -79,5 +78,5 @@ index 10651f1e1d..615ae3de7c 100644
  #define TS_LONG             0x0004
  #define TS_SHORT            0x000C
 -- 
-2.22.0
+2.27.0
 

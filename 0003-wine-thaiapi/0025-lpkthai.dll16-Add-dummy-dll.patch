@@ -1,8 +1,7 @@
-From 444bfbb266646dbc786be4873adb60ed00c182eb Mon Sep 17 00:00:00 2001
+From 2138740d97de655edd1322ce0956dc7474c27bb1 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Fri, 15 Mar 2019 03:42:06 +0700
-Subject: [PATCH 25/25] lpkthai.dll16: Add dummy dll.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 25/26] lpkthai.dll16: Add dummy dll.
 
 This dll was required by Microsoft Office 97 Thai Edition
 Language Switcher.
@@ -17,10 +16,10 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  create mode 100644 dlls/lpkthai.dll16/lpkthai.dll16.spec
 
 diff --git a/configure.ac b/configure.ac
-index 6ce39b8900..8c692a960a 100644
+index d81f5cc88c..14415d2ec3 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3342,6 +3342,7 @@ WINE_CONFIG_MAKEFILE(dlls/localspl)
+@@ -3407,6 +3407,7 @@ WINE_CONFIG_MAKEFILE(dlls/localspl)
  WINE_CONFIG_MAKEFILE(dlls/localspl/tests)
  WINE_CONFIG_MAKEFILE(dlls/localui)
  WINE_CONFIG_MAKEFILE(dlls/localui/tests)
@@ -61,5 +60,5 @@ index 0000000000..a3c0ff22fa
 +#31  stub THK_THUNKDATA16
 +104 stub FINDTHAIWORDBREAK
 -- 
-2.22.0
+2.27.0
 

@@ -1,8 +1,7 @@
-From 11e19044efff6808d98bf637f2e8d35681a75365 Mon Sep 17 00:00:00 2001
+From 56f4a284bbd087d38fa1c84078e361bf0e54e337 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:18:58 +0700
-Subject: [PATCH 06/25] user.exe16: Implement CountThaiCharType.
-To: wine-devel <wine-devel@winehq.org>
+Subject: [PATCH 06/26] user.exe16: Implement CountThaiCharType.
 
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 ---
@@ -46,5 +45,5 @@ index 575a23d008..f19fd95ad1 100644
  
  
 -- 
-2.22.0
+2.27.0
 
