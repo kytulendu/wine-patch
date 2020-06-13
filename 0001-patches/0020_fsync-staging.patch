@@ -1,0 +1,39 @@
+From 3c46b4fb1b2461532c4a20887b5f356909aff049 Mon Sep 17 00:00:00 2001
+From: Tk-Glitch <ti3nou@gmail.com>
+Date: Thu, 8 Aug 2019 14:44:43 +0200
+Subject: Prepare for Fsync
+
+
+diff --git a/server/device.c b/server/device.c
+index 3380d00fd54..695faf7bffd 100644
+--- a/server/device.c
++++ b/server/device.c
+@@ -1008,11 +1008,11 @@ DECL_HANDLER(get_next_device_request)
+                 /* we already own the object if it's only on manager queue */
+                 if (irp->file) grab_object( irp );
+                 manager->current_call = irp;
+-
+-                if (do_esync() && list_empty( &manager->requests ))
+-                    esync_clear( manager->esync_fd );
+             }
+             else close_handle( current->process, reply->next );
++
++            if (do_esync() && list_empty( &manager->requests ))
++                    esync_clear( manager->esync_fd );
+         }
+     }
+     else set_error( STATUS_PENDING );
+diff --git a/server/process.c b/server/process.c
+index 7bb5db9a036..c47441d5611 100644
+--- a/server/process.c
++++ b/server/process.c
+@@ -541,8 +541,8 @@ struct process *create_process( int fd, struct process *parent, int inherit_all,
+     process->trace_data      = 0;
+     process->rawinput_mouse  = NULL;
+     process->rawinput_kbd    = NULL;
+-    process->esync_fd        = -1;
+     list_init( &process->kernel_object );
++    process->esync_fd        = -1;
+     list_init( &process->thread_list );
+     list_init( &process->locks );
+     list_init( &process->asyncs );
