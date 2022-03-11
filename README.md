@@ -2,7 +2,7 @@
 
 A collection of wine patch for my self compile version of wine.
 
-For wine-staging-tkg 5.20
+For wine-staging-tkg 7.3
 
 https://github.com/Frogging-Family/wine-tkg-git
 

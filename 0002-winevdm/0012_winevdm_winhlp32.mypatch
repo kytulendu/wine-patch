@@ -122,10 +122,10 @@ index 3ade6c1d5d0..e75cb198418 100644
      if (!HLPFILE_RtfAddControl(rd, "{\\pict")) goto done;
      if (type == 0x06)
      {
--        sprintf(tmp, "\\dibitmap0\\picw%d\\pich%d",
+-        sprintf(tmp, "\\dibitmap0\\picw%ld\\pich%ld",
 -                bi->bmiHeader.biWidth, bi->bmiHeader.biHeight);
 +        /* 96dpi: 15twips = 1px */
-+        sprintf(tmp, "\\dibitmap0\\picw%d\\pich%d\\picwgoal%d\\pichgoal%d",
++        sprintf(tmp, "\\dibitmap0\\picw%ld\\pich%ld\\picwgoal%ld\\pichgoal%ld",
 +                bi->bmiHeader.biWidth, bi->bmiHeader.biHeight,
 +                bi->bmiHeader.biWidth * 15, bi->bmiHeader.biHeight * 15);
          if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
@@ -134,9 +134,9 @@ index 3ade6c1d5d0..e75cb198418 100644
      }
      else
      {
--        sprintf(tmp, "\\wbitmap0\\wbmbitspixel%d\\wbmplanes%d\\picw%d\\pich%d",
+-        sprintf(tmp, "\\wbitmap0\\wbmbitspixel%d\\wbmplanes%d\\picw%ld\\pich%ld",
 +        /* 96dpi: 15twips = 1px */
-+        sprintf(tmp, "\\wbitmap0\\wbmbitspixel%d\\wbmplanes%d\\picw%d\\pich%d\\picwgoal%d\\pichgoal%d",
++        sprintf(tmp, "\\wbitmap0\\wbmbitspixel%d\\wbmplanes%d\\picw%ld\\pich%ld\\picwgoal%ld\\pichgoal%ld",
                  bi->bmiHeader.biBitCount, bi->bmiHeader.biPlanes,
 -                bi->bmiHeader.biWidth, bi->bmiHeader.biHeight);
 +                bi->bmiHeader.biWidth, bi->bmiHeader.biHeight,
@@ -185,7 +185,7 @@ index 3ade6c1d5d0..e75cb198418 100644
      for (nc = 0; nc < ncol; /**/)
      {
 +        BYTE brdr;
-         WINE_TRACE("looking for format at offset %lu in column %d\n", (SIZE_T)(format - (buf + 0x15)), nc);
+         WINE_TRACE("looking for format at offset %Iu in column %d\n", (SIZE_T)(format - (buf + 0x15)), nc);
          if (!HLPFILE_RtfAddControl(rd, "\\pard")) goto done;
          if (buf[0x14] == HLP_TABLE)
 @@ -1374,11 +1387,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
@@ -486,7 +486,7 @@ index 3ade6c1d5d0..e75cb198418 100644
                  wi->sr_color = (flags & 0x0100) ? GET_UINT(ptr, 86) : 0xFFFFFF;
                  wi->nsr_color = (flags & 0x0200) ? GET_UINT(ptr, 90) : 0xFFFFFF;
 +                wi->flags = flags;
-                 WINE_TRACE("System-Window: flags=%c%c%c%c%c%c%c%c type=%s name=%s caption=%s (%d,%d)x(%d,%d)\n",
+                 WINE_TRACE("System-Window: flags=%c%c%c%c%c%c%c%c type=%s name=%s caption=%s (%ld,%ld)x(%ld,%ld)\n",
                             flags & 0x0001 ? 'T' : 't',
                             flags & 0x0002 ? 'N' : 'n',
 @@ -2257,6 +2341,26 @@ static BOOL HLPFILE_GetTOMap(HLPFILE *hlpfile)
@@ -626,7 +626,7 @@ index 280e6182361..8009afd94ba 100644
  {
      HLPFILE_PAGE*       page = MACRO_CurrentWindow()->page;
  
--    WINE_TRACE("(%x, %x, %x)\n", r, g, b);
+-    WINE_TRACE("(%lx, %lx, %lx)\n", r, g, b);
 +    WINE_TRACE("(%d)\n", rgb);
      page->file->has_popup_color = TRUE;
 -    page->file->popup_color = RGB(r, g, b);

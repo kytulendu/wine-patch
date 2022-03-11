@@ -262,7 +262,7 @@ index 050cddb0dd5..a4bb2ff79b8 100644
      ofn32.nFileOffset       = lpofn->nFileOffset;
      ofn32.nFileExtension    = lpofn->nFileExtension;
      ofn32.lpstrDefExt       = MapSL( lpofn->lpstrDefExt );
-     ofn32.lCustData         = lpofn->lCustData;
+     ofn32.lCustData         = ofn; /* See WM_INITDIALOG in the hook proc */
      ofn32.lpfnHook          = dummy_hook;  /* this is to force old 3.1 dialog style */
 +    ofn32.lpTemplateName    = NULL;
 +    ofn32.hInstance         = GetModuleHandleW(L"commdlg.dll16");

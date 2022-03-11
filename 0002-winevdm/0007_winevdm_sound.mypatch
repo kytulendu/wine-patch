@@ -19,9 +19,9 @@ index 8e9b04bfa83..542063d9037 100644
  C_SRCS = sound.c
 diff --git a/dlls/sound.drv16/sound.c b/dlls/sound.drv16/sound.c
 index 0f1386cf160..bc6faa5742b 100644
---- a/dlls/sound.drv16/sound.c
-+++ b/dlls/sound.drv16/sound.c
-@@ -20,20 +20,64 @@
+--- sound.c	2022-03-11 13:01:34.713412863 +0700
++++ sound.c	2022-03-11 13:05:03.610836288 +0700
+@@ -20,20 +20,65 @@
  
  #include <stdarg.h>
  #include <stdlib.h>
@@ -60,6 +60,7 @@ index 0f1386cf160..bc6faa5742b 100644
 +static int tempo;
 +
 +INT16 WINAPI StopSound16(void);
++INT16 WINAPI SetVoiceSound16(INT16 nVoice, DWORD lFrequency, INT16 nDuration);
 +
  /***********************************************************************
   *		OpenSound (SOUND.1)
@@ -88,7 +89,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -41,7 +85,13 @@ INT16 WINAPI OpenSound16(void)
+@@ -41,7 +86,13 @@
   */
  void WINAPI CloseSound16(void)
  {
@@ -103,21 +104,11 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -49,18 +99,14 @@ void WINAPI CloseSound16(void)
+@@ -49,8 +100,14 @@
   */
  INT16 WINAPI SetVoiceQueueSize16(INT16 nVoice, INT16 nBytes)
  {
 -  FIXME("(%d,%d): stub\n",nVoice,nBytes);
--  return 0;
--}
--
--/***********************************************************************
-- *		SetVoiceNote (SOUND.4)
-- */
--INT16 WINAPI SetVoiceNote16(INT16 nVoice, INT16 nValue, INT16 nLength,
--                            INT16 nCdots)
--{
--  FIXME("(%d,%d,%d,%d): stub\n",nVoice,nValue,nLength,nCdots);
 -  return 0;
 +    if (owner != GetCurrentTask()) return 0;
 +    if (nVoice != 1) return 0;
@@ -130,7 +121,32 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -69,9 +115,15 @@ INT16 WINAPI SetVoiceNote16(INT16 nVoice, INT16 nValue, INT16 nLength,
+@@ -59,8 +116,22 @@
+ INT16 WINAPI SetVoiceNote16(INT16 nVoice, INT16 nValue, INT16 nLength,
+                             INT16 nCdots)
+ {
+-  FIXME("(%d,%d,%d,%d): stub\n",nVoice,nValue,nLength,nCdots);
+-  return 0;
++    const int notes[] = { 4186, 4435, 4699, 4978, 5274, 5588, 5920, 6272, 6645, 7040, 7459, 7902 };
++    int freq;
++    int len;
++
++    if (--nValue > 83) return S_SERDNT;
++
++    TRACE("(%d, %d, %d, %d)\n", nVoice, nValue, nLength, nCdots);
++
++    nValue = (nValue + pitch) % 84;
++    freq = notes[nValue % 12] >> (6 - (nValue / 12));
++    len = (nCdots ? ((nCdots * 3) / 2) : 1) * ((96000 / tempo) / nLength);
++    if (nCdots != 0 && len > 32767)
++    {
++        len = (96000 / tempo) / nLength;
++    }
++    return SetVoiceSound16(nVoice, freq << 16, len);
+ }
+ 
+ /***********************************************************************
+@@ -69,9 +140,15 @@
  INT16 WINAPI SetVoiceAccent16(INT16 nVoice, INT16 nTempo, INT16 nVolume,
                                INT16 nMode, INT16 nPitch)
  {
@@ -149,7 +165,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -79,8 +131,8 @@ INT16 WINAPI SetVoiceAccent16(INT16 nVoice, INT16 nTempo, INT16 nVolume,
+@@ -79,8 +156,8 @@
   */
  INT16 WINAPI SetVoiceEnvelope16(INT16 nVoice, INT16 nShape, INT16 nRepeat)
  {
@@ -160,7 +176,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -88,8 +140,8 @@ INT16 WINAPI SetVoiceEnvelope16(INT16 nVoice, INT16 nShape, INT16 nRepeat)
+@@ -88,8 +165,8 @@
   */
  INT16 WINAPI SetSoundNoise16(INT16 nSource, INT16 nDuration)
  {
@@ -171,11 +187,11 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -97,24 +149,111 @@ INT16 WINAPI SetSoundNoise16(INT16 nSource, INT16 nDuration)
+@@ -97,8 +174,75 @@
   */
  INT16 WINAPI SetVoiceSound16(INT16 nVoice, DWORD lFrequency, INT16 nDuration)
  {
--  FIXME("(%d, %d, %d): stub\n",nVoice,lFrequency, nDuration);
+-  FIXME("(%d, %ld, %d): stub\n",nVoice,lFrequency, nDuration);
 -  return 0;
 +    int freq = HIWORD(lFrequency);
 +    if (owner != GetCurrentTask()) return 0;
@@ -189,37 +205,10 @@ index 0f1386cf160..bc6faa5742b 100644
 +    queue[nextnote].duration = ((nDuration + 1) / 2) * 5; // 2.5 ms per tick rounded up
 +    nextnote++;
 +    return 0;
- }
- 
- /***********************************************************************
-- *		StartSound (SOUND.9)
-+ *		SetVoiceNote (SOUND.4)
-  */
--INT16 WINAPI StartSound16(void)
-+INT16 WINAPI SetVoiceNote16(INT16 nVoice, INT16 nValue, INT16 nLength,
-+                            INT16 nCdots)
-+{
-+    const int notes[] = { 4186, 4435, 4699, 4978, 5274, 5588, 5920, 6272, 6645, 7040, 7459, 7902 };
-+    int freq;
-+    int len;
-+
-+    if (--nValue > 83) return S_SERDNT;
-+
-+    TRACE("(%d, %d, %d, %d)\n", nVoice, nValue, nLength, nCdots);
-+
-+    nValue = (nValue + pitch) % 84;
-+    freq = notes[nValue % 12] >> (6 - (nValue / 12));
-+    len = (nCdots ? ((nCdots * 3) / 2) : 1) * ((96000 / tempo) / nLength);
-+    if (nCdots != 0 && len > 32767)
-+    {
-+        len = (96000 / tempo) / nLength;
-+    }
-+    return SetVoiceSound16(nVoice, freq << 16, len);
 +}
 +
 +static DWORD WINAPI play(LPVOID param)
- {
--  return 0;
++ {
 +    const float mspersamp = 1000.0f / 48000.0f;
 +    int len = 0;
 +    int k = 0;
@@ -229,7 +218,7 @@ index 0f1386cf160..bc6faa5742b 100644
 +
 +    for (int i = 0; i < nextnote; i++)
 +        len += (float)queue[i].duration / mspersamp;
-+    if (!len) return;
++    if (!len) return 1;
 +
 +    buflen = len;
 +    wavbuf = (char *)HeapAlloc(GetProcessHeap(), 0, buflen);
@@ -276,11 +265,9 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-- *		StopSound (SOUND.10)
-+ *		StartSound (SOUND.9)
+@@ -106,7 +250,11 @@
   */
--INT16 WINAPI StopSound16(void)
-+INT16 WINAPI StartSound16(void)
+ INT16 WINAPI StartSound16(void)
  {
 -  return 0;
 +    if (owner != GetCurrentTask()) return 0;
@@ -291,7 +278,18 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -122,7 +261,31 @@ INT16 WINAPI StopSound16(void)
+@@ -114,7 +262,9 @@
+  */
+ INT16 WINAPI StopSound16(void)
+ {
+-  return 0;
++    if (owner != GetCurrentTask()) return 0;
++    if (!playing) return 0;
++    waveOutReset(wohand);
+ }
+ 
+ /***********************************************************************
+@@ -122,7 +272,20 @@
   */
  INT16 WINAPI WaitSoundState16(INT16 x)
  {
@@ -310,17 +308,6 @@ index 0f1386cf160..bc6faa5742b 100644
 +            RestoreThunkLock(count);
 +        }
 +    }
-+    return 0;
-+}
-+
-+/***********************************************************************
-+ *		StopSound (SOUND.10)
-+ */
-+INT16 WINAPI StopSound16(void)
-+{
-+    if (owner != GetCurrentTask()) return 0;
-+    if (!playing) return 0;
-+    waveOutReset(wohand);
      return 0;
  }
  
