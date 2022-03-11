@@ -8,6 +8,10 @@ https://github.com/Frogging-Family/wine-tkg-git
 
 # Patch Lists
 
+    - customization.cfg
+    Customization file for wine-staging-tkg used by myself.
+    Addition patches in customization file is from https://github.com/Frogging-Family/community-patches
+
     - 0001-patches/0001-Added-support-for-Win-1-and-2-applications.mypatch
     Add support for Windows 1.x and 2.x applications.
     This is a patch file version of https://github.com/TransmissionZero/Wine
