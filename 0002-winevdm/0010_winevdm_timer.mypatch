@@ -12,9 +12,9 @@ index 1113ba22e6e..8a82e5ffecc 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -3835,6 +3835,7 @@ WINE_CONFIG_MAKEFILE(dlls/taskschd)
- WINE_CONFIG_MAKEFILE(dlls/taskschd/tests)
- WINE_CONFIG_MAKEFILE(dlls/tdh)
  WINE_CONFIG_MAKEFILE(dlls/tdi.sys)
+ WINE_CONFIG_MAKEFILE(dlls/threadpoolwinrt)
+ WINE_CONFIG_MAKEFILE(dlls/threadpoolwinrt/tests)
 +WINE_CONFIG_MAKEFILE(dlls/timer.drv16,enable_win16)
  WINE_CONFIG_MAKEFILE(dlls/toolhelp.dll16,enable_win16)
  WINE_CONFIG_MAKEFILE(dlls/traffic)
