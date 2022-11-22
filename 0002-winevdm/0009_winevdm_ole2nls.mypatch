@@ -1,4 +1,4 @@
-From c4656371fa2b93a8ba9e0e8218e16253db4aa74b Mon Sep 17 00:00:00 2001
+From fd106383a2a55eb72b039683fd6f98e46a975cc1 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Sun, 24 Feb 2019 21:41:03 +0700
 Subject: ole2nls.dll16: Port the patch from winevdm.

@@ -1,4 +1,4 @@
-From 123442adcc644dbae9a297e32874e80fc514bc50 Mon Sep 17 00:00:00 2001
+From 13573623994a386efb1282f89f318c0f21f7b63b Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 25 Feb 2019 01:13:59 +0700
 Subject: wifeman.dll16: Port the patch from winevdm.
@@ -8,11 +8,11 @@ from https://github.com/otya128/winevdm/tree/v0.7.0/wifeman
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/configure.ac b/configure.ac
-index 8a82e5ffecc..071b1292e6d 100644
+index 7ba8bd4e540..a0b93ac53ad 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3909,6 +3909,7 @@ WINE_CONFIG_MAKEFILE(dlls/wer/tests)
- WINE_CONFIG_MAKEFILE(dlls/wevtapi)
+@@ -3197,6 +3197,7 @@ WINE_CONFIG_MAKEFILE(dlls/wevtapi/tests)
+ WINE_CONFIG_MAKEFILE(dlls/wevtsvc)
  WINE_CONFIG_MAKEFILE(dlls/wiaservc)
  WINE_CONFIG_MAKEFILE(dlls/wiaservc/tests)
 +WINE_CONFIG_MAKEFILE(dlls/wifeman.dll16,enable_win16)
@@ -31,7 +31,7 @@ index 00000000000..3a0d06637ce
 +C_SRCS = wifeman.c
 diff --git a/dlls/wifeman.dll16/wifeman.c b/dlls/wifeman.dll16/wifeman.c
 new file mode 100644
-index 00000000000..63c71ac4611
+index 00000000000..67f98f525ba
 --- /dev/null
 +++ b/dlls/wifeman.dll16/wifeman.c
 @@ -0,0 +1,34 @@

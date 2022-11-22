@@ -1,4 +1,4 @@
-From c027321d08ec4cd6f1a3c45c58933cb1ac1b1a5d Mon Sep 17 00:00:00 2001
+From 44c87917961a36eac1f5f0805514dc110760a7d7 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 09:42:55 +0700
 Subject: ctl3dv2.dll16: Add Ctl3dSetStyle stub.

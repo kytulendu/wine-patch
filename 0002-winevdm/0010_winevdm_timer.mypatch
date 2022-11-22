@@ -1,4 +1,4 @@
-From e21a1425b2a3b0e24847f3b24f8f79ae7ffd4887 Mon Sep 17 00:00:00 2001
+From 4f83a141d87eca756742b7f4b7ff8c3529a1eeb9 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 25 Feb 2019 00:45:04 +0700
 Subject: timer.drv16: Port the patch from winevdm.
@@ -8,10 +8,10 @@ from https://github.com/otya128/winevdm/tree/v0.7.0/timer
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/configure.ac b/configure.ac
-index 1113ba22e6e..8a82e5ffecc 100644
+index 5798fd7b00a..7ba8bd4e540 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3835,6 +3835,7 @@ WINE_CONFIG_MAKEFILE(dlls/taskschd)
+@@ -3121,6 +3121,7 @@ WINE_CONFIG_MAKEFILE(dlls/tdh)
  WINE_CONFIG_MAKEFILE(dlls/tdi.sys)
  WINE_CONFIG_MAKEFILE(dlls/threadpoolwinrt)
  WINE_CONFIG_MAKEFILE(dlls/threadpoolwinrt/tests)
@@ -20,10 +20,10 @@ index 1113ba22e6e..8a82e5ffecc 100644
  WINE_CONFIG_MAKEFILE(dlls/traffic)
  WINE_CONFIG_MAKEFILE(dlls/twain.dll16,enable_win16)
 diff --git a/dlls/krnl386.exe16/kernel.c b/dlls/krnl386.exe16/kernel.c
-index 89ea5c042e7..ac7e1714970 100644
+index 5891c7e0588..46c363dcfde 100644
 --- a/dlls/krnl386.exe16/kernel.c
 +++ b/dlls/krnl386.exe16/kernel.c
-@@ -144,6 +144,7 @@ BOOL WINAPI KERNEL_DllEntryPoint( DWORD reasion, HINSTANCE16 inst, WORD ds,
+@@ -143,6 +143,7 @@ BOOL WINAPI KERNEL_DllEntryPoint( DWORD reasion, HINSTANCE16 inst, WORD ds,
      /* Force loading of some dlls */
      LoadLibrary16( "system.drv" );
      LoadLibrary16( "comm.drv" );

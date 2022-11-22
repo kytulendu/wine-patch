@@ -1,4 +1,4 @@
-From b5b8080744e7f10af16caa1b87d73d04e225a91d Mon Sep 17 00:00:00 2001
+From d295e319c43d36dfe47a51f55d040ef933b9406a Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Tue, 19 Feb 2019 00:55:20 +0700
 Subject: sound.drv16: Port the patch from winevdm.
@@ -18,9 +18,9 @@ index 8e9b04bfa83..542063d9037 100644
  
  C_SRCS = sound.c
 diff --git a/dlls/sound.drv16/sound.c b/dlls/sound.drv16/sound.c
-index 0f1386cf160..bc6faa5742b 100644
---- sound.c	2022-03-11 13:01:34.713412863 +0700
-+++ sound.c	2022-03-11 13:05:03.610836288 +0700
+index f93b96c4fa1..c28c4d969b2 100644
+--- a/dlls/sound.drv16/sound.c
++++ b/dlls/sound.drv16/sound.c
 @@ -20,20 +20,65 @@
  
  #include <stdarg.h>
@@ -89,7 +89,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -41,7 +86,13 @@
+@@ -41,7 +86,13 @@ INT16 WINAPI OpenSound16(void)
   */
  void WINAPI CloseSound16(void)
  {
@@ -104,7 +104,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -49,8 +100,14 @@
+@@ -49,8 +100,14 @@ void WINAPI CloseSound16(void)
   */
  INT16 WINAPI SetVoiceQueueSize16(INT16 nVoice, INT16 nBytes)
  {
@@ -121,7 +121,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -59,8 +116,22 @@
+@@ -59,8 +116,22 @@ INT16 WINAPI SetVoiceQueueSize16(INT16 nVoice, INT16 nBytes)
  INT16 WINAPI SetVoiceNote16(INT16 nVoice, INT16 nValue, INT16 nLength,
                              INT16 nCdots)
  {
@@ -146,7 +146,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -69,9 +140,15 @@
+@@ -69,9 +140,15 @@ INT16 WINAPI SetVoiceNote16(INT16 nVoice, INT16 nValue, INT16 nLength,
  INT16 WINAPI SetVoiceAccent16(INT16 nVoice, INT16 nTempo, INT16 nVolume,
                                INT16 nMode, INT16 nPitch)
  {
@@ -165,7 +165,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -79,8 +156,8 @@
+@@ -79,8 +156,8 @@ INT16 WINAPI SetVoiceAccent16(INT16 nVoice, INT16 nTempo, INT16 nVolume,
   */
  INT16 WINAPI SetVoiceEnvelope16(INT16 nVoice, INT16 nShape, INT16 nRepeat)
  {
@@ -176,7 +176,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -88,8 +165,8 @@
+@@ -88,8 +165,8 @@ INT16 WINAPI SetVoiceEnvelope16(INT16 nVoice, INT16 nShape, INT16 nRepeat)
   */
  INT16 WINAPI SetSoundNoise16(INT16 nSource, INT16 nDuration)
  {
@@ -187,7 +187,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -97,8 +174,75 @@
+@@ -97,8 +174,75 @@ INT16 WINAPI SetSoundNoise16(INT16 nSource, INT16 nDuration)
   */
  INT16 WINAPI SetVoiceSound16(INT16 nVoice, DWORD lFrequency, INT16 nDuration)
  {
@@ -265,7 +265,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -106,7 +250,11 @@
+@@ -106,7 +250,11 @@ INT16 WINAPI SetVoiceSound16(INT16 nVoice, DWORD lFrequency, INT16 nDuration)
   */
  INT16 WINAPI StartSound16(void)
  {
@@ -278,7 +278,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -114,7 +262,9 @@
+@@ -114,7 +262,9 @@ INT16 WINAPI StartSound16(void)
   */
  INT16 WINAPI StopSound16(void)
  {
@@ -289,7 +289,7 @@ index 0f1386cf160..bc6faa5742b 100644
  }
  
  /***********************************************************************
-@@ -122,7 +272,20 @@
+@@ -122,7 +272,20 @@ INT16 WINAPI StopSound16(void)
   */
  INT16 WINAPI WaitSoundState16(INT16 x)
  {

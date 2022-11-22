@@ -1,4 +1,4 @@
-From 28d722577c4f540db150f03f425350a6463d468f Mon Sep 17 00:00:00 2001
+From c87533d0deb999ec3d5aefe30c38d184dff0ddb4 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 14 Aug 2019 01:05:27 +0700
 Subject: commdlg.dll16: Port the patch from winevdm.
@@ -82,7 +82,7 @@ index 1654e171c26..40ba5b81dd9 100644
  22  pascal   PrintSetupDlgProc(word word word long) PrintSetupDlgProc16
  #23  pascal  EDITINTEGERONLY exported, shared data
 diff --git a/dlls/commdlg.dll16/filedlg.c b/dlls/commdlg.dll16/filedlg.c
-index 050cddb0dd5..a4bb2ff79b8 100644
+index 5ad67a4a91f..b186a2b5f90 100644
 --- a/dlls/commdlg.dll16/filedlg.c
 +++ b/dlls/commdlg.dll16/filedlg.c
 @@ -29,10 +29,87 @@
@@ -173,7 +173,7 @@ index 050cddb0dd5..a4bb2ff79b8 100644
  
  static inline WORD get_word( const char **ptr )
  {
-@@ -554,6 +631,65 @@ BOOL16 CALLBACK FileSaveDlgProc16(HWND16 hWnd16, UINT16 wMsg, WPARAM16 wParam, L
+@@ -560,6 +637,65 @@ BOOL16 CALLBACK FileSaveDlgProc16(HWND16 hWnd16, UINT16 wMsg, WPARAM16 wParam, L
      return FALSE;
  }
  
@@ -239,7 +239,7 @@ index 050cddb0dd5..a4bb2ff79b8 100644
  /***********************************************************************
   *           GetOpenFileName   (COMMDLG.1)
   *
-@@ -572,9 +708,13 @@ BOOL16 WINAPI GetOpenFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+@@ -578,9 +714,13 @@ BOOL16 WINAPI GetOpenFileName16( SEGPTR ofn ) /* [in/out] address of structure w
      LPDLGTEMPLATEA template = NULL;
      OPENFILENAMEA ofn32;
      BOOL ret;
@@ -253,7 +253,7 @@ index 050cddb0dd5..a4bb2ff79b8 100644
      ofn32.lStructSize       = OPENFILENAME_SIZE_VERSION_400A;
      ofn32.hwndOwner         = HWND_32( lpofn->hwndOwner );
      ofn32.lpstrFilter       = MapSL( lpofn->lpstrFilter );
-@@ -587,36 +727,51 @@ BOOL16 WINAPI GetOpenFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+@@ -593,36 +733,51 @@ BOOL16 WINAPI GetOpenFileName16( SEGPTR ofn ) /* [in/out] address of structure w
      ofn32.nMaxFileTitle     = lpofn->nMaxFileTitle;
      ofn32.lpstrInitialDir   = MapSL( lpofn->lpstrInitialDir );
      ofn32.lpstrTitle        = MapSL( lpofn->lpstrTitle );
@@ -313,7 +313,7 @@ index 050cddb0dd5..a4bb2ff79b8 100644
      HeapFree( GetProcessHeap(), 0, template );
      return ret;
  }
-@@ -639,9 +794,13 @@ BOOL16 WINAPI GetSaveFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+@@ -645,9 +800,13 @@ BOOL16 WINAPI GetSaveFileName16( SEGPTR ofn ) /* [in/out] address of structure w
      LPDLGTEMPLATEA template = NULL;
      OPENFILENAMEA ofn32;
      BOOL ret;
@@ -327,7 +327,7 @@ index 050cddb0dd5..a4bb2ff79b8 100644
      ofn32.lStructSize       = OPENFILENAME_SIZE_VERSION_400A;
      ofn32.hwndOwner         = HWND_32( lpofn->hwndOwner );
      ofn32.lpstrFilter       = MapSL( lpofn->lpstrFilter );
-@@ -654,36 +813,50 @@ BOOL16 WINAPI GetSaveFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+@@ -660,36 +819,50 @@ BOOL16 WINAPI GetSaveFileName16( SEGPTR ofn ) /* [in/out] address of structure w
      ofn32.nMaxFileTitle     = lpofn->nMaxFileTitle;
      ofn32.lpstrInitialDir   = MapSL( lpofn->lpstrInitialDir );
      ofn32.lpstrTitle        = MapSL( lpofn->lpstrTitle );
@@ -388,7 +388,7 @@ index 050cddb0dd5..a4bb2ff79b8 100644
      return ret;
  }
 diff --git a/dlls/commdlg.dll16/fontdlg.c b/dlls/commdlg.dll16/fontdlg.c
-index b7c87fd7361..d11e052d2aa 100644
+index 79efb3a292f..f8a86b28078 100644
 --- a/dlls/commdlg.dll16/fontdlg.c
 +++ b/dlls/commdlg.dll16/fontdlg.c
 @@ -69,11 +69,11 @@ BOOL16 WINAPI ChooseFont16(LPCHOOSEFONT16 lpChFont)
@@ -513,7 +513,7 @@ index 00000000000..a6817b76f95
 +
 +#define IDB_BITMAP1                     101
 diff --git a/dlls/user.exe16/dialog.c b/dlls/user.exe16/dialog.c
-index 10416384562..87706d66747 100644
+index 315f70dd6f3..f3348b17ad6 100644
 --- a/dlls/user.exe16/dialog.c
 +++ b/dlls/user.exe16/dialog.c
 @@ -24,11 +24,18 @@
@@ -535,7 +535,7 @@ index 10416384562..87706d66747 100644
  /* Dialog control information */
  typedef struct
  {
-@@ -221,7 +228,6 @@ static BOOL DIALOG_CreateControls16( HWND hwnd, LPCSTR template,
+@@ -233,7 +240,6 @@ static BOOL DIALOG_CreateControls16( HWND hwnd, LPCSTR template,
      return TRUE;
  }
  
@@ -543,7 +543,7 @@ index 10416384562..87706d66747 100644
  /***********************************************************************
   *           DIALOG_ParseTemplate16
   *
-@@ -292,6 +298,253 @@ static LPCSTR DIALOG_ParseTemplate16( LPCSTR p, DLG_TEMPLATE * result )
+@@ -304,6 +310,253 @@ static LPCSTR DIALOG_ParseTemplate16( LPCSTR p, DLG_TEMPLATE * result )
      return p;
  }
  
@@ -798,10 +798,10 @@ index 10416384562..87706d66747 100644
  /***********************************************************************
   *           DIALOG_CreateIndirect16
 diff --git a/dlls/user.exe16/message.c b/dlls/user.exe16/message.c
-index fa9388ceaa1..f76178f8a77 100644
+index 9af217bf5f1..107775cd103 100644
 --- a/dlls/user.exe16/message.c
 +++ b/dlls/user.exe16/message.c
-@@ -216,7 +216,7 @@ WNDPROC16 WINPROC_GetProc16( WNDPROC proc, BOOL unicode )
+@@ -223,7 +223,7 @@ WNDPROC16 WINPROC_GetProc16( WNDPROC proc, BOOL unicode )
  }
  
  /* call a 16-bit window procedure */
@@ -823,10 +823,10 @@ index 578e64e7904..822d7c921b1 100644
  @ stdcall -arch=win32 LoadBitmap16(long str)
  @ stdcall -arch=win32 LoadString16(long long ptr long)
 diff --git a/dlls/user.exe16/user_private.h b/dlls/user.exe16/user_private.h
-index 336b89102d4..d3f92c017e4 100644
+index 0805997246b..cd4a3c3edcc 100644
 --- a/dlls/user.exe16/user_private.h
 +++ b/dlls/user.exe16/user_private.h
-@@ -126,4 +126,22 @@ extern HICON get_icon_32( HICON16 icon16 ) DECLSPEC_HIDDEN;
+@@ -122,4 +122,22 @@ extern HICON get_icon_32( HICON16 icon16 ) DECLSPEC_HIDDEN;
  extern DWORD USER16_AlertableWait DECLSPEC_HIDDEN;
  extern WORD USER_HeapSel DECLSPEC_HIDDEN;
  
@@ -850,10 +850,10 @@ index 336b89102d4..d3f92c017e4 100644
 +
  #endif /* __WINE_USER_PRIVATE_H */
 diff --git a/dlls/user.exe16/window.c b/dlls/user.exe16/window.c
-index 1f53bdc9540..e371c99cf62 100644
+index 69d178e31b0..7f4a24b4cb1 100644
 --- a/dlls/user.exe16/window.c
 +++ b/dlls/user.exe16/window.c
-@@ -37,13 +37,6 @@ WINE_DEFAULT_DEBUG_CHANNEL(win);
+@@ -36,13 +36,6 @@ WINE_DEFAULT_DEBUG_CHANNEL(win);
  
  static HWND16 hwndSysModal;
  
@@ -867,7 +867,7 @@ index 1f53bdc9540..e371c99cf62 100644
  static struct list class_list = LIST_INIT( class_list );
  
  struct wnd_enum_info
-@@ -1625,6 +1618,77 @@ ATOM WINAPI RegisterClassEx16( const WNDCLASSEX16 *wc )
+@@ -1639,6 +1632,77 @@ ATOM WINAPI RegisterClassEx16( const WNDCLASSEX16 *wc )
      return atom;
  }
  

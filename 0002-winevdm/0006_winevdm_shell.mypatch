@@ -1,4 +1,4 @@
-From 311ffec04450652e758693cfae17970a164d96ce Mon Sep 17 00:00:00 2001
+From 26d1be1fe7a7ef59fcb4e3d115e7f00df5abba74 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 23:27:32 +0700
 Subject: shell.dll16: Port the patch from winevdm.
@@ -8,7 +8,7 @@ from https://github.com/otya128/winevdm/tree/v0.7.0/shell
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/dlls/shell.dll16/shell.c b/dlls/shell.dll16/shell.c
-index 3e7c32a632d..5916b94651d 100644
+index 1b55478be7f..27c04936f1f 100644
 --- a/dlls/shell.dll16/shell.c
 +++ b/dlls/shell.dll16/shell.c
 @@ -69,6 +69,7 @@ static UINT	uMsgShellActivate = 0;

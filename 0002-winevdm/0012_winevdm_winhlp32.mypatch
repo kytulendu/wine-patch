@@ -1,4 +1,4 @@
-From a3503d0a1451ae1072861ed475835ad637da93df Mon Sep 17 00:00:00 2001
+From baa72eb20885c855cf64acb2794b7f694c6e0218 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Sun, 12 May 2019 00:40:00 +0700
 Subject: winhlp32: Port the patch from winevdm.
@@ -8,7 +8,7 @@ from https://github.com/otya128/winevdm/tree/v0.7.0/winhlp32
 Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
 
 diff --git a/programs/winhlp32/Makefile.in b/programs/winhlp32/Makefile.in
-index 78e0e5a257b..0725df0a936 100644
+index 79841972fd0..0ee967f07b5 100644
 --- a/programs/winhlp32/Makefile.in
 +++ b/programs/winhlp32/Makefile.in
 @@ -1,5 +1,5 @@
@@ -17,9 +17,9 @@ index 78e0e5a257b..0725df0a936 100644
 +IMPORTS   = user32 gdi32 ole32
  DELAYIMPORTS = shell32 comctl32 comdlg32
  
- EXTRADLLFLAGS = -mwindows -mno-cygwin
+ EXTRADLLFLAGS = -mwindows
 diff --git a/programs/winhlp32/hlpfile.c b/programs/winhlp32/hlpfile.c
-index 3ade6c1d5d0..e75cb198418 100644
+index 73c4f4a27af..a0908677fa5 100644
 --- a/programs/winhlp32/hlpfile.c
 +++ b/programs/winhlp32/hlpfile.c
 @@ -29,6 +29,7 @@
@@ -161,7 +161,7 @@ index 3ade6c1d5d0..e75cb198418 100644
 +    // WMF type uses MM_HIMETRIC units for size
 +    HLPFILE_AddHotSpotLinks(rd, file, beg, hs_size, hs_offset, mm == 8 ? 27 : 1);
  
-     WINE_TRACE("sz=%u csz=%u offs=%u/%u,%u/%u\n",
+     WINE_TRACE("sz=%lu csz=%lu offs=%lu/%lu,%lu/%lu\n",
                 size, csize, off, (ULONG)(ptr - beg), hs_size, hs_offset);
 @@ -1144,6 +1155,7 @@ static  BOOL    HLPFILE_RtfAddGfxByAddr(struct RtfData* rd, HLPFILE *hlpfile,
          if (numpict != 1) WINE_FIXME("Supporting only one bitmap format per logical bitmap (for now). Using first format\n");
@@ -605,7 +605,7 @@ index 55ef681edd8..c680c0e2bab 100644
  
  BOOL          HLPFILE_BrowsePage(HLPFILE_PAGE*, struct RtfData* rd,
 diff --git a/programs/winhlp32/macro.c b/programs/winhlp32/macro.c
-index 280e6182361..8009afd94ba 100644
+index 777efbbf74f..fe8a60eefef 100644
 --- a/programs/winhlp32/macro.c
 +++ b/programs/winhlp32/macro.c
 @@ -767,7 +767,7 @@ static void CALLBACK MACRO_RegisterRoutine(LPCSTR dll_name, LPCSTR proc, LPCSTR
@@ -644,7 +644,7 @@ index 280e6182361..8009afd94ba 100644
      {"ShortCut",            "SH", 0, "SSUUS",  MACRO_ShortCut},
      {"TCard",               NULL, 0, "U",      MACRO_TCard},
 diff --git a/programs/winhlp32/winhelp.c b/programs/winhlp32/winhelp.c
-index a98a76003ba..d650197ccaf 100644
+index 73db4b58876..f651a6fc09f 100644
 --- a/programs/winhlp32/winhelp.c
 +++ b/programs/winhlp32/winhelp.c
 @@ -27,6 +27,7 @@
@@ -779,7 +779,7 @@ index a98a76003ba..d650197ccaf 100644
 +        if (wh->ofsPath)
 +            SetCurrentDirectoryA((LPSTR)wh + wh->ofsPath);
  
-         WINE_TRACE("Got[%u]: cmd=%u data=%08x fn=%s\n",
+         WINE_TRACE("Got[%u]: cmd=%u data=%08lx fn=%s\n",
                     wh->size, wh->command, wh->data, debugstr_a(ptr));
 @@ -414,9 +456,31 @@ static LRESULT  WINHELP_HandleCommand(HWND hSrcWnd, LPARAM lParam)
                  MACRO_JumpHash(ptr, "main", 0);

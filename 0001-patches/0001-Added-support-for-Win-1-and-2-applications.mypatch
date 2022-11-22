@@ -1,11 +1,11 @@
-From cbafa2850a40cc5783354df05941be3ad99f2fbc Mon Sep 17 00:00:00 2001
+From 4d3d34723475259052dac8625fad9c3aebd8c071 Mon Sep 17 00:00:00 2001
 From: Martin Payne <development@martinpayne.me.uk>
 Date: Sun, 17 Sep 2017 21:21:36 +0100
 Subject: Added support for Windows 1.x and 2.x applications.
 
 
 diff --git a/dlls/krnl386.exe16/ne_module.c b/dlls/krnl386.exe16/ne_module.c
-index c951a18f869..1728d8ee228 100644
+index 82b976fab6b..7907f30c67a 100644
 --- a/dlls/krnl386.exe16/ne_module.c
 +++ b/dlls/krnl386.exe16/ne_module.c
 @@ -561,11 +561,10 @@ static HMODULE16 build_module( const void *mapping, SIZE_T mapping_size, LPCSTR
@@ -104,7 +104,7 @@ index c951a18f869..1728d8ee228 100644
  
      pModule->ne_enttab = pData - (BYTE *)pModule;
 diff --git a/dlls/krnl386.exe16/ne_segment.c b/dlls/krnl386.exe16/ne_segment.c
-index 70eb3360914..b270aaff0c1 100644
+index 3eb8bae2ff3..b8ff8623aaf 100644
 --- a/dlls/krnl386.exe16/ne_segment.c
 +++ b/dlls/krnl386.exe16/ne_segment.c
 @@ -329,6 +329,45 @@ unknown:
@@ -164,10 +164,10 @@ index 70eb3360914..b270aaff0c1 100644
          return TRUE;  /* No relocation data, we are done */
  
 diff --git a/dlls/user.exe16/user.c b/dlls/user.exe16/user.c
-index deec596f766..bf656946502 100644
+index 75b81b0ea05..503eb42cd2e 100644
 --- a/dlls/user.exe16/user.c
 +++ b/dlls/user.exe16/user.c
-@@ -459,6 +459,67 @@ static void free_module_icons( HINSTANCE16 inst )
+@@ -460,6 +460,67 @@ static void free_module_icons( HINSTANCE16 inst )
      }
  }
  
@@ -235,7 +235,7 @@ index deec596f766..bf656946502 100644
  /**********************************************************************
   * Management of the 16-bit clipboard formats
   */
-@@ -2157,6 +2218,10 @@ HANDLE16 WINAPI LoadImage16(HINSTANCE16 hinst, LPCSTR name, UINT16 type, INT16 c
+@@ -2156,6 +2217,10 @@ HANDLE16 WINAPI LoadImage16(HINSTANCE16 hinst, LPCSTR name, UINT16 type, INT16 c
          WCHAR path[MAX_PATH], filename[MAX_PATH];
          HANDLE file;
  
@@ -246,7 +246,7 @@ index deec596f766..bf656946502 100644
          filename[0] = 0;
          if (!(hRsrc = FindResource16( hinst, name, (LPCSTR)RT_BITMAP ))) return 0;
          if (!(handle = LoadResource16( hinst, hRsrc ))) return 0;
-@@ -2193,27 +2258,43 @@ HANDLE16 WINAPI LoadImage16(HINSTANCE16 hinst, LPCSTR name, UINT16 type, INT16 c
+@@ -2192,27 +2257,43 @@ HANDLE16 WINAPI LoadImage16(HINSTANCE16 hinst, LPCSTR name, UINT16 type, INT16 c
      {
          HICON16 hIcon = 0;
          BYTE *dir, *bits;
@@ -303,10 +303,10 @@ index deec596f766..bf656946502 100644
  
          if (hIcon && (flags & LR_SHARED)) add_shared_icon( hinst, hRsrc, hGroupRsrc, hIcon );
 diff --git a/dlls/user32/cursoricon.c b/dlls/user32/cursoricon.c
-index 440e9683845..b674c9f2c17 100644
+index 59642fafe96..e4f7cd56e2d 100644
 --- a/dlls/user32/cursoricon.c
 +++ b/dlls/user32/cursoricon.c
-@@ -1458,6 +1458,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
+@@ -1092,6 +1092,134 @@ static void riff_find_chunk( DWORD chunk_id, DWORD chunk_type, const riff_chunk_
  }
  
  
@@ -441,7 +441,7 @@ index 440e9683845..b674c9f2c17 100644
  /*
   * .ANI layout:
   *
-@@ -1677,8 +1805,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
+@@ -1263,8 +1391,21 @@ HICON WINAPI CreateIconFromResourceEx( LPBYTE bits, UINT cbSize,
  
      if (dwVersion == 0x00020000)
      {
