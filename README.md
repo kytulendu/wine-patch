@@ -2,21 +2,23 @@
 
 A collection of wine patch for my self compile version of wine.
 
-For wine-staging-tkg 7.18
+For wine-staging-tkg 7.20
 
 https://github.com/Frogging-Family/wine-tkg-git
 
+Put *.mypatch into `wine-tkg-git/wine-tkg-userpatches` directory
+
 # Patch Lists
 
-    - customization.cfg
-    Customization file for wine-staging-tkg used by myself.
+    - wine-tkg.cfg
+    Customization file for wine-staging-tkg used by myself, put into ~/.config/frogminer/wine-tkg.cfg
     Addition patches in customization file is from https://github.com/Frogging-Family/community-patches
 
     - 0001-patches/0001-Added-support-for-Win-1-and-2-applications.mypatch
     Add support for Windows 1.x and 2.x applications.
     This is a patch file version of https://github.com/TransmissionZero/Wine
 
-    - 0002-winevdm/*.patch
+    - 0002-winevdm/*.mypatch
     Patches ported from the winevdm project (wine on Windows) version 0.7.0, https://github.com/otya128/winevdm
     Note: OLE stuff might not get ported, as wine's OLE support is limited.
     Remaining component to port:
