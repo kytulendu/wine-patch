@@ -1,4 +1,4 @@
-From 6a728c8cb14015164e33889270d18b6a47b9998c Mon Sep 17 00:00:00 2001
+From 46a357831d44545fe66666d8ecfce56ef563aa55 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:17:23 +0700
 Subject: [PATCH 05/26] user.exe16: Implement IsThaiKbdSeqCheck and
@@ -10,7 +10,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index e2d8aae520..575a23d008 100644
+index e2d8aae5205..575a23d008c 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -32,6 +32,7 @@ WINE_DEFAULT_DEBUG_CHANNEL(user);
@@ -43,5 +43,5 @@ index e2d8aae520..575a23d008 100644
  
  
 -- 
-2.27.0
+2.39.0
 

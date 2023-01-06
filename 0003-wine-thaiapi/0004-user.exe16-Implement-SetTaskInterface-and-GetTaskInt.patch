@@ -1,4 +1,4 @@
-From 83a49780925cb70a497eefa741f8f1fd8bcdb285 Mon Sep 17 00:00:00 2001
+From 3c3381d44d7c8f893f8769a35f11733143a37754 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:16:00 +0700
 Subject: [PATCH 04/26] user.exe16: Implement SetTaskInterface and
@@ -11,7 +11,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  2 files changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index f409eb2d69..e2d8aae520 100644
+index f409eb2d69e..e2d8aae5205 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -30,13 +30,16 @@
@@ -44,7 +44,7 @@ index f409eb2d69..e2d8aae520 100644
 +    return 1;
  }
 diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
-index e44f0ccfe5..a4e8a5d799 100644
+index e44f0ccfe57..a4e8a5d7993 100644
 --- a/include/wine/winuser16.h
 +++ b/include/wine/winuser16.h
 @@ -584,7 +584,15 @@ typedef struct tagCOPYDATASTRUCT16 {
@@ -65,5 +65,5 @@ index e44f0ccfe5..a4e8a5d799 100644
  #define KOKAI           161  /* ก  A1 */
  #define KHOKHAI         162  /* ข  A2 */
 -- 
-2.27.0
+2.39.0
 

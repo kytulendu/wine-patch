@@ -1,7 +1,7 @@
-From 2138740d97de655edd1322ce0956dc7474c27bb1 Mon Sep 17 00:00:00 2001
+From 674535ad39a5cf6fcd54cdd1e852316eadb8a14b Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Fri, 15 Mar 2019 03:42:06 +0700
-Subject: [PATCH 25/26] lpkthai.dll16: Add dummy dll.
+Subject: [PATCH 24/26] lpkthai.dll16: Add dummy dll.
 
 This dll was required by Microsoft Office 97 Thai Edition
 Language Switcher.
@@ -16,10 +16,10 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  create mode 100644 dlls/lpkthai.dll16/lpkthai.dll16.spec
 
 diff --git a/configure.ac b/configure.ac
-index d81f5cc88c..14415d2ec3 100644
+index 10c773908be..ed75f2488c2 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3407,6 +3407,7 @@ WINE_CONFIG_MAKEFILE(dlls/localspl)
+@@ -2721,6 +2721,7 @@ WINE_CONFIG_MAKEFILE(dlls/localspl)
  WINE_CONFIG_MAKEFILE(dlls/localspl/tests)
  WINE_CONFIG_MAKEFILE(dlls/localui)
  WINE_CONFIG_MAKEFILE(dlls/localui/tests)
@@ -29,7 +29,7 @@ index d81f5cc88c..14415d2ec3 100644
  WINE_CONFIG_MAKEFILE(dlls/lzexpand.dll16,enable_win16)
 diff --git a/dlls/lpkthai.dll16/Makefile.in b/dlls/lpkthai.dll16/Makefile.in
 new file mode 100644
-index 0000000000..bd0b0d3312
+index 00000000000..bd0b0d3312e
 --- /dev/null
 +++ b/dlls/lpkthai.dll16/Makefile.in
 @@ -0,0 +1,2 @@
@@ -37,7 +37,7 @@ index 0000000000..bd0b0d3312
 +EXTRADLLFLAGS = -m16
 diff --git a/dlls/lpkthai.dll16/lpkthai.dll16.spec b/dlls/lpkthai.dll16/lpkthai.dll16.spec
 new file mode 100644
-index 0000000000..a3c0ff22fa
+index 00000000000..a3c0ff22fa4
 --- /dev/null
 +++ b/dlls/lpkthai.dll16/lpkthai.dll16.spec
 @@ -0,0 +1,18 @@
@@ -60,5 +60,5 @@ index 0000000000..a3c0ff22fa
 +#31  stub THK_THUNKDATA16
 +104 stub FINDTHAIWORDBREAK
 -- 
-2.27.0
+2.39.0
 

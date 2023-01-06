@@ -1,4 +1,4 @@
-From 8c0da8474c5cb976fd2fe63b86dc348ba58e7254 Mon Sep 17 00:00:00 2001
+From 9d2ed5a2b8a6ab915608d11861fb36b3ca06017c Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 4 Apr 2018 11:51:46 +0700
 Subject: [PATCH 13/26] user.exe16: Correct return value for SetTaskInterface.
@@ -9,7 +9,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index cfa3c385a8..8ae1bf112e 100644
+index cfa3c385a88..8ae1bf112ef 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -31,7 +31,7 @@
@@ -37,5 +37,5 @@ index cfa3c385a8..8ae1bf112e 100644
 +    return oldInterface;
  }
 -- 
-2.27.0
+2.39.0
 

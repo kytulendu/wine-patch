@@ -1,4 +1,4 @@
-From 5f8c8b4971adb4011ce10e8fb6ff8b23fa07bd2a Mon Sep 17 00:00:00 2001
+From 768802bf8f84fcbaa7fb2011c79efcbb989f6d99 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:23:21 +0700
 Subject: [PATCH 08/26] keyboard.drv16: Implement lstrNumArabicToThai and
@@ -10,7 +10,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 71 insertions(+), 3 deletions(-)
 
 diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
-index 19cc0a5514..a4a911de55 100644
+index 19cc0a5514b..a4a911de55d 100644
 --- a/dlls/keyboard.drv16/thai.c
 +++ b/dlls/keyboard.drv16/thai.c
 @@ -1,5 +1,5 @@
@@ -107,5 +107,5 @@ index 19cc0a5514..a4a911de55 100644
  
  /**********************************************************************
 -- 
-2.27.0
+2.39.0
 

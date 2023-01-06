@@ -1,4 +1,4 @@
-From 830fc67d4d767253a0387997b6213c8f457d76e7 Mon Sep 17 00:00:00 2001
+From 71d18e93d10df533b08bec228fb43980fe91f07d Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:13:49 +0700
 Subject: [PATCH 03/26] user.exe16: Implement ThaiCharType.
@@ -10,7 +10,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  2 files changed, 222 insertions(+), 2 deletions(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index b24eeeb4ee..f409eb2d69 100644
+index b24eeeb4eeb..f409eb2d69e 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -85,8 +85,117 @@ void WINAPI FindThaiWordBreak16( SEGPTR lpString, WORD nCount, SEGPTR lpWordBrea
@@ -134,7 +134,7 @@ index b24eeeb4ee..f409eb2d69 100644
  
  
 diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
-index 3dc984254c..e44f0ccfe5 100644
+index 3dc984254c9..e44f0ccfe57 100644
 --- a/include/wine/winuser16.h
 +++ b/include/wine/winuser16.h
 @@ -563,6 +563,117 @@ typedef struct tagCOPYDATASTRUCT16 {
@@ -256,5 +256,5 @@ index 3dc984254c..e44f0ccfe5 100644
  HICON16     WINAPI CopyImage16(HANDLE16,UINT16,INT16,INT16,UINT16);
  HICON16     WINAPI CreateIconFromResource16(LPBYTE,UINT16,BOOL16,DWORD);
 -- 
-2.27.0
+2.39.0
 

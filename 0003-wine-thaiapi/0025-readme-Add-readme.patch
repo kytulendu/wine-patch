@@ -1,7 +1,7 @@
-From b883c2df34df725972bde358f437d1fdcf3c4227 Mon Sep 17 00:00:00 2001
+From 9a85fe6efe270b896c481679611a76d83c0bb6fc Mon Sep 17 00:00:00 2001
 From: Khralkatorrix <garuda2550@gmail.com>
 Date: Wed, 10 Jun 2020 00:54:48 +0700
-Subject: [PATCH 26/26] readme: Add readme.
+Subject: [PATCH 25/26] readme: Add readme.
 
 Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
 
 diff --git a/README.thaiapi b/README.thaiapi
 new file mode 100644
-index 0000000000..0172f35ae8
+index 00000000000..0172f35ae88
 --- /dev/null
 +++ b/README.thaiapi
 @@ -0,0 +1,107 @@
@@ -123,5 +123,5 @@ index 0000000000..0172f35ae8
 +- Microsoft Word 6.0a Thai Edition
 +API: IsThaiFont
 -- 
-2.27.0
+2.39.0
 

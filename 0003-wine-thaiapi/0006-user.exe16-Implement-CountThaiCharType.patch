@@ -1,4 +1,4 @@
-From 56f4a284bbd087d38fa1c84078e361bf0e54e337 Mon Sep 17 00:00:00 2001
+From 244454756f1071eb31639e76411b0b0eeb817c08 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:18:58 +0700
 Subject: [PATCH 06/26] user.exe16: Implement CountThaiCharType.
@@ -9,7 +9,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 23 insertions(+), 2 deletions(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index 575a23d008..f19fd95ad1 100644
+index 575a23d008c..f19fd95ad18 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -258,8 +258,29 @@ WORD WINAPI ValidateThaiStr16( SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, BYTE cC
@@ -45,5 +45,5 @@ index 575a23d008..f19fd95ad1 100644
  
  
 -- 
-2.27.0
+2.39.0
 

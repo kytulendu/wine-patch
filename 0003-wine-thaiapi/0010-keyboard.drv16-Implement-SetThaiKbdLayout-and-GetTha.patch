@@ -1,4 +1,4 @@
-From d31904bf7e05fe763dd45d24ab73badbbb4da437 Mon Sep 17 00:00:00 2001
+From c44dbb9e3faf058fda22cace1fa9dbb0bae80adf Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 17:39:06 +0700
 Subject: [PATCH 10/26] keyboard.drv16: Implement SetThaiKbdLayout and
@@ -11,7 +11,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  2 files changed, 15 insertions(+), 9 deletions(-)
 
 diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
-index a4a911de55..739ad89cf1 100644
+index a4a911de55d..739ad89cf13 100644
 --- a/dlls/keyboard.drv16/thai.c
 +++ b/dlls/keyboard.drv16/thai.c
 @@ -19,26 +19,28 @@
@@ -62,7 +62,7 @@ index a4a911de55..739ad89cf1 100644
  
  /**********************************************************************
 diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
-index 10651f1e1d..615ae3de7c 100644
+index 10651f1e1d6..615ae3de7cf 100644
 --- a/include/wine/winuser16.h
 +++ b/include/wine/winuser16.h
 @@ -592,6 +592,11 @@ typedef struct tagCOPYDATASTRUCT16 {
@@ -78,5 +78,5 @@ index 10651f1e1d..615ae3de7c 100644
  #define TS_LONG             0x0004
  #define TS_SHORT            0x000C
 -- 
-2.27.0
+2.39.0
 

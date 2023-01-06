@@ -1,0 +1,136 @@
+From 92893ab3a9cd0dfabf07c6cc1470a728e96fc9fa Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
+Date: Fri, 6 Jan 2023 21:46:58 +0700
+Subject: [PATCH 26/26] readme: Update readme.
+
+---
+ README.thaiapi | 92 ++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 78 insertions(+), 14 deletions(-)
+
+diff --git a/README.thaiapi b/README.thaiapi
+index 0172f35ae88..cb30a5a5dd3 100644
+--- a/README.thaiapi
++++ b/README.thaiapi
+@@ -45,6 +45,9 @@ Wine with support for Thai API from Windows 3.0/3.1/95/98/ME Thai Edition.
+ | implemented | USER.497    | SetThaiKbdSeqCheck       | |
+ | semi-stub   | USER.498    | SetTaskInterface         | |
+ | stub        | LPKTHAI.DLL | | Dummy dll, required by Microsoft Office 97 Thai Edition Language Switcher. |
++| x           | THAIDRV.32  | ThaiExist                | Win 3.0a Thai, call IsThaiExist |
++| x           | THAIDRV.33  | CheckSequence            | Win 3.0a Thai, call SetCheckSequence |
++| x           | THAIDRV.34  | KeyboardStatus           | Win 3.0a Thai, call GetThaiStatus and SetThaiStatus, then post a message |
+ 
+ ### Note:
+ - Other than TkEnable, TkDisable, IsThaiExist, GetThaiStatus, SetThaiStatus
+@@ -74,34 +77,95 @@ example: [english str][0xEF][thai str]
+ - Fix display string crash with Thai text
+ - Add Thai bitmap system font
+ - In ThaiCharType16 function, consider using lookup table
+-- Invisigate Thai API usage in Windows 95 Thai Edition and Microsoft Office 95 Thai Edition
++- Invisigate Thai API usage in Windows 95 Thai Edition, Windows NT 4.0 Thai and Microsoft Office 95 Thai Edition
+ 
+ ### List of software that use Thai API:
+ - CU-Writer for Windows (CWW77)
+-CWW.EXE
+-API: SetThaiKbdLayout, GetThaiKbdLayout, lstrKbdThaiToEng, SetThaiKbdSeqCheck
+-CWWPRINT.EXE
+-API: SetThaiKbdSeqCheck, GetKeyboardLanguage, IsThaiKbdSeqCheck, SetKeyboardLanguage, SetLanguageToggleKey, GetThaiKbdLayout, lstrKbdThaiToEng
++
++        CWW.EXE
++        API:
++            KEYBOARD.15     SetThaiKbdLayout
++            KEYBOARD.16     GetThaiKbdLayout
++            KEYBOARD.17     lstrKbdThaiToEng
++            USER.475        GetKeyboardLanguage
++            USER.476        SetKeyboardLanguage
++            USER.477        SetLanguageToggleKey
++            USER.497        SetThaiKbdSeqCheck
++        bugs
++            - ESC menu not working, 002f:fixme:hook:SetWindowsHookEx16 hook type 1 broken in Win16
++            - Can't type Thai language, it type as English instread
++        CWWPRINT.EXE
++        API:
++            KEYBOARD.16     GetThaiKbdLayout
++            KEYBOARD.17     lstrKbdThaiToEng
++            USER.475        GetKeyboardLanguage
++            USER.476        SetKeyboardLanguage
++            USER.477        SetLanguageToggleKey
++            USER.496        IsThaiKbdSeqCheck
++            USER.497        SetThaiKbdSeqCheck
++
+ - iRC ZeWrite Professional for Windows 1.0
+-API: FindThaiWordBreak, lstrKbdEngToThai, lstrKbdThaiToEng, SetThaiKbdSeqCheck, ThaiCharType
++
++        API:
++            KEYBOARD.17     lstrKbdThaiToEng
++            KEYBOARD.18     lstrKbdEngToThai
++            USER.485        FindThaiWordBreak
++            USER.486        ThaiCharType
++            USER.497        SetThaiKbdSeqCheck
++
+ - Lotus Approach 3.0 Thai?
+ - Lotus ccMail 2.1 Thai?
+ - Lotus SmartSuite Release 2.0 Thai?
+ - Lotus SmartSuite Release 3.0 Thai?
+ - Microsoft Excel 5.0a Thai Edition
+-API: FindThaiWordBreak, GetKeyboardLanguage, IsThaiCharCombinable, SetKeyboardLanguage
++
++        API:
++            USER.475        GetKeyboardLanguage
++            USER.476        SetKeyboardLanguage
++            USER.485        FindThaiWordBreak
++            USER.489        IsThaiCharCombinable
++
+ - Microsoft Office 4.2 Standard Thai Edition and Microsoft Office 4.3 Professional Thai Edition
+-Only Excel 5.0a, Word 6.0a is using Thai API.
++
++        Only Excel 5.0a, Word 6.0a is using Thai API.
++
+ - Microsoft Office 95 Thai Edition?
+ - Microsoft Office 97 Professional Thai Edition
+-Language Switcher require `LPKTHAI.DLL` to switch to Thai language.
++
++        Language Switcher require `LPKTHAI.DLL` to switch to Thai language.
++
+ - Microsoft Mail for Windows 3.02 (Bundled with Windows for Workgroup 3.1 Thai Edition)
+-API: FindThaiWordBreak, lstrKbdThaiToEng, lstrKbdEngToThai , lstrDayName, lstrMonthName, lstrYearNumber, GetTaskInterface, SetTaskInterface
++
++        API:
++            KEYBOARD.17     lstrKbdThaiToEng
++            KEYBOARD.18     lstrKbdEngToThai
++            USER.474        GetTaskInterface
++            USER.485        FindThaiWordBreak
++            USER.493        lstrDayName
++            USER.494        lstrMonthName
++            USER.495        lstrYearNumber
++            USER.498        SetTaskInterface
++
+ - Microsoft Schedule+ for Windows 1.0 (Bundled with Windows for Workgroup 3.1 Thai Edition)
+-API: FindThaiWordBreak, lstrKbdThaiToEng, lstrKbdEngToThai, GetTaskInterface
++
++        API:
++            KEYBOARD.17     lstrKbdThaiToEng
++            KEYBOARD.18     lstrKbdEngToThai
++            USER.474        GetTaskInterface
++            USER.485        FindThaiWordBreak
++
+ - Microsoft Windows 3.1 Thai Edition NOTEPAD.EXE
+-API: GetTaskInterface, SetTaskInterface
++
++        API:
++            USER.474        GetTaskInterface
++            USER.498        SetTaskInterface
++
+ - Microsoft Windows 3.1 Thai Edition TWRITE.EXE
+-API: FindThaiWordBreak
++
++        API:
++            USER.485        FindThaiWordBreak
++
+ - Microsoft Word 6.0a Thai Edition
+-API: IsThaiFont
++
++        API:
++            GDI.490         IsThaiFont
+-- 
+2.39.0
+

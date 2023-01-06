@@ -1,4 +1,4 @@
-From c29943265d7532ae5fecf7efa61761a427a679a9 Mon Sep 17 00:00:00 2001
+From c5ba8a3c304e6530e170604cbb6d0767f282fc4e Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 10:07:31 +0700
 Subject: [PATCH 09/26] user.exe16: Fix default profile string.
@@ -9,7 +9,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index eb32634dbe..99f6192f6c 100644
+index eb32634dbe1..99f6192f6cb 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -346,7 +346,7 @@ SEGPTR WINAPI lstrDayName16( WORD nDay, SEGPTR lpDest, WORD nFormat )
@@ -40,5 +40,5 @@ index eb32634dbe..99f6192f6c 100644
              else
                  iLenght = GetProfileStringA( "intl", "sLongDate", "dd MMMM yyyy",
 -- 
-2.27.0
+2.39.0
 

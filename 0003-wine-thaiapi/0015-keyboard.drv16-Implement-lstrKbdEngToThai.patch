@@ -1,4 +1,4 @@
-From 0d5abf774429f868c6f30ab8459d107d0e3323ad Mon Sep 17 00:00:00 2001
+From c82067b4b272d4e6513e6d5be861de7b901eafe1 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Tue, 10 Apr 2018 22:05:39 +0700
 Subject: [PATCH 15/26] keyboard.drv16: Implement lstrKbdEngToThai.
@@ -9,7 +9,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 85 insertions(+), 1 deletion(-)
 
 diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
-index f69123eefa..b4bbf14a4d 100644
+index f69123eefaf..b4bbf14a4da 100644
 --- a/dlls/keyboard.drv16/thai.c
 +++ b/dlls/keyboard.drv16/thai.c
 @@ -63,10 +63,94 @@ VOID WINAPI lstrKbdThaiToEng16(SEGPTR lpSrc, SEGPTR lpDest, WORD nCount, INT16 n
@@ -109,5 +109,5 @@ index f69123eefa..b4bbf14a4d 100644
  
  /**********************************************************************
 -- 
-2.27.0
+2.39.0
 

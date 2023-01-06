@@ -1,4 +1,4 @@
-From d50c2a39f84a39354718cdcf94cb8b53d71d4ec0 Mon Sep 17 00:00:00 2001
+From 234fa2231f10d6f3e2549e3c8eb62b6a4c23ea06 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:22:11 +0700
 Subject: [PATCH 07/26] user.exe16: Implement lstrDayName, lstrMonthName and
@@ -11,7 +11,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  2 files changed, 282 insertions(+), 6 deletions(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index f19fd95ad1..eb32634dbe 100644
+index f19fd95ad18..eb32634dbe1 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -289,8 +289,108 @@ WORD WINAPI CountThaiCharType16( SEGPTR lpString, WORD nCount, WORD Ntype )
@@ -318,7 +318,7 @@ index f19fd95ad1..eb32634dbe 100644
  
  
 diff --git a/include/wine/winuser16.h b/include/wine/winuser16.h
-index a4e8a5d799..10651f1e1d 100644
+index a4e8a5d7993..10651f1e1d6 100644
 --- a/include/wine/winuser16.h
 +++ b/include/wine/winuser16.h
 @@ -592,6 +592,12 @@ typedef struct tagCOPYDATASTRUCT16 {
@@ -335,5 +335,5 @@ index a4e8a5d799..10651f1e1d 100644
  /* TODO: change the value to hex? */
  #define KOKAI           161  /* ก  A1 */
 -- 
-2.27.0
+2.39.0
 

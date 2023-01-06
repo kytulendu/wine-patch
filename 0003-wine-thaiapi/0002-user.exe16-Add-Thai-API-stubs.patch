@@ -1,4 +1,4 @@
-From 74d3815e651ea7bcb7040ebcfae7aeb5590e4592 Mon Sep 17 00:00:00 2001
+From 8f26ad099dbd02be2970243c63cc359dcdbd2605 Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Mon, 2 Apr 2018 09:09:46 +0700
 Subject: [PATCH 02/26] user.exe16: Add Thai API stubs.
@@ -14,7 +14,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  create mode 100644 dlls/user.exe16/thai.c
 
 diff --git a/dlls/user.exe16/Makefile.in b/dlls/user.exe16/Makefile.in
-index 5a82b7590c..c2d1ed76af 100644
+index 7e2438d033f..8875d3ceebf 100644
 --- a/dlls/user.exe16/Makefile.in
 +++ b/dlls/user.exe16/Makefile.in
 @@ -9,6 +9,7 @@ C_SRCS = \
@@ -27,7 +27,7 @@ index 5a82b7590c..c2d1ed76af 100644
  
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
 new file mode 100644
-index 0000000000..b24eeeb4ee
+index 00000000000..b24eeeb4eeb
 --- /dev/null
 +++ b/dlls/user.exe16/thai.c
 @@ -0,0 +1,210 @@
@@ -242,10 +242,10 @@ index 0000000000..b24eeeb4ee
 +    return 0;
 +}
 diff --git a/dlls/user.exe16/user.c b/dlls/user.exe16/user.c
-index 27b9279383..15b64d2132 100644
+index 75b81b0ea05..05afe6c909a 100644
 --- a/dlls/user.exe16/user.c
 +++ b/dlls/user.exe16/user.c
-@@ -2994,11 +2994,12 @@ SEGPTR WINAPI AnsiPrev16( LPCSTR start, SEGPTR current )
+@@ -2993,11 +2993,12 @@ SEGPTR WINAPI AnsiPrev16( LPCSTR start, SEGPTR current )
  /****************************************************************************
   *		GetKeyboardLayoutName (USER.477)
   */
@@ -259,7 +259,7 @@ index 27b9279383..15b64d2132 100644
  
  /***********************************************************************
   *		SystemParametersInfo (USER.483)
-@@ -3115,42 +3116,46 @@ BOOL16 WINAPI SystemParametersInfo16( UINT16 uAction, UINT16 uParam,
+@@ -3114,42 +3115,46 @@ BOOL16 WINAPI SystemParametersInfo16( UINT16 uAction, UINT16 uParam,
  /***********************************************************************
   *		USER_489 (USER.489)
   */
@@ -311,7 +311,7 @@ index 27b9279383..15b64d2132 100644
  /***********************************************************************
   *           FormatMessage   (USER.606)
 diff --git a/dlls/user.exe16/user.exe16.spec b/dlls/user.exe16/user.exe16.spec
-index ec571800e7..6caf2763a0 100644
+index ec571800e71..6caf2763a02 100644
 --- a/dlls/user.exe16/user.exe16.spec
 +++ b/dlls/user.exe16/user.exe16.spec
 @@ -430,9 +430,14 @@
@@ -366,10 +366,10 @@ index ec571800e7..6caf2763a0 100644
  500 stub FARCALLNETDRIVER 			# Undocumented Windows
  501 pascal -ret16 WNetOpenJob(ptr ptr word ptr)  WNetOpenJob16
 diff --git a/dlls/user.exe16/window.c b/dlls/user.exe16/window.c
-index bf86719325..98c99e6b6f 100644
+index 69d178e31b0..9e24ea2cdc9 100644
 --- a/dlls/user.exe16/window.c
 +++ b/dlls/user.exe16/window.c
-@@ -2014,20 +2014,23 @@ BOOL16 WINAPI DragDetect16( HWND16 hwnd, POINT16 pt )
+@@ -2028,20 +2028,23 @@ BOOL16 WINAPI DragDetect16( HWND16 hwnd, POINT16 pt )
  /**************************************************************************
   *              SetScrollInfo   (USER.475)
   */
@@ -395,5 +395,5 @@ index bf86719325..98c99e6b6f 100644
  /**************************************************************************
   *              EnableScrollBar   (USER.482)
 -- 
-2.27.0
+2.39.0
 

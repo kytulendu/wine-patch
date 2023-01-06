@@ -1,4 +1,4 @@
-From 5e19bf8e76b3351856c7c41a2d3da41fd048ac56 Mon Sep 17 00:00:00 2001
+From 4b17c9608a17fcd92b57a60d983c92de17879c8e Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 23:00:55 +0700
 Subject: [PATCH 21/26] user.exe16: Add some documentation.
@@ -9,7 +9,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 113 insertions(+), 1 deletion(-)
 
 diff --git a/dlls/user.exe16/thai.c b/dlls/user.exe16/thai.c
-index 8ae1bf112e..12def7e4b0 100644
+index 8ae1bf112ef..12def7e4b0b 100644
 --- a/dlls/user.exe16/thai.c
 +++ b/dlls/user.exe16/thai.c
 @@ -37,6 +37,15 @@ static BOOL16 THAI_KbdSeqCheck = TRUE;  /* Thai API keyboard sequence check flag
@@ -206,5 +206,5 @@ index 8ae1bf112e..12def7e4b0 100644
  WORD WINAPI SetTaskInterface16( HTASK16 hTask, WORD wMode )
  {
 -- 
-2.27.0
+2.39.0
 

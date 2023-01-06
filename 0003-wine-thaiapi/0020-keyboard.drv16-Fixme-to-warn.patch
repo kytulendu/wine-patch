@@ -1,4 +1,4 @@
-From 6fc0e8fb4f40c30c04fdc8f5668025a16523b578 Mon Sep 17 00:00:00 2001
+From 2902fda717e9a8de68fc0e475cecd82d832d714b Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 21:14:17 +0700
 Subject: [PATCH 20/26] keyboard.drv16: Fixme to warn.
@@ -9,7 +9,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/dlls/keyboard.drv16/thai.c b/dlls/keyboard.drv16/thai.c
-index c7a53a1cc8..3f1f7a377f 100644
+index c7a53a1cc8f..3f1f7a377ff 100644
 --- a/dlls/keyboard.drv16/thai.c
 +++ b/dlls/keyboard.drv16/thai.c
 @@ -47,7 +47,7 @@ VOID WINAPI SetThaiKbdLayout16(INT16 nThaiKbd)
@@ -22,5 +22,5 @@ index c7a53a1cc8..3f1f7a377f 100644
  
  /**********************************************************************
 -- 
-2.27.0
+2.39.0
 

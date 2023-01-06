@@ -1,4 +1,4 @@
-From 265207873a12164ef9d4d2fa06d48826d3eacafd Mon Sep 17 00:00:00 2001
+From e490c9895bb8105b190cb6dfd80442b82975f51d Mon Sep 17 00:00:00 2001
 From: Khral Steelforge <garuda2550@gmail.com>
 Date: Wed, 11 Apr 2018 20:16:29 +0700
 Subject: [PATCH 19/26] gdi.exe16: Implement IsThaiFont.
@@ -12,7 +12,7 @@ Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
  create mode 100644 dlls/gdi.exe16/thai.c
 
 diff --git a/dlls/gdi.exe16/Makefile.in b/dlls/gdi.exe16/Makefile.in
-index 312641cd51..1fb2f121c4 100644
+index 21850e2e660..3456f7e2e65 100644
 --- a/dlls/gdi.exe16/Makefile.in
 +++ b/dlls/gdi.exe16/Makefile.in
 @@ -8,6 +8,7 @@ C_SRCS = \
@@ -25,7 +25,7 @@ index 312641cd51..1fb2f121c4 100644
  
  RC_SRCS = version.rc
 diff --git a/dlls/gdi.exe16/gdi.exe16.spec b/dlls/gdi.exe16/gdi.exe16.spec
-index cade1c24b4..e333d3d546 100644
+index cade1c24b42..e333d3d5464 100644
 --- a/dlls/gdi.exe16/gdi.exe16.spec
 +++ b/dlls/gdi.exe16/gdi.exe16.spec
 @@ -331,7 +331,9 @@
@@ -41,7 +41,7 @@ index cade1c24b4..e333d3d546 100644
  492 stub CreateEnhMetafile
 diff --git a/dlls/gdi.exe16/thai.c b/dlls/gdi.exe16/thai.c
 new file mode 100644
-index 0000000000..5d44d01293
+index 00000000000..5d44d01293f
 --- /dev/null
 +++ b/dlls/gdi.exe16/thai.c
 @@ -0,0 +1,51 @@
@@ -97,5 +97,5 @@ index 0000000000..5d44d01293
 +        return FALSE;
 +}
 -- 
-2.27.0
+2.39.0
 
