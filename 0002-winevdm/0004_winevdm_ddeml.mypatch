@@ -1,11 +1,14 @@
-From 2a6510e3187406cc6418c2c88578ab165c288d53 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 3157f2f25ee4728abdb751c847179d11bc879d83 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 22:30:18 +0700
 Subject: ddeml.dll16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/ddeml
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/ddeml.dll16/ddeml.c | 85 +++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 75 insertions(+), 10 deletions(-)
 
 diff --git a/dlls/ddeml.dll16/ddeml.c b/dlls/ddeml.dll16/ddeml.c
 index c1ca8f75e1d..75f3f7b9a6a 100644
@@ -162,3 +165,6 @@ index c1ca8f75e1d..75f3f7b9a6a 100644
      ci16.wFmt = ci32.wFmt;
      ci16.wType = ci32.wType;
      ci16.wStatus = ci32.wStatus;
+-- 
+2.39.1
+

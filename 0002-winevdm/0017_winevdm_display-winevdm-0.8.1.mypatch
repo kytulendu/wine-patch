@@ -1,0 +1,40 @@
+From 2bde33c4e9c072b9306c19b04b9218cdbb94179b Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
+Date: Sat, 4 Feb 2023 13:52:53 +0700
+Subject: [PATCH 17/23] display.drv16: Update to winevdm-0.8.1.
+
+---
+ dlls/display.drv16/display.c          | 6 ++++++
+ dlls/display.drv16/display.drv16.spec | 2 +-
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/dlls/display.drv16/display.c b/dlls/display.drv16/display.c
+index 2476b630b3d..780bdebeabb 100644
+--- a/dlls/display.drv16/display.c
++++ b/dlls/display.drv16/display.c
+@@ -93,3 +93,9 @@ VOID WINAPI UserRepaintDisable16( BOOL16 disable )
+ {
+     FIXME("stub\n");
+ }
++
++WORD WINAPI SetPaletteTranslate16( WORD wNumEntries, LPBYTE lpTranslate)
++{
++    WARN("stub\n");
++    return 0;
++}
+diff --git a/dlls/display.drv16/display.drv16.spec b/dlls/display.drv16/display.drv16.spec
+index dc4ee5db882..799b39ad1e5 100644
+--- a/dlls/display.drv16/display.drv16.spec
++++ b/dlls/display.drv16/display.drv16.spec
+@@ -23,7 +23,7 @@
+ # ATI driver exports
+ 22 stub SetPalette
+ 23 stub GetPalette
+-24 stub SetPaletteTranslate
++24 pascal -ret16 SetPaletteTranslate(word ptr) SetPaletteTranslate16
+ 25 stub GetPaletteTranslate
+ 26 stub UpdateColors
+ 27 stub StretchBlt
+-- 
+2.39.1
+

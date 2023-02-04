@@ -1,0 +1,94 @@
+From f79cf6bae8523c5ca59333ad9c11c91207f9d6c7 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
+Date: Sat, 4 Feb 2023 13:50:01 +0700
+Subject: [PATCH 16/23] ddeml.dll16: Update to winevdm-0.8.1.
+
+---
+ dlls/ddeml.dll16/ddeml.c | 41 +++++++++++++++++++++++++++-------------
+ 1 file changed, 28 insertions(+), 13 deletions(-)
+
+diff --git a/dlls/ddeml.dll16/ddeml.c b/dlls/ddeml.dll16/ddeml.c
+index 75f3f7b9a6a..d55c196d891 100644
+--- a/dlls/ddeml.dll16/ddeml.c
++++ b/dlls/ddeml.dll16/ddeml.c
+@@ -32,6 +32,7 @@
+ #include "wownt32.h"
+ #include "dde.h"
+ #include "ddeml.h"
++#include "winuser.h"
+ #include "wine/debug.h"
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(ddeml);
+@@ -100,7 +101,7 @@ static HDDEDATA	CALLBACK WDML_InvokeCallback16(DWORD pfn16, UINT uType, UINT uFm
+     DWORD               d1 = 0;
+     HDDEDATA            ret;
+     CONVCONTEXT16       cc16;
+-    WORD args[16];
++    WORD args[14];
+ 
+     switch (uType)
+     {
+@@ -116,10 +117,8 @@ static HDDEDATA	CALLBACK WDML_InvokeCallback16(DWORD pfn16, UINT uType, UINT uFm
+         d1 = dwData1;
+         break;
+     }
+-    args[15] = HIWORD(uType);
+-    args[14] = LOWORD(uType);
+-    args[13] = HIWORD(uFmt);
+-    args[12] = LOWORD(uFmt);
++    args[13] = uType;
++    args[12] = uFmt;
+     args[11] = HIWORD(hConv);
+     args[10] = LOWORD(hConv);
+     args[9]  = HIWORD(hsz1);
+@@ -346,7 +345,18 @@ BOOL16 WINAPI DdeDisconnectList16(HCONVLIST hConvList)
+ DWORD WINAPI DdeQueryString16(DWORD idInst, HSZ hsz, LPSTR lpsz, DWORD cchMax,
+                               INT16 codepage)
+ {
+-    return DdeQueryStringA(idInst, hsz, lpsz, cchMax, codepage);
++    if (codepage != CP_WINANSI)
++    {
++        if (!codepage || (codepage == GetKBCodePage()))
++            WARN("Codepage %x supplied but only CP_WINANSI is supported\n", codepage);
++        else
++        {
++            ERR("Invalid codepage %x\n", codepage);
++            return DMLERR_INVALIDPARAMETER;
++        }
++    }
++
++    return DdeQueryStringA(idInst, hsz, lpsz, cchMax, CP_WINANSI);
+ }
+ 
+ /*****************************************************************
+@@ -400,15 +410,20 @@ HDDEDATA WINAPI DdeCreateDataHandle16(DWORD idInst, LPBYTE pSrc, DWORD cb,
+  */
+ HSZ WINAPI DdeCreateStringHandle16(DWORD idInst, LPCSTR str, INT16 codepage)
+ {
+-    if  (codepage)
++    if (codepage != CP_WINANSI)
+     {
+-        return DdeCreateStringHandleA(idInst, str, codepage);
+-    }
+-    else
+-    {
+-        TRACE("Default codepage supplied\n");
+-        return DdeCreateStringHandleA(idInst, str, CP_WINANSI);
++        if (!codepage || (codepage == GetKBCodePage()))
++            WARN("Codepage %x supplied but only CP_WINANSI is supported\n", codepage);
++        else
++        {
++            ERR("Invalid codepage %x\n", codepage);
++            return DMLERR_INVALIDPARAMETER;
++        }
+     }
++    if (!stricmp(str, "Progman"))
++        str = "Progman16";
++
++    return DdeCreateStringHandleA(idInst, str, CP_WINANSI);
+ }
+ 
+ /*****************************************************************
+-- 
+2.39.1
+

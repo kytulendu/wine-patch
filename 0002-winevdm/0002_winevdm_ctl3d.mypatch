@@ -1,9 +1,13 @@
-From b07b42de98fd4c4e1757601fa267152b52a66568 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 51008c311ae53ed57575075bf8da54ca995e9116 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 09:43:10 +0700
 Subject: ctl3d.dll16: Add Ctl3dSetStyle stub.
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/ctl3d.dll16/ctl3d.c          | 8 ++++++++
+ dlls/ctl3d.dll16/ctl3d.dll16.spec | 2 +-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/dlls/ctl3d.dll16/ctl3d.c b/dlls/ctl3d.dll16/ctl3d.c
 index fa46175da28..53572882f3b 100644
@@ -34,3 +38,6 @@ index ae1e0fde247..a7a8b26640e 100644
  20 pascal Ctl3dDlgFramePaint(word word word long) Ctl3dDlgFramePaint16
  21 pascal -ret16 Ctl3dSubclassDlgEx(word long) Ctl3dSubclassDlgEx16
  22 pascal -ret16 Ctl3dWinIniChange() Ctl3dWinIniChange16
+-- 
+2.39.1
+

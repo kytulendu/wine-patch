@@ -1,0 +1,478 @@
+From 46a0008d943f5e58d5906615ee165912ea8cbf20 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
+Date: Sat, 4 Feb 2023 13:46:33 +0700
+Subject: [PATCH 15/23] commdlg.dll16: Update to winevdm-0.8.1.
+
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/commdlg.dll16/cdlg16.h           |   2 +-
+ dlls/commdlg.dll16/commdlg.dll16.spec |   2 +-
+ dlls/commdlg.dll16/filedlg.c          | 103 +++++---------------
+ dlls/commdlg.dll16/fontdlg.c          |  29 +++++-
+ dlls/commdlg.dll16/printdlg.c         | 133 ++++++++++++++++++++++----
+ 5 files changed, 167 insertions(+), 102 deletions(-)
+
+diff --git a/dlls/commdlg.dll16/cdlg16.h b/dlls/commdlg.dll16/cdlg16.h
+index 1f166ed5ecf..172b6f7338c 100644
+--- a/dlls/commdlg.dll16/cdlg16.h
++++ b/dlls/commdlg.dll16/cdlg16.h
+@@ -146,7 +146,7 @@ BOOL16  WINAPI GetOpenFileName16(SEGPTR ofn);
+ BOOL16  WINAPI GetSaveFileName16(SEGPTR ofn);
+ BOOL16  WINAPI PrintDlg16( SEGPTR print);
+ HWND16  WINAPI ReplaceText16( SEGPTR find);
+-BOOL16  WINAPI ChooseFont16(LPCHOOSEFONT16);
++BOOL16  WINAPI ChooseFont16(SEGPTR);
+ BOOL16 CALLBACK ColorDlgProc16( HWND16 hDlg16, UINT16 message, WPARAM16 wParam, LPARAM lParam );
+ BOOL16 CALLBACK FileSaveDlgProc16(HWND16 hWnd16, UINT16 wMsg, WPARAM16 wParam, LPARAM lParam);
+ BOOL16 CALLBACK FileOpenDlgProc16(HWND16 hWnd16, UINT16 wMsg, WPARAM16 wParam, LPARAM lParam);
+diff --git a/dlls/commdlg.dll16/commdlg.dll16.spec b/dlls/commdlg.dll16/commdlg.dll16.spec
+index 40ba5b81dd9..5e83b27cc38 100644
+--- a/dlls/commdlg.dll16/commdlg.dll16.spec
++++ b/dlls/commdlg.dll16/commdlg.dll16.spec
+@@ -9,7 +9,7 @@
+ 12  pascal -ret16 ReplaceText(segptr) ReplaceText16
+ 13  pascal   FindTextDlgProc(word word word long) FindTextDlgProc16
+ 14  pascal   ReplaceTextDlgProc(word word word long) ReplaceTextDlgProc16
+-15  pascal -ret16 ChooseFont(ptr) ChooseFont16
++15  pascal -ret16 ChooseFont(segptr) ChooseFont16
+ 16  pascal -ret16 FormatCharDlgProc(word word word long) FormatCharDlgProc16
+ 18  pascal -ret16 FontStyleEnumProc(ptr ptr word long)   FontStyleEnumProc16
+ 19  pascal -ret16 FontFamilyEnumProc(ptr ptr word long)  FontFamilyEnumProc16
+diff --git a/dlls/commdlg.dll16/filedlg.c b/dlls/commdlg.dll16/filedlg.c
+index e9df9943296..97be0fc3894 100644
+--- a/dlls/commdlg.dll16/filedlg.c
++++ b/dlls/commdlg.dll16/filedlg.c
+@@ -47,6 +47,10 @@ UINT WMCOLOROK;
+ UINT WMSHAREVI;
+ UINT WMWOWDirChange;
+ 
++/* from printdlg.c */
++LPDLGTEMPLATEA resource_to_dialog32(HINSTANCE16 hInst, LPCSTR name);
++LPDLGTEMPLATEA handle_to_dialog32(HGLOBAL16 hg);
++
+ /* from user.exe16 */
+ DLGTEMPLATE* (WINAPI *dialog_template16_to_template32)(HINSTANCE16, SEGPTR, DWORD *, dialog_data *);
+ LRESULT (WINAPI *DIALOG_CallDialogProc)(HWND, UINT, WPARAM, LPARAM, WNDPROC16);
+@@ -642,60 +646,6 @@ DWORD get_ofn_flag(DWORD flag)
+     return (flag | OFN_NOLONGNAMES) & ~OFN_ENABLETEMPLATE;
+ }
+ 
+-LPCSTR dynamic_resource(HINSTANCE16 hInstance, SEGPTR lpTemplateName)
+-{
+-    HGLOBAL16 hmem;
+-    HRSRC16 hRsrc;
+-    LPCVOID data;
+-    PVOID BaseAddress;
+-    IMAGE_RESOURCE_DIRECTORY *dir;
+-    ULONG size;
+-    PVOID root;
+-    DWORD oldprotect;
+-    IMAGE_RESOURCE_DIRECTORY_ENTRY *entry;
+-    int min, max, pos;
+-    HRSRC hRsrc32;
+-    HGLOBAL hmem32;
+-    MEMORY_BASIC_INFORMATION mbi;
+-    LPVOID data32;
+-    DWORD sized;
+-    DLGTEMPLATE *tmp32;
+-    DWORD _;
+-
+-    if (!(hRsrc = FindResource16(hInstance, MapSL(lpTemplateName), (LPCSTR)RT_DIALOG))) return 0;
+-    if (!(hmem = LoadResource16(hInstance, hRsrc))) return 0;
+-    if (!(data = LockResource16(hmem))) return 0;
+-    BaseAddress = GetModuleHandleW(L"commdlg.dll16");
+-    root = ImageDirectoryEntryToData(BaseAddress, TRUE, IMAGE_DIRECTORY_ENTRY_RESOURCE, &size);
+-    VirtualQuery(root, &mbi, sizeof(mbi));
+-    VirtualProtect(mbi.BaseAddress, mbi.RegionSize, PAGE_READWRITE, &oldprotect);
+-    dir = root;
+-
+-    entry = (IMAGE_RESOURCE_DIRECTORY_ENTRY *)(dir + 1);
+-    min = dir->NumberOfNamedEntries;
+-    max = min + dir->NumberOfIdEntries - 1;
+-    pos = min;
+-    while (pos <= max)
+-    {
+-        if (entry[pos].Id == (WORD)RT_BITMAP)
+-        {
+-            entry[pos].Id = (WORD)RT_DIALOG;
+-            break;
+-        }
+-        pos++;
+-    }
+-    if (!(hRsrc32 = FindResourceA(BaseAddress, (LPCSTR)IDB_BITMAP1, (LPCSTR)RT_DIALOG))) return 0;
+-    if (!(hmem32 = LoadResource(BaseAddress, hRsrc32))) return 0;
+-    if (!(data32 = LockResource(hmem32))) return 0;
+-    if (!dialog_template16_to_template32)
+-        dialog_template16_to_template32 = (void *)GetProcAddress( GetModuleHandleA("user.exe16"), "dialog_template16_to_template32" );
+-    tmp32 = dialog_template16_to_template32(hInstance, MapLS(data32), &sized, NULL);
+-    UnMapLS(data32);
+-    memcpy(data32, tmp32, sized);
+-    VirtualProtect(mbi.BaseAddress, mbi.RegionSize, oldprotect, &_);
+-    return MAKEINTRESOURCEA(IDB_BITMAP1);
+-}
+-
+ /***********************************************************************
+  *           GetOpenFileName   (COMMDLG.1)
+  *
+@@ -742,20 +692,14 @@ BOOL16 WINAPI GetOpenFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+     ofn32.lpTemplateName    = NULL;
+     ofn32.hInstance         = GetModuleHandleW(L"commdlg.dll16");
+ 
+-    if (lpofn->Flags & OFN_ENABLETEMPLATE)
++    if ((lpofn->Flags & OFN_ENABLETEMPLATE) || (lpofn->Flags & OFN_ENABLETEMPLATEHANDLE))
+     {
+-        HRSRC16 res = FindResource16( lpofn->hInstance, MapSL(lpofn->lpTemplateName), (LPCSTR)RT_DIALOG );
+-        HGLOBAL16 handle = LoadResource16( lpofn->hInstance, res );
+-        DWORD size = SizeofResource16( lpofn->hInstance, res );
+-        SEGPTR ptr16 = WOWGlobalLock16(handle);
+-        DWORD size2;
+-
+-        if (!dialog_template16_to_template32)
+-            dialog_template16_to_template32 = (void *)GetProcAddress( GetModuleHandleA("user.exe16"), "dialog_template16_to_template32" );
+-        ofn32.hInstance = (HINSTANCE)dialog_template16_to_template32(lpofn->hInstance, ptr16, &size2, NULL);
+-        template = (LPDLGTEMPLATEA)ofn32.hInstance;
++        if (lpofn->Flags & OFN_ENABLETEMPLATE)
++            template = resource_to_dialog32(lpofn->hInstance, MapSL(lpofn->lpTemplateName));
++        else
++            template = handle_to_dialog32(lpofn->hInstance);
++        ofn32.hInstance = (HINSTANCE) template;
+         ofn32.Flags |= OFN_ENABLETEMPLATEHANDLE;
+-        FreeResource16( handle );
+     }
+ 
+     if (lpofn->Flags & OFN_ENABLEHOOK)
+@@ -769,12 +713,16 @@ BOOL16 WINAPI GetOpenFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+         }
+     }
+ 
++    if (ofn32.lpstrFile && ofn32.lpstrFile[0])
++        CharUpperBuffA(ofn32.lpstrFile, min(strlen(ofn32.lpstrFile), ofn32.nMaxFile));
++
+     ReleaseThunkLock(&count);
+     if ((ret = GetOpenFileNameA( &ofn32 )))
+     {
+ 	lpofn->nFilterIndex   = ofn32.nFilterIndex;
+ 	lpofn->nFileOffset    = ofn32.nFileOffset;
+ 	lpofn->nFileExtension = ofn32.nFileExtension;
++        CharUpperBuffA(ofn32.lpstrFile, min(strlen(ofn32.lpstrFile), ofn32.nMaxFile));
+     }
+     RestoreThunkLock(count);
+     delete_thunk(ofn32.lpfnHook);
+@@ -828,20 +776,14 @@ BOOL16 WINAPI GetSaveFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+     ofn32.lpTemplateName    = NULL;
+     ofn32.hInstance         = GetModuleHandleW(L"commdlg.dll16");
+ 
+-    if (lpofn->Flags & OFN_ENABLETEMPLATE)
++    if ((lpofn->Flags & OFN_ENABLETEMPLATE) || (lpofn->Flags & OFN_ENABLETEMPLATEHANDLE))
+     {
+-        HRSRC16 res = FindResource16( lpofn->hInstance, MapSL(lpofn->lpTemplateName), (LPCSTR)RT_DIALOG );
+-        HGLOBAL16 handle = LoadResource16( lpofn->hInstance, res );
+-        DWORD size = SizeofResource16( lpofn->hInstance, res );
+-        SEGPTR ptr16 = WOWGlobalLock16(handle);
+-        DWORD size2;
+-
+-        if (!dialog_template16_to_template32)
+-            dialog_template16_to_template32 = (void *)GetProcAddress( GetModuleHandleA("user.exe16"), "dialog_template16_to_template32" );
+-        ofn32.hInstance = (HINSTANCE)dialog_template16_to_template32(lpofn->hInstance, ptr16, &size2, NULL);
+-        template = (LPDLGTEMPLATEA)ofn32.hInstance;
++        if (lpofn->Flags & OFN_ENABLETEMPLATE)
++            template = resource_to_dialog32(lpofn->hInstance, MapSL(lpofn->lpTemplateName));
++        else
++            template = handle_to_dialog32(lpofn->hInstance);
++        ofn32.hInstance = (HINSTANCE) template;
+         ofn32.Flags |= OFN_ENABLETEMPLATEHANDLE;
+-        FreeResource16( handle );
+     }
+ 
+     if (lpofn->Flags & OFN_ENABLEHOOK)
+@@ -854,12 +796,17 @@ BOOL16 WINAPI GetSaveFileName16( SEGPTR ofn ) /* [in/out] address of structure w
+             ofn32.lpfnHook = dummy_hook;
+         }
+     }
++
++    if (ofn32.lpstrFile && ofn32.lpstrFile[0])
++        CharUpperBuffA(ofn32.lpstrFile, min(strlen(ofn32.lpstrFile), ofn32.nMaxFile));
++
+     ReleaseThunkLock(&count);
+     if ((ret = GetSaveFileNameA( &ofn32 )))
+     {
+ 	lpofn->nFilterIndex   = ofn32.nFilterIndex;
+ 	lpofn->nFileOffset    = ofn32.nFileOffset;
+ 	lpofn->nFileExtension = ofn32.nFileExtension;
++        CharUpperBuffA(ofn32.lpstrFile, min(strlen(ofn32.lpstrFile), ofn32.nMaxFile));
+     }
+     RestoreThunkLock(count);
+     delete_thunk(ofn32.lpfnHook);
+diff --git a/dlls/commdlg.dll16/fontdlg.c b/dlls/commdlg.dll16/fontdlg.c
+index 85e71aa55f6..2844dcd66e7 100644
+--- a/dlls/commdlg.dll16/fontdlg.c
++++ b/dlls/commdlg.dll16/fontdlg.c
+@@ -37,6 +37,10 @@
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(commdlg);
+ 
++/* from printdlg.c */
++LPDLGTEMPLATEA resource_to_dialog32(HINSTANCE16 hInst, LPCSTR name);
++LPDLGTEMPLATEA handle_to_dialog32(HGLOBAL16 hg);
++
+ /***********************************************************************
+  *                FontFamilyEnumProc                     (COMMDLG.19)
+  */
+@@ -60,11 +64,13 @@ INT16 WINAPI FontStyleEnumProc16( SEGPTR logfont, SEGPTR metrics,
+ /***********************************************************************
+  *                        ChooseFont   (COMMDLG.15)
+  */
+-BOOL16 WINAPI ChooseFont16(LPCHOOSEFONT16 lpChFont)
++BOOL16 WINAPI ChooseFont16(SEGPTR cf)
+ {
++    LPCHOOSEFONT16 lpChFont = MapSL(cf);
+     CHOOSEFONTA cf32;
+     LOGFONTA lf32;
+     LOGFONT16 *font16;
++    LPDLGTEMPLATEA template = NULL;
+ 
+     if (!lpChFont) return FALSE;
+     font16 = MapSL(lpChFont->lpLogFont);
+@@ -98,11 +104,22 @@ BOOL16 WINAPI ChooseFont16(LPCHOOSEFONT16 lpChFont)
+     lf32.lfPitchAndFamily = font16->lfPitchAndFamily;
+     lstrcpynA( lf32.lfFaceName, font16->lfFaceName, LF_FACESIZE );
+ 
+-    if (lpChFont->Flags & (CF_ENABLETEMPLATEHANDLE | CF_ENABLETEMPLATE))
+-        FIXME( "custom templates no longer supported, using default\n" );
++    if ((lpChFont->Flags & CF_ENABLETEMPLATE) || (lpChFont->Flags & CF_ENABLETEMPLATEHANDLE))
++    {
++        if (lpChFont->Flags & CF_ENABLETEMPLATE)
++            template = resource_to_dialog32(lpChFont->hInstance, MapSL(lpChFont->lpTemplateName));
++        else
++            template = handle_to_dialog32(lpChFont->hInstance);
++        cf32.hInstance = (HGLOBAL)template;
++        cf32.Flags |= CF_ENABLETEMPLATEHANDLE;
++    }
+ 
+-    if (lpChFont->lpfnHook)
+-        FIXME( "custom hook %p no longer supported\n", lpChFont->lpfnHook );
++    if (lpChFont->Flags & CF_ENABLEHOOK)
++    {
++        COMMDLGTHUNK *thunk = allocate_thunk(cf, (SEGPTR)lpChFont->lpfnHook);
++        cf32.Flags |= CF_ENABLEHOOK;
++        cf32.lpfnHook = (LPCFHOOKPROC)thunk;
++    }
+ 
+     if (!ChooseFontA( &cf32 )) return FALSE;
+ 
+@@ -126,6 +143,8 @@ BOOL16 WINAPI ChooseFont16(LPCHOOSEFONT16 lpChFont)
+     font16->lfQuality = lf32.lfQuality;
+     font16->lfPitchAndFamily = lf32.lfPitchAndFamily;
+     lstrcpynA( font16->lfFaceName, lf32.lfFaceName, LF_FACESIZE );
++    delete_thunk(cf32.lpfnHook);
++    HeapFree(GetProcessHeap(), 0, template);
+     return TRUE;
+ }
+ 
+diff --git a/dlls/commdlg.dll16/printdlg.c b/dlls/commdlg.dll16/printdlg.c
+index 4d60e8aab64..f5f32499306 100644
+--- a/dlls/commdlg.dll16/printdlg.c
++++ b/dlls/commdlg.dll16/printdlg.c
+@@ -42,6 +42,82 @@
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(commdlg);
+ 
++/* Maximum length of a device name */
++#define CCHDEVICENAME16 32
++
++/* Maximum length of a paper name */
++#define CCHPAPERNAME16  64
++
++#pragma pack(push, 1)
++typedef struct {
++    char    dmDeviceName[CCHDEVICENAME16];
++    UINT16  dmSpecVersion;
++    UINT16  dmDriverVersion;
++    UINT16  dmSize;
++    UINT16  dmDriverExtra;
++    DWORD   dmFields;
++    INT16   dmOrientation;
++    INT16   dmPaperSize;
++    INT16   dmPaperLength;
++    INT16   dmPaperWidth;
++    INT16   dmScale;
++    INT16   dmCopies;
++    INT16   dmDefaultSource;
++    INT16   dmPrintQuality;
++    INT16   dmColor;
++    INT16   dmDuplex;
++    INT16   dmYResolution;
++    INT16   dmTTOption;
++} DEVMODE16, *LPDEVMODE16;
++#pragma pack(pop)
++
++//sizeof(DEVMODE16) != sizeof(DEVMODEA)
++void DEVMODE16To32(DEVMODE16 *src, LPDEVMODEA dst)
++{
++    memcpy(dst->dmDeviceName, src->dmDeviceName, min(CCHDEVICENAME16, CCHDEVICENAME));
++    dst->dmDeviceName[CCHDEVICENAME - 1] = 0;
++    dst->dmSpecVersion = 0x30a;
++    dst->dmDriverVersion = src->dmDriverVersion;
++    dst->dmSize = sizeof(DEVMODEA);
++    dst->dmDriverExtra = 0;
++    dst->dmFields = src->dmFields & 0x7fbf;
++    dst->dmOrientation = src->dmOrientation;
++    dst->dmPaperSize = src->dmPaperSize;
++    dst->dmPaperLength = src->dmPaperLength;
++    dst->dmPaperWidth = src->dmPaperWidth;
++    dst->dmScale = src->dmScale;
++    dst->dmCopies = src->dmCopies;
++    dst->dmDefaultSource = src->dmDefaultSource;
++    dst->dmPrintQuality = src->dmPrintQuality;
++    dst->dmColor = src->dmColor;
++    dst->dmDuplex = src->dmDuplex;
++    dst->dmYResolution = src->dmYResolution;
++    dst->dmTTOption = src->dmTTOption;
++}
++
++void DEVMODE32To16(LPDEVMODE16 dst, const LPDEVMODEA src)
++{
++    memcpy(dst->dmDeviceName, src->dmDeviceName, min(CCHDEVICENAME16, CCHDEVICENAME));
++    dst->dmDeviceName[CCHDEVICENAME16 - 1] = 0;
++    dst->dmSpecVersion = 0x30a;
++    dst->dmDriverVersion = src->dmDriverVersion;
++    dst->dmSize = sizeof(DEVMODE16);
++    dst->dmDriverExtra = 0;
++    dst->dmFields = src->dmFields & 0x7fbf;
++    dst->dmOrientation = src->dmOrientation;
++    dst->dmPaperSize = src->dmPaperSize;
++    dst->dmPaperLength = src->dmPaperLength;
++    dst->dmPaperWidth = src->dmPaperWidth;
++    dst->dmScale = src->dmScale;
++    dst->dmCopies = src->dmCopies;
++    dst->dmDefaultSource = src->dmDefaultSource;
++    dst->dmPrintQuality = src->dmPrintQuality;
++    dst->dmColor = src->dmColor;
++    dst->dmDuplex = src->dmDuplex;
++    dst->dmYResolution = src->dmYResolution;
++    dst->dmTTOption = src->dmTTOption;
++}
++
+ static void global_handle_to_16( HGLOBAL16 *h16, HGLOBAL handle )
+ {
+     DWORD size;
+@@ -87,17 +163,22 @@ LPDLGTEMPLATEA resource_to_dialog32(HINSTANCE16 hInst, LPCSTR name)
+ {
+     HRSRC16 res = FindResource16(hInst, name, (LPCSTR)RT_DIALOG);
+     HGLOBAL16 handle = LoadResource16(hInst, res);
+-    DWORD size = SizeofResource16(hInst, res);
+-    SEGPTR ptr16 = WOWGlobalLock16(handle);
+     DWORD size2;
+-    LPDLGTEMPLATEA r;
+-
+-    if (!dialog_template16_to_template32)
+-            dialog_template16_to_template32 = (void *)GetProcAddress( GetModuleHandleA("user.exe16"), "dialog_template16_to_template32" );
+-    r = dialog_template16_to_template32(hInst, ptr16, &size2, NULL);
++    SEGPTR ptr16 = WOWGlobalLock16(handle);
++    LPDLGTEMPLATEA r = dialog_template16_to_template32(hInst, ptr16, &size2, NULL);
+     FreeResource16(handle);
+     return r;
+ }
++
++LPDLGTEMPLATEA handle_to_dialog32(HGLOBAL16 hg)
++{
++    DWORD size2;
++    SEGPTR ptr16 = WOWGlobalLock16(hg);
++    LPDLGTEMPLATEA r = dialog_template16_to_template32(NULL, ptr16, &size2, NULL);
++    WOWGlobalUnlock16(hg);
++    return r;
++}
++
+ /**********************************************************************
+  *
+  *      16 bit commdlg
+@@ -126,6 +207,14 @@ BOOL16 WINAPI PrintDlg16( SEGPTR pd )
+     HINSTANCE16 hInst;
+     LPDLGTEMPLATEA template_setup = NULL;
+     LPDLGTEMPLATEA template_print = NULL;
++    HGLOBAL *hdma = NULL;
++    if (lppd->hDevMode)
++    {
++        hdma = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, sizeof(DEVMODEA));
++        DEVMODE16To32(GlobalLock16(lppd->hDevMode), GlobalLock(hdma));
++        GlobalUnlock(hdma);
++        GlobalUnlock16(lppd->hDevMode);
++    }
+ 
+     if (!lppd) return PrintDlgA(NULL); /* generate failure with CDERR_INITIALIZATION */
+ 
+@@ -134,7 +223,7 @@ BOOL16 WINAPI PrintDlg16( SEGPTR pd )
+                                        PD_ENABLESETUPTEMPLATE | PD_ENABLESETUPTEMPLATEHANDLE |
+                                        PD_ENABLEPRINTHOOK | PD_ENABLESETUPHOOK);
+     pd32.hwndOwner   = HWND_32(lppd->hwndOwner);
+-    pd32.hDevMode    = global_handle_from_16( lppd->hDevMode );
++    pd32.hDevMode    = hdma;
+     pd32.hDevNames   = global_handle_from_16( lppd->hDevNames );
+     pd32.nFromPage   = lppd->nFromPage;
+     pd32.nToPage     = lppd->nToPage;
+@@ -145,21 +234,24 @@ BOOL16 WINAPI PrintDlg16( SEGPTR pd )
+     pd32.lpfnSetupHook = NULL;
+     hInst = lppd->hInstance;
+ 
+-    if (lppd->Flags & PD_ENABLEPRINTTEMPLATE)
++    if ((lppd->Flags & PD_ENABLEPRINTTEMPLATE) || (lppd->Flags & PD_ENABLEPRINTTEMPLATEHANDLE))
+     {
+-        template_print = resource_to_dialog32(hInst, MapSL(lppd->lpPrintTemplateName));
++        if (lppd->Flags & PD_ENABLEPRINTTEMPLATE)
++            template_print = resource_to_dialog32(hInst, MapSL(lppd->lpPrintTemplateName));
++        else
++            template_print = handle_to_dialog32(lppd->hPrintTemplate);
+         pd32.hPrintTemplate = (HGLOBAL)template_print;
+         pd32.Flags |= PD_ENABLEPRINTTEMPLATEHANDLE;
+     }
+-    if (lppd->Flags & PD_ENABLESETUPTEMPLATE)
++    if ((lppd->Flags & PD_ENABLESETUPTEMPLATE) || (lppd->Flags & PD_ENABLESETUPTEMPLATEHANDLE))
+     {
+-        template_setup = resource_to_dialog32(hInst, MapSL(lppd->lpSetupTemplateName));
++        if (lppd->Flags & PD_ENABLESETUPTEMPLATE)
++            template_setup = resource_to_dialog32(hInst, MapSL(lppd->lpSetupTemplateName));
++        else
++            template_setup = handle_to_dialog32(lppd->hSetupTemplate);
+         pd32.hSetupTemplate = (HGLOBAL)template_setup;
+         pd32.Flags |= PD_ENABLESETUPTEMPLATEHANDLE;
+     }
+-    if (lppd->Flags & (PD_ENABLEPRINTTEMPLATEHANDLE |
+-                       PD_ENABLESETUPTEMPLATEHANDLE))
+-        FIXME( "custom templates handle no longer supported, using default\n" );
+     if (lppd->Flags & PD_ENABLEPRINTHOOK)
+     {
+         COMMDLGTHUNK *thunk = allocate_thunk(pd, (SEGPTR)lppd->lpfnPrintHook);
+@@ -169,7 +261,7 @@ BOOL16 WINAPI PrintDlg16( SEGPTR pd )
+     if (lppd->Flags & PD_ENABLESETUPHOOK)
+     {
+         COMMDLGTHUNK *thunk = allocate_thunk(pd, (SEGPTR)lppd->lpfnSetupHook);
+-        pd32.Flags |= PD_ENABLEPRINTHOOK;
++        pd32.Flags |= PD_ENABLESETUPHOOK;
+         pd32.lpfnSetupHook = (LPSETUPHOOKPROC)thunk;
+     }
+ 
+@@ -180,13 +272,20 @@ BOOL16 WINAPI PrintDlg16( SEGPTR pd )
+     {
+         lppd->hDC = HDC_16( pd32.hDC );
+         global_handle_to_16( &lppd->hDevNames, pd32.hDevNames );
+-        global_handle_to_16( &lppd->hDevMode, pd32.hDevMode );
+ 
+         lppd->nFromPage   = pd32.nFromPage;
+         lppd->nToPage     = pd32.nToPage;
+         lppd->nMinPage    = pd32.nMinPage;
+         lppd->nMaxPage    = pd32.nMaxPage;
+         lppd->nCopies     = pd32.nCopies;
++        if (pd32.hDevMode)
++        {
++            if (!lppd->hDevMode)
++                lppd->hDevMode = GlobalAlloc16(GMEM_MOVEABLE, sizeof(DEVMODE16));
++            DEVMODE32To16(GlobalLock16(lppd->hDevMode), GlobalLock(pd32.hDevMode));
++            GlobalUnlock(pd32.hDevMode);
++            GlobalUnlock16(lppd->hDevMode);
++        }
+     }
+     GlobalFree( pd32.hDevNames );
+     GlobalFree( pd32.hDevMode );
+-- 
+2.39.1
+

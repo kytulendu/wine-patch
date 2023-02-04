@@ -1,11 +1,14 @@
-From a9083832cab4587891909fdd733215cb1b6264c7 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 1f8b43ddd4b8436dd51fd2ec6570f3dfebb4249f Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Tue, 19 Feb 2019 01:34:03 +0700
 Subject: wing.dll16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/wing
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/wing.dll16/wing.c | 76 ++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 73 insertions(+), 3 deletions(-)
 
 diff --git a/dlls/wing.dll16/wing.c b/dlls/wing.dll16/wing.c
 index 44c2f40eb1c..f6778def396 100644
@@ -102,3 +105,6 @@ index 44c2f40eb1c..f6778def396 100644
      return ret;
  }
  
+-- 
+2.39.1
+

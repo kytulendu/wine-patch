@@ -1,17 +1,29 @@
-From 4f83a141d87eca756742b7f4b7ff8c3529a1eeb9 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 158ccbe540de385616263bed4fdde60d90b9b802 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Mon, 25 Feb 2019 00:45:04 +0700
 Subject: timer.drv16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/timer
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ configure.ac                      |  1 +
+ dlls/krnl386.exe16/kernel.c       |  1 +
+ dlls/timer.drv16/Makefile.in      |  7 +++++++
+ dlls/timer.drv16/timer.c          | 15 +++++++++++++++
+ dlls/timer.drv16/timer.drv16.spec |  2 ++
+ dlls/timer.drv16/timer.rc         |  3 +++
+ 6 files changed, 29 insertions(+)
+ create mode 100644 dlls/timer.drv16/Makefile.in
+ create mode 100644 dlls/timer.drv16/timer.c
+ create mode 100644 dlls/timer.drv16/timer.drv16.spec
+ create mode 100644 dlls/timer.drv16/timer.rc
 
 diff --git a/configure.ac b/configure.ac
-index 5798fd7b00a..7ba8bd4e540 100644
+index 8cf8ea5f239..10c03e33eee 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3121,6 +3121,7 @@ WINE_CONFIG_MAKEFILE(dlls/tdh)
+@@ -3051,6 +3051,7 @@ WINE_CONFIG_MAKEFILE(dlls/tdh)
  WINE_CONFIG_MAKEFILE(dlls/tdi.sys)
  WINE_CONFIG_MAKEFILE(dlls/threadpoolwinrt)
  WINE_CONFIG_MAKEFILE(dlls/threadpoolwinrt/tests)
@@ -82,3 +94,6 @@ index 00000000000..1a38ca6adda
 +#define WINE_FILEDESCRIPTION_STR "Wine timer driver"
 +
 +#include "wine/wine_common_ver.rc"
+-- 
+2.39.1
+

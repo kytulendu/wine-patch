@@ -1,0 +1,40 @@
+From 951a4c6fbd4b63ec4751ef0310f630ec9f5fe3e0 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
+Date: Sat, 4 Feb 2023 16:32:10 +0700
+Subject: autoreconf
+
+---
+ configure | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/configure b/configure
+index 8c5cabfcd13..b46bc4fa86a 100755
+--- a/configure
++++ b/configure
+@@ -21165,6 +21165,7 @@ wine_fn_config_makefile dlls/comctl32/tests enable_tests
+ wine_fn_config_makefile dlls/comdlg32 enable_comdlg32
+ wine_fn_config_makefile dlls/comdlg32/tests enable_tests
+ wine_fn_config_makefile dlls/comm.drv16 enable_win16
++wine_fn_config_makefile dlls/commctrl.dll16 enable_win16
+ wine_fn_config_makefile dlls/commdlg.dll16 enable_win16
+ wine_fn_config_makefile dlls/compobj.dll16 enable_win16
+ wine_fn_config_makefile dlls/compstui enable_compstui
+@@ -21801,6 +21802,7 @@ wine_fn_config_makefile dlls/tdh enable_tdh
+ wine_fn_config_makefile dlls/tdi.sys enable_tdi_sys
+ wine_fn_config_makefile dlls/threadpoolwinrt enable_threadpoolwinrt
+ wine_fn_config_makefile dlls/threadpoolwinrt/tests enable_tests
++wine_fn_config_makefile dlls/timer.drv16 enable_win16
+ wine_fn_config_makefile dlls/toolhelp.dll16 enable_win16
+ wine_fn_config_makefile dlls/traffic enable_traffic
+ wine_fn_config_makefile dlls/twain.dll16 enable_win16
+@@ -21876,6 +21878,7 @@ wine_fn_config_makefile dlls/wevtapi/tests enable_tests
+ wine_fn_config_makefile dlls/wevtsvc enable_wevtsvc
+ wine_fn_config_makefile dlls/wiaservc enable_wiaservc
+ wine_fn_config_makefile dlls/wiaservc/tests enable_tests
++wine_fn_config_makefile dlls/wifeman.dll16 enable_win16
+ wine_fn_config_makefile dlls/wimgapi enable_wimgapi
+ wine_fn_config_makefile dlls/win32k.sys enable_win32k_sys
+ wine_fn_config_makefile dlls/win32s16.dll16 enable_win16
+-- 
+2.39.1
+

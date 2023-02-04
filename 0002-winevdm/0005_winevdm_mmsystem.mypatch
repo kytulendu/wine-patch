@@ -1,14 +1,20 @@
-From 22691a04e72c8027f6b5607d5e84f6bae8e21387 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 7e82107f8d46813b6f3c7541ef4022fc891a55ae Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 23:11:30 +0700
 Subject: mmsystem.dll16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/mmsystem
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/mmsystem.dll16/mci16.c             | 53 ++++++++++++++++++++-----
+ dlls/mmsystem.dll16/mmio16.c            | 33 +++++++++++----
+ dlls/mmsystem.dll16/mmsystem.c          |  7 ++++
+ dlls/mmsystem.dll16/mmsystem.dll16.spec |  2 +-
+ 4 files changed, 78 insertions(+), 17 deletions(-)
 
 diff --git a/dlls/mmsystem.dll16/mci16.c b/dlls/mmsystem.dll16/mci16.c
-index 8acd5fe436d..0bcd4871be3 100644
+index 599e7edc31b..9015f5509b9 100644
 --- a/dlls/mmsystem.dll16/mci16.c
 +++ b/dlls/mmsystem.dll16/mci16.c
 @@ -167,8 +167,8 @@ static MMSYSTEM_MapType	MCI_MapMsg16To32W(WORD wMsg, DWORD dwFlags, DWORD_PTR* l
@@ -104,7 +110,7 @@ index 8acd5fe436d..0bcd4871be3 100644
      DWORD_PTR           dwParam2 = p2;
 +    DWORD count;
  
-     TRACE("(%04X, %s, %08lX, %08lX)\n", wDevID, MCI_MessageToString(wMsg), dwParam1, dwParam2);
+     TRACE("(%04X, %s, %08lx, %08Ix)\n", wDevID, MCI_MessageToString(wMsg), dwParam1, dwParam2);
  
 @@ -712,7 +745,9 @@ DWORD WINAPI mciSendCommand16(UINT16 wDevID, UINT16 wMsg, DWORD dwParam1, DWORD
              break;
@@ -226,7 +232,7 @@ index 971157d8f17..982bdc88015 100644
  
      /* WARNING: this heavily relies on mmioAdvance implementation (for choosing which
 diff --git a/dlls/mmsystem.dll16/mmsystem.c b/dlls/mmsystem.dll16/mmsystem.c
-index 3538d942bc4..5934c7aefbb 100644
+index 59480292224..49b901335b7 100644
 --- a/dlls/mmsystem.dll16/mmsystem.c
 +++ b/dlls/mmsystem.dll16/mmsystem.c
 @@ -1230,6 +1230,13 @@ UINT16 WINAPI waveOutOpen16(HWAVEOUT16* lphWaveOut, UINT16 uDeviceID,
@@ -256,3 +262,6 @@ index 66d1e9baa86..1dbd5c02daf 100644
  1222   pascal  mmioSendMessage(word word long long) mmioSendMessage16
  1223   pascal  mmioDescend(word ptr ptr word) mmioDescend16
  1224   pascal  mmioAscend(word ptr word) mmioAscend16
+-- 
+2.39.1
+

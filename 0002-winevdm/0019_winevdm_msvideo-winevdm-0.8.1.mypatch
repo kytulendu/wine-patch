@@ -1,0 +1,552 @@
+From 35ca0f8c86fa258f8a9f2a33da6df3a3816f109e Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
+Date: Sat, 4 Feb 2023 16:04:07 +0700
+Subject: [PATCH 19/23] msvideo.dll16: Update to winevdm-0.8.1.
+
+---
+ dlls/msvideo.dll16/msvideo.dll16.spec |  52 ++--
+ dlls/msvideo.dll16/msvideo16.c        | 399 ++++++++++++++++++++++++--
+ 2 files changed, 410 insertions(+), 41 deletions(-)
+
+diff --git a/dlls/msvideo.dll16/msvideo.dll16.spec b/dlls/msvideo.dll16/msvideo.dll16.spec
+index 02e2c957df7..4a586778155 100644
+--- a/dlls/msvideo.dll16/msvideo.dll16.spec
++++ b/dlls/msvideo.dll16/msvideo.dll16.spec
+@@ -1,30 +1,30 @@
+ #1 pascal WEP(word)
+ 2 pascal VideoForWindowsVersion() VideoForWindowsVersion
+ 3 pascal DllEntryPoint(long word word word long word) VIDEO_LibMain
+-20 stub VIDEOGETNUMDEVS
+-21 stub VIDEOGETERRORTEXT
++20 pascal videoGetNumDevs() videoGetNumDevs16
++21 pascal videoGetErrorText(word word str word) videoGetErrorText16
+ 22 pascal VideoCapDriverDescAndVer(word ptr word ptr word) VideoCapDriverDescAndVer16
+-28 stub VIDEOOPEN
+-29 stub VIDEOCLOSE
+-30 stub VIDEODIALOG
+-31 stub VIDEOFRAME
+-32 stub VIDEOCONFIGURE
+-33 stub VIDEOCONFIGURESTORAGE
+-34 stub VIDEOGETCHANNELCAPS
+-35 stub VIDEOUPDATE
+-40 stub VIDEOSTREAMADDBUFFER
+-41 stub VIDEOSTREAMFINI
+-42 stub VIDEOSTREAMGETERROR
+-43 stub VIDEOSTREAMGETPOSITION
+-44 stub VIDEOSTREAMINIT
+-46 stub VIDEOSTREAMPREPAREHEADER
+-47 stub VIDEOSTREAMRESET
+-49 stub VIDEOSTREAMSTART
+-50 stub VIDEOSTREAMSTOP
+-51 stub VIDEOSTREAMUNPREPAREHEADER
+-52 stub VIDEOSTREAMALLOCHDRANDBUFFER
+-53 stub VIDEOSTREAMFREEHDRANDBUFFER
+-60 stub VIDEOMESSAGE
++28 pascal videoOpen(ptr long long) videoOpen16
++29 pascal videoClose(word) videoClose16
++30 pascal videoDialog(word word long) videoDialog16
++31 pascal videoFrame(word ptr) videoFrame16
++32 pascal videoConfigure(word word long ptr ptr long ptr long) videoConfigure16
++33 pascal videoConfigureStorage(word str long) videoConfigureStorage16
++34 pascal videoGetChannelCaps(word ptr long) videoGetChannelCaps16
++35 pascal videoUpdate(word word word) videoUpdate16
++40 pascal videoStreamAddBuffer(word ptr long) videoStreamAddBuffer16
++41 pascal videoStreamFini(word) videoStreamFini16
++42 pascal videoStreamGetError(word ptr ptr) videoStreamGetError16
++43 pascal videoStreamGetPosition(word ptr long) videoStreamGetPosition16
++44 pascal videoStreamInit(word long long long long) videoStreamInit16
++46 pascal videoStreamPrepareHeader(word ptr long) videoStreamPrepareHeader16
++47 pascal videoStreamReset(word) videoStreamReset16
++49 pascal videoStreamStart(word) videoStreamStart16
++50 pascal videoStreamStop(word) videoStreamStop16
++51 pascal videoStreamUnprepareHeader(word ptr long) videoStreamUnprepareHeader16
++52 pascal videoStreamAllocHdrAndBuffer(word ptr long) videoStreamAllocHdrAndBuffer16
++53 pascal videoStreamFreeHdrAndBuffer(word ptr) videoStreamFreeHdrAndBuffer16
++60 pascal videoMessage(word word long long) videoMessage16
+ 102 pascal -ret16 DrawDibOpen() DrawDibOpen16
+ 103 pascal -ret16 DrawDibClose(word) DrawDibClose16
+ 104 pascal -ret16 DrawDibBegin(word word s_word s_word ptr s_word s_word word) DrawDibBegin16
+@@ -41,8 +41,8 @@
+ 119 pascal -ret16 DrawDibStop(word) DrawDibStop16
+ 120 stub DRAWDIBGETBUFFER
+ 200 pascal -ret16 ICInfo(long long segptr) ICInfo16
+-201 stub ICINSTALL
+-202 stub ICREMOVE
++201 pascal -ret16 ICInstall(long long long ptr word) ICInstall16
++202 pascal -ret16 ICRemove(long long word) ICRemove16
+ 203 pascal -ret16 ICOpen(long long word) ICOpen16
+ 204 pascal ICClose(word) ICClose16
+ 205 pascal ICSendMessage(word word long long) ICSendMessage16
+@@ -66,3 +66,5 @@
+ 251 cdecl _MCIWndRegisterClass() MCIWndRegisterClass16
+ 252 stub GETOPENFILENAMEPREVIEW
+ 253 stub GETSAVEFILENAMEPREVIEW
++
++@ cdecl -arch=win32 get_video_thunk(long)
+diff --git a/dlls/msvideo.dll16/msvideo16.c b/dlls/msvideo.dll16/msvideo16.c
+index d2ee1275353..49e41c3e083 100644
+--- a/dlls/msvideo.dll16/msvideo16.c
++++ b/dlls/msvideo.dll16/msvideo16.c
+@@ -34,6 +34,7 @@
+ #include "wownt32.h"
+ #include "vfw16.h"
+ #include "wine/debug.h"
++#include "wine/mmsystem16.h"
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(msvideo);
+ 
+@@ -639,8 +640,8 @@ static void MSVIDEO_UnmapMsg16To32(UINT msg, LPVOID data16, LPDWORD lParam1, LPD
+           HeapFree(GetProcessHeap(), 0, x[0]);
+           if (x[1])
+           HeapFree(GetProcessHeap(), 0, x[1]);
+-          }
+-          break;*/
++          }*/
++          break;
+     case ICM_COMPRESS:
+     case ICM_DECOMPRESS:
+     case ICM_DECOMPRESSEX_QUERY:
+@@ -649,7 +650,7 @@ static void MSVIDEO_UnmapMsg16To32(UINT msg, LPVOID data16, LPDWORD lParam1, LPD
+     case ICM_DRAW_BEGIN:
+     case ICM_DRAW_SUGGESTFORMAT:
+     case ICM_DRAW:
+-        HeapFree(GetProcessHeap(), 0, data16);
++        HeapFree(GetProcessHeap(), 0, *lParam1);
+         break;
+     default:
+         ERR("Unmapping unmapped msg %d\n", msg);
+@@ -686,12 +687,112 @@ static  LRESULT CALLBACK  IC_Callback3216(DWORD pfn16, HIC hic, HDRVR hdrv, UINT
+ {
+     WORD args[8];
+     DWORD ret = 0;
++    void *data = (void *)lp1;
+ 
+     switch (msg)
+     {
+-    case DRV_OPEN:
+-        lp2 = (DWORD)MapLS((void*)lp2);
+-        break;
++        case DRV_OPEN:
++            lp2 = (DWORD)MapLS((void*)lp2);
++            break;
++        case ICM_GETINFO:
++        {
++            ICINFO16 *ici16 = HeapAlloc(GetProcessHeap(), 0, sizeof(ICINFO16));
++            ICINFO *ici = lp1;
++
++            ici16->dwSize = sizeof(ICINFO16);
++            ici16->fccType = ici->fccType;
++            ici16->fccHandler = ici->fccHandler;
++            ici16->dwFlags = ici->dwFlags;
++            ici16->dwVersion = ici->dwVersion;
++            ici16->dwVersionICM = ici->dwVersionICM;
++            WideCharToMultiByte( CP_ACP, 0, ici->szName, -1, ici16->szName,
++                            sizeof(ici16->szName), NULL, NULL );
++            ici16->szName[sizeof(ici16->szName)-1] = 0;
++            WideCharToMultiByte( CP_ACP, 0, ici->szDescription, -1, ici16->szDescription,
++                            sizeof(ici16->szDescription), NULL, NULL );
++            ici16->szDescription[sizeof(ici16->szDescription)-1] = 0;
++            WideCharToMultiByte( CP_ACP, 0, ici->szDriver, -1, ici16->szDriver,
++                            sizeof(ici16->szDriver), NULL, NULL );
++            ici16->szDescription[sizeof(ici16->szDescription)-1] = 0;
++            lp1 = MapLS(ici16);
++            lp2 = sizeof(ICINFO16);
++            break;
++        }
++        case ICM_DRAW_QUERY:
++            lp1 = MapLS(lp1);
++            break;
++        case ICM_DRAW_BEGIN:
++        {
++            ICDRAWBEGIN16 *icdb16 = HeapAlloc(GetProcessHeap(), 0, sizeof(ICDRAWBEGIN16));
++            ICDRAWBEGIN *icdb = lp1;
++
++            icdb16->dwFlags = icdb->dwFlags;
++            icdb16->hpal = HPALETTE_16(icdb->hpal);
++            icdb16->hwnd = HWND_16(icdb->hwnd);
++            icdb16->hdc = HDC_16(icdb->hdc);
++            icdb16->xDst = icdb->xDst;
++            icdb16->yDst = icdb->yDst;
++            icdb16->dxDst = icdb->dxDst;
++            icdb16->dyDst = icdb->dyDst;
++            icdb16->lpbi = MapLS(icdb->lpbi);
++            icdb16->xSrc = icdb->xSrc;
++            icdb16->ySrc = icdb->ySrc;
++            icdb16->dxSrc = icdb->dxSrc;
++            icdb16->dySrc = icdb->dySrc;
++            icdb16->dwRate = icdb->dwRate;
++            icdb16->dwScale = icdb->dwScale;
++
++            lp1 = (LPARAM)(MapLS(icdb16));
++            lp2 = sizeof(ICDRAWBEGIN16);
++            break;
++        }
++        case ICM_DRAW_SUGGESTFORMAT:
++        {
++            ICDRAWSUGGEST16 *icds16 = HeapAlloc(GetProcessHeap(), 0, sizeof(ICDRAWSUGGEST16));
++            ICDRAWSUGGEST *icds = lp1;
++
++            icds16->lpbiIn = MapLS(icds->lpbiIn);
++            icds16->lpbiSuggest = MapLS(icds->lpbiSuggest);
++            icds16->dxSrc = icds->dxSrc;
++            icds16->dySrc = icds->dySrc;
++            icds16->dxDst = icds->dxDst;
++            icds16->dyDst = icds->dyDst;
++            icds16->hicDecompressor = HIC_16(icds->hicDecompressor);
++
++            lp1 = (LPARAM)((char *)MapLS(icds16) + 4); // dwFlags doesn't exist?
++            lp2 = sizeof(ICDRAWSUGGEST16) - 4;
++            break;
++        }
++        case ICM_DRAW_WINDOW:
++            lp1 = (LPARAM)(MapLS(lp1));
++            break;
++        case ICM_DRAW:
++        {
++            ICDRAW *icd16 = HeapAlloc(GetProcessHeap(), 0, sizeof(ICDRAW));
++            ICDRAW *icd = lp1;
++
++            DWORD size = icd->cbData;
++            int count = (size + 0xffff) / 0x10000;
++            WORD sel = AllocSelectorArray16(count);
++            for (int i = 0; i < count; i++)
++            {
++                SetSelectorBase(sel + (i << __AHSHIFT), (DWORD)icd->lpData + i * 0x10000);
++                SetSelectorLimit16(sel + (i << __AHSHIFT), size - 1);
++                size -= 0x10000;
++            }
++            icd16->dwFlags = icd->dwFlags;
++            icd16->lpFormat = MapLS(icd->lpFormat);
++            icd16->lpData = sel << 16;
++            icd16->cbData = icd->cbData;
++            icd16->lTime = icd->lTime;
++
++            lp1 = (LPARAM)(MapLS(icd16));
++            lp2 = sizeof(ICDRAW);
++            break;
++        }
++        case ICM_DRAW_REALIZE:
++            lp1 = (LPARAM)(HDC_16(lp1));
++            break;
+     }
+     args[7] = HIWORD(hic);
+     args[6] = LOWORD(hic);
+@@ -705,9 +806,61 @@ static  LRESULT CALLBACK  IC_Callback3216(DWORD pfn16, HIC hic, HDRVR hdrv, UINT
+ 
+     switch (msg)
+     {
+-    case DRV_OPEN:
+-        UnMapLS(lp2);
+-        break;
++        case DRV_OPEN:
++            UnMapLS(lp2);
++            break;
++        case ICM_GETINFO:
++        {
++            ICINFO16 *ici16 = MapSL(lp1);
++            ICINFO *ici = (ICINFO *)data;
++
++            UnMapLS(lp1);
++            ici->fccType = ici16->fccType;
++            ici->fccHandler = ici16->fccHandler;
++            ici->dwFlags = ici16->dwFlags;
++            ici->dwVersion = ici16->dwVersion;
++            ici->dwVersionICM = ici16->dwVersionICM;
++            MultiByteToWideChar( CP_ACP, 0, ici16->szName, -1, ici->szName, 16 );
++            MultiByteToWideChar( CP_ACP, 0, ici16->szDescription, -1, ici->szDescription, 128 );
++            MultiByteToWideChar( CP_ACP, 0, ici16->szDriver, -1, ici->szDriver, 128 );
++            HeapFree(GetProcessHeap(), 0, ici16);
++            break;
++        }
++        case ICM_DRAW_QUERY:
++            UnMapLS(lp1);
++            break;
++        case ICM_DRAW_BEGIN:
++        {
++            ICDRAWBEGIN16 *icdb16 = MapSL(lp1);
++            UnMapLS(lp1);
++            UnMapLS(icdb16->lpbi);
++            HeapFree(GetProcessHeap(), 0, icdb16);
++            break;
++        }
++        case ICM_DRAW_SUGGESTFORMAT:
++        {
++            ICDRAWSUGGEST16 *icds16 = MapSL(lp1 - 4);
++            UnMapLS(lp1);
++            UnMapLS(icds16->lpbiIn);
++            UnMapLS(icds16->lpbiSuggest);
++            HeapFree(GetProcessHeap(), 0, icds16);
++            break;
++        }
++        case ICM_DRAW_WINDOW:
++            UnMapLS(lp1);
++            break;
++        case ICM_DRAW:
++        {
++            ICDRAW *icd16 = MapSL(lp1);
++            int count = (lp2 + 0xffff) / 0x10000;
++            WORD sel = SELECTOROF(icd16->lpData);
++            for (int i = 0; i < count; i++)
++                FreeSelector16(sel + (i << __AHSHIFT));
++            UnMapLS(lp1);
++            UnMapLS(icd16->lpFormat);
++            HeapFree(GetProcessHeap(), 0, icd16);
++            break;
++        }
+     }
+     return ret;
+ }
+@@ -782,6 +935,20 @@ static struct msvideo_thunk*    MSVIDEO_HasThunk(HIC16 hic)
+     return NULL;
+ }
+ 
++void *get_video_thunk(DWORD pfn16)
++{
++    struct msvideo_thunk* thunk;
++
++    if (!MSVIDEO_Thunks)
++        return NULL;
++
++    for (thunk = MSVIDEO_Thunks; thunk < &MSVIDEO_Thunks[MAX_THUNKS]; thunk++)
++    {
++        if (thunk->pfn16 == pfn16) return thunk;
++    }
++    return (void *)MSVIDEO_AddThunk(pfn16);
++}
++
+ /***********************************************************************
+  *		ICOpenFunction			[MSVIDEO.206]
+  */
+@@ -995,18 +1162,43 @@ BOOL CDECL MCIWndRegisterClass16(void)
+ }
+ 
+ static LRESULT (WINAPI *pMCIWndProc)(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+-
++char *(* WINAPI xlate_str_handle)(const char *origstr, char *newstr) = NULL;
+ static LRESULT WINAPI MCIWndProc16(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+ {
+     switch (msg)
+     {
+-    case MCIWNDM_SENDSTRINGA:
+-    case MCIWNDM_SETTIMEFORMATA:
+-        lparam = (ULONG_PTR)MapSL(lparam);
+-        break;
++        case MCIWNDM_SENDSTRINGA:
++        {
++            char newstr[128];
++            lparam = (ULONG_PTR)MapSL(lparam);
++
++            if (!xlate_str_handle)
++            {
++                HMODULE mmsystem = LoadLibraryA("mmsystem.dll16");
++                if (mmsystem)
++                    xlate_str_handle = (char *(* WINAPI)(const char *origstr, char *newstr))GetProcAddress(mmsystem, "xlate_str_handle");
++            }
++            if (xlate_str_handle)
++                return CallWindowProcA(pMCIWndProc, hwnd, msg, wparam, xlate_str_handle(lparam, newstr));
++        }
+ 
+-    default:
+-        break;
++        case MCIWNDM_SETTIMEFORMATA:
++        case MCIWNDM_GETMODEA:
++            lparam = (ULONG_PTR)MapSL(lparam);
++            break;
++
++        case MCI_OPEN:
++            return CallWindowProcA(pMCIWndProc, hwnd, MCIWNDM_OPENA, 0, (ULONG_PTR)MapSL(lparam));
++
++        case MCIWNDM_SETPALETTE:
++            wparam = HPALETTE_32(wparam);
++            break;
++
++        case WM_DESTROY:
++            SetWindowLongPtrA(hwnd, GWLP_WNDPROC, (ULONG_PTR)pMCIWndProc);
++            break;
++        default:
++            break;
+     }
+ 
+     return CallWindowProcA(pMCIWndProc, hwnd, msg, wparam, lparam);
+@@ -1023,3 +1215,178 @@ HWND16 CDECL MCIWndCreate16(HWND16 parent, HINSTANCE16 hinst16,
+         pMCIWndProc = (void *)SetWindowLongPtrA(hwnd, GWLP_WNDPROC, (ULONG_PTR)MCIWndProc16);
+     return HWND_16(hwnd);
+ }
++
++typedef struct videohdr_tag16 {
++    SEGPTR      lpData;
++    DWORD       dwBufferLength;
++    DWORD       dwBytesUsed;
++    DWORD       dwTimeCaptured;
++    DWORD       dwUser;
++    DWORD       dwFlags;
++    DWORD       dwReserved[4];
++} VIDEOHDR16, *PVIDEOHDR16, *LPVIDEOHDR16;
++typedef WORD HVIDEO16;
++typedef HVIDEO16 *LPHVIDEO16;
++
++DWORD WINAPI videoGetNumDevs16(void)
++{
++    FIXME("()\n");
++    return 0;
++}
++DWORD WINAPI videoOpen16(LPHVIDEO16 lphVideo, DWORD dwDevice, DWORD dwFlags)
++{
++    FIXME("\n");
++    return 0;
++}
++DWORD WINAPI videoClose16(HVIDEO16 hVideo)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoDialog16(HVIDEO16 hVideo, HWND16 hWndParent, DWORD dwFlags)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoGetChannelCaps16(HVIDEO16 hVideo, LPCHANNEL_CAPS lpChannelCaps, DWORD dwSize)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoUpdate16(HVIDEO16 hVideo, HWND16 hWnd, HDC16 hDC)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoConfigure16(HVIDEO16 hVideo, UINT16 msg, DWORD dwFlags, LPDWORD lpdwReturn, LPVOID lpData1, DWORD dwSize1, LPVOID lpData2, DWORD dwSize2)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoConfigureStorage16(HVIDEO16 hVideo, LPSTR lpstrIdent, DWORD dwFlags)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoFrame16(HVIDEO16 hVideo, LPVIDEOHDR16 lpVHdr)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoMessage16(HVIDEO16 hVideo, UINT16 msg, DWORD dwP1, DWORD dwP2)
++{
++    FIXME("\n");
++    return 0;
++}
++
++
++DWORD WINAPI videoStreamAddBuffer16(HVIDEO16 hVideo, LPVIDEOHDR16 lpVHdr, DWORD dwSize)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamGetError16(HVIDEO16 hVideo, LPDWORD lpdwErrorFirst, LPDWORD lpdwErrorLast)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoGetErrorText16(HVIDEO16 hVideo, UINT16 wError, LPSTR lpText, UINT16 wSize)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamGetPosition16(HVIDEO16 hVideo, LPMMTIME16 lpInfo, DWORD dwSize)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamInit16(HVIDEO16 hVideo, DWORD dwMicroSecPerFrame, DWORD dwCallback, DWORD dwCallbackInst, DWORD dwFlags)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamFini16(HVIDEO16 hVideo)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamPrepareHeader16(HVIDEO16 hVideo, LPVIDEOHDR16 lpVHdr, DWORD dwSize)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamReset16(HVIDEO16 hVideo)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamStart16(HVIDEO16 hVideo)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamStop16(HVIDEO16 hVideo)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamUnprepareHeader16(HVIDEO16 hVideo, LPVIDEOHDR16 lpVHdr, DWORD dwSize)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamAllocHdrAndBuffer16(HVIDEO16 hVideo, LPVIDEOHDR16 *plpVHdr, DWORD dwSize)
++{
++    FIXME("\n");
++    return 0;
++}
++
++DWORD WINAPI videoStreamFreeHdrAndBuffer16(HVIDEO16 hVideo, LPVIDEOHDR16 lpVHdr)
++{
++    FIXME("\n");
++    return 0;
++}
++
++BOOL16 WINAPI ICInstall16(DWORD fccType, DWORD fccHandler, LPARAM lParam, LPSTR szDesc, UINT16 wFlags)
++{
++    if (wFlags == ICINSTALL_FUNCTION)
++    {
++        BOOL ret;
++        struct msvideo_thunk*       thunk;
++
++        EnterCriticalSection(&msvideo_cs);
++        if (!(thunk = MSVIDEO_AddThunk((DWORD)lParam)))
++        {
++            LeaveCriticalSection(&msvideo_cs);
++            return 0;
++        }
++        if (!(ret = ICInstall(fccType, fccHandler, thunk, szDesc, wFlags)))
++            thunk->pfn16 = 0;
++        LeaveCriticalSection(&msvideo_cs);
++        return ret;
++    }
++    return ICInstall(fccType, fccHandler, lParam, szDesc, wFlags);
++}
++
++BOOL16 WINAPI ICRemove16(DWORD fccType, DWORD fccHandler, UINT16 wFlags)
++{
++    return ICRemove(fccType, fccHandler, wFlags);
++}
+-- 
+2.39.1
+

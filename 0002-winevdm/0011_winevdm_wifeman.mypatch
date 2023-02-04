@@ -1,17 +1,26 @@
-From 13573623994a386efb1282f89f318c0f21f7b63b Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From b560da880e120abb46d886d8da2c85ea83e85bd9 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Mon, 25 Feb 2019 01:13:59 +0700
 Subject: wifeman.dll16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/wifeman
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ configure.ac                          |  1 +
+ dlls/wifeman.dll16/Makefile.in        |  4 ++
+ dlls/wifeman.dll16/wifeman.c          | 34 +++++++++++
+ dlls/wifeman.dll16/wifeman.dll16.spec | 86 +++++++++++++++++++++++++++
+ 4 files changed, 125 insertions(+)
+ create mode 100644 dlls/wifeman.dll16/Makefile.in
+ create mode 100644 dlls/wifeman.dll16/wifeman.c
+ create mode 100644 dlls/wifeman.dll16/wifeman.dll16.spec
 
 diff --git a/configure.ac b/configure.ac
-index 7ba8bd4e540..a0b93ac53ad 100644
+index 10c03e33eee..440d1e7740e 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -3197,6 +3197,7 @@ WINE_CONFIG_MAKEFILE(dlls/wevtapi/tests)
+@@ -3127,6 +3127,7 @@ WINE_CONFIG_MAKEFILE(dlls/wevtapi/tests)
  WINE_CONFIG_MAKEFILE(dlls/wevtsvc)
  WINE_CONFIG_MAKEFILE(dlls/wiaservc)
  WINE_CONFIG_MAKEFILE(dlls/wiaservc/tests)
@@ -161,3 +170,6 @@ index 00000000000..9cce152ede1
 +150 stub DEBUGASSERTION
 +151 stub DELAYEDINIT
 +152 stub FirstInit
+-- 
+2.39.1
+

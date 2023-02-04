@@ -1,11 +1,15 @@
-From fd106383a2a55eb72b039683fd6f98e46a975cc1 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 3520b2c0f24235552fdf2c825b8984481dd79f9a Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Sun, 24 Feb 2019 21:41:03 +0700
 Subject: ole2nls.dll16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/ole2nls
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/ole2nls.dll16/ole2nls.c          | 90 ++++++++++++++++++++++++++-
+ dlls/ole2nls.dll16/ole2nls.dll16.spec |  2 +-
+ 2 files changed, 88 insertions(+), 4 deletions(-)
 
 diff --git a/dlls/ole2nls.dll16/ole2nls.c b/dlls/ole2nls.dll16/ole2nls.c
 index b4b332fefb4..37c39beca2e 100644
@@ -139,3 +143,6 @@ index d3fc613473c..616fb0fd641 100644
  7 pascal -ret16 GetStringTypeA(long long str word ptr) GetStringType16
  8 pascal -ret16 CompareStringA(long long str word str word) CompareString16
  9 pascal -ret16 RegisterNLSInfoChanged(ptr) RegisterNLSInfoChanged16
+-- 
+2.39.1
+

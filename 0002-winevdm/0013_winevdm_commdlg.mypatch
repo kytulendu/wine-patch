@@ -1,12 +1,27 @@
-From c87533d0deb999ec3d5aefe30c38d184dff0ddb4 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From bc722a673cd057d2afc7721785d1598392ba3e73 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Wed, 14 Aug 2019 01:05:27 +0700
 Subject: commdlg.dll16: Port the patch from winevdm.
 
  from https://github.com/otya128/winevdm/tree/v0.7.0/commdlg
  and https://github.com/otya128/winevdm/tree/v0.7.0/user
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/commdlg.dll16/Makefile.in        |   2 +-
+ dlls/commdlg.dll16/cdlg16.h           |  31 +++-
+ dlls/commdlg.dll16/commdlg.dll16.spec |   2 +-
+ dlls/commdlg.dll16/filedlg.c          | 207 +++++++++++++++++++--
+ dlls/commdlg.dll16/fontdlg.c          |   4 +-
+ dlls/commdlg.dll16/printdlg.c         |  61 +++++-
+ dlls/commdlg.dll16/resource.h         |   2 +
+ dlls/user.exe16/dialog.c              | 255 +++++++++++++++++++++++++-
+ dlls/user.exe16/message.c             |   2 +-
+ dlls/user.exe16/user.exe16.spec       |   2 +
+ dlls/user.exe16/user_private.h        |  18 ++
+ dlls/user.exe16/window.c              |  78 +++++++-
+ 12 files changed, 627 insertions(+), 37 deletions(-)
+ create mode 100644 dlls/commdlg.dll16/resource.h
 
 diff --git a/dlls/commdlg.dll16/Makefile.in b/dlls/commdlg.dll16/Makefile.in
 index 69731147d07..e00f640cd4e 100644
@@ -82,7 +97,7 @@ index 1654e171c26..40ba5b81dd9 100644
  22  pascal   PrintSetupDlgProc(word word word long) PrintSetupDlgProc16
  #23  pascal  EDITINTEGERONLY exported, shared data
 diff --git a/dlls/commdlg.dll16/filedlg.c b/dlls/commdlg.dll16/filedlg.c
-index 5ad67a4a91f..b186a2b5f90 100644
+index 2631febb6ae..e9df9943296 100644
 --- a/dlls/commdlg.dll16/filedlg.c
 +++ b/dlls/commdlg.dll16/filedlg.c
 @@ -29,10 +29,87 @@
@@ -388,7 +403,7 @@ index 5ad67a4a91f..b186a2b5f90 100644
      return ret;
  }
 diff --git a/dlls/commdlg.dll16/fontdlg.c b/dlls/commdlg.dll16/fontdlg.c
-index 79efb3a292f..f8a86b28078 100644
+index 0bf94976d9d..85e71aa55f6 100644
 --- a/dlls/commdlg.dll16/fontdlg.c
 +++ b/dlls/commdlg.dll16/fontdlg.c
 @@ -69,11 +69,11 @@ BOOL16 WINAPI ChooseFont16(LPCHOOSEFONT16 lpChFont)
@@ -406,7 +421,7 @@ index 79efb3a292f..f8a86b28078 100644
      cf32.lCustData = lpChFont->lCustData;
      cf32.lpfnHook = NULL;
 diff --git a/dlls/commdlg.dll16/printdlg.c b/dlls/commdlg.dll16/printdlg.c
-index ac4741ee4e9..ee9c0bb5834 100644
+index c44d21c0e23..4d60e8aab64 100644
 --- a/dlls/commdlg.dll16/printdlg.c
 +++ b/dlls/commdlg.dll16/printdlg.c
 @@ -80,6 +80,24 @@ static HGLOBAL global_handle_from_16( HGLOBAL16 handle )
@@ -513,7 +528,7 @@ index 00000000000..a6817b76f95
 +
 +#define IDB_BITMAP1                     101
 diff --git a/dlls/user.exe16/dialog.c b/dlls/user.exe16/dialog.c
-index 315f70dd6f3..f3348b17ad6 100644
+index b61ae5cd519..6f217e3fa4b 100644
 --- a/dlls/user.exe16/dialog.c
 +++ b/dlls/user.exe16/dialog.c
 @@ -24,11 +24,18 @@
@@ -798,7 +813,7 @@ index 315f70dd6f3..f3348b17ad6 100644
  /***********************************************************************
   *           DIALOG_CreateIndirect16
 diff --git a/dlls/user.exe16/message.c b/dlls/user.exe16/message.c
-index 9af217bf5f1..107775cd103 100644
+index 59c58ed9bd9..12edb95ac47 100644
 --- a/dlls/user.exe16/message.c
 +++ b/dlls/user.exe16/message.c
 @@ -223,7 +223,7 @@ WNDPROC16 WINPROC_GetProc16( WNDPROC proc, BOOL unicode )
@@ -945,3 +960,6 @@ index 69d178e31b0..7f4a24b4cb1 100644
  
  /***********************************************************************
   *		GetClassInfoEx (USER.398)
+-- 
+2.39.1
+

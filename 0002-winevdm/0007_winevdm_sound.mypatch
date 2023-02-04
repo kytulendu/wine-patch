@@ -1,11 +1,15 @@
-From d295e319c43d36dfe47a51f55d040ef933b9406a Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 9f4b8e6cd0317364f0da046821d22353a5320775 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Tue, 19 Feb 2019 00:55:20 +0700
 Subject: sound.drv16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/sound
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/sound.drv16/Makefile.in |   1 +
+ dlls/sound.drv16/sound.c     | 201 +++++++++++++++++++++++++++++++----
+ 2 files changed, 183 insertions(+), 19 deletions(-)
 
 diff --git a/dlls/sound.drv16/Makefile.in b/dlls/sound.drv16/Makefile.in
 index 8e9b04bfa83..542063d9037 100644
@@ -311,3 +315,6 @@ index f93b96c4fa1..c28c4d969b2 100644
      return 0;
  }
  
+-- 
+2.39.1
+

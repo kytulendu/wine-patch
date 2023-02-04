@@ -1,11 +1,21 @@
-From baa72eb20885c855cf64acb2794b7f694c6e0218 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From 573e8cc6f8679a7c50e3bb6eaf837bfe1392cbe0 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Sun, 12 May 2019 00:40:00 +0700
 Subject: winhlp32: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/winhlp32
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ programs/winhlp32/Makefile.in   |   2 +-
+ programs/winhlp32/hlpfile.c     | 185 ++++++++---
+ programs/winhlp32/hlpfile.h     |  11 +-
+ programs/winhlp32/macro.c       |  10 +-
+ programs/winhlp32/winhelp.c     | 558 ++++++++++++++++++++++++--------
+ programs/winhlp32/winhelp.h     |   3 +
+ programs/winhlp32/winhelp_res.h |   2 +
+ programs/winhlp32/winhlp32.rc   |  10 +
+ 8 files changed, 594 insertions(+), 187 deletions(-)
 
 diff --git a/programs/winhlp32/Makefile.in b/programs/winhlp32/Makefile.in
 index 79841972fd0..0ee967f07b5 100644
@@ -19,10 +29,10 @@ index 79841972fd0..0ee967f07b5 100644
  
  EXTRADLLFLAGS = -mwindows
 diff --git a/programs/winhlp32/hlpfile.c b/programs/winhlp32/hlpfile.c
-index 73c4f4a27af..a0908677fa5 100644
+index e8ae723cff0..c15357e9d25 100644
 --- a/programs/winhlp32/hlpfile.c
 +++ b/programs/winhlp32/hlpfile.c
-@@ -29,6 +29,7 @@
+@@ -30,6 +30,7 @@
  #include "wingdi.h"
  #include "winuser.h"
  #include "winhelp.h"
@@ -30,7 +40,7 @@ index 73c4f4a27af..a0908677fa5 100644
  
  #include "wine/debug.h"
  
-@@ -66,7 +67,7 @@ static HLPFILE *first_hlpfile = 0;
+@@ -67,7 +68,7 @@ static HLPFILE *first_hlpfile = 0;
   *     Pointer to block identified by key, or NULL if failure.
   *
   */
@@ -39,7 +49,7 @@ index 73c4f4a27af..a0908677fa5 100644
                             HLPFILE_BPTreeCompare comp)
  {
      unsigned magic;
-@@ -382,7 +383,7 @@ HLPFILE_PAGE *HLPFILE_PageByOffset(HLPFILE* hlpfile, LONG offset, ULONG* relativ
+@@ -383,7 +384,7 @@ HLPFILE_PAGE *HLPFILE_PageByOffset(HLPFILE* hlpfile, LONG offset, ULONG* relativ
      {
          if (page->offset <= offset && (!found || found->offset < page->offset))
          {
@@ -48,7 +58,7 @@ index 73c4f4a27af..a0908677fa5 100644
              found = page;
          }
      }
-@@ -596,7 +597,7 @@ static ULONG fetch_ulong(const BYTE** ptr)
+@@ -597,7 +598,7 @@ static ULONG fetch_ulong(const BYTE** ptr)
          (*ptr) += 2;
      }
      return ret;
@@ -57,7 +67,7 @@ index 73c4f4a27af..a0908677fa5 100644
  
  static short fetch_short(const BYTE** ptr)
  {
-@@ -783,7 +784,7 @@ static HLPFILE_LINK*       HLPFILE_AllocLink(struct RtfData* rd, int cookie,
+@@ -785,7 +786,7 @@ static HLPFILE_LINK*       HLPFILE_AllocLink(struct RtfData* rd, int cookie,
   *
   */
  static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
@@ -66,7 +76,7 @@ index 73c4f4a27af..a0908677fa5 100644
  {
      unsigned    i, hs_num;
      ULONG       hs_macro;
-@@ -817,10 +818,13 @@ static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
+@@ -819,10 +820,13 @@ static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
           */
          {
          case 0xC8:
@@ -80,7 +90,7 @@ index 73c4f4a27af..a0908677fa5 100644
          case 0xE6:
          case 0xE7:
              hslink = (HLPFILE_HOTSPOTLINK*)
-@@ -861,10 +865,13 @@ static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
+@@ -863,10 +867,13 @@ static void HLPFILE_AddHotSpotLinks(struct RtfData* rd, HLPFILE* file,
          }
          if (hslink)
          {
@@ -98,7 +108,7 @@ index 73c4f4a27af..a0908677fa5 100644
              /* target = GET_UINT(start, 7 + 15 * i + 11); */
          }
          str += strlen(str) + 1;
-@@ -953,9 +960,8 @@ static BOOL HLPFILE_RtfAddTransparentBitmap(struct RtfData* rd, const BITMAPINFO
+@@ -955,9 +962,8 @@ static BOOL HLPFILE_RtfAddTransparentBitmap(struct RtfData* rd, const BITMAPINFO
  
      return ret;
  }
@@ -109,7 +119,7 @@ index 73c4f4a27af..a0908677fa5 100644
   *
   */
  static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE* beg, BYTE type, BYTE pack)
-@@ -999,7 +1005,7 @@ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE*
+@@ -1001,7 +1007,7 @@ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE*
  
      off = GET_UINT(ptr, 0); ptr += 4;
      hs_offset = GET_UINT(ptr, 0); ptr += 4;
@@ -118,7 +128,7 @@ index 73c4f4a27af..a0908677fa5 100644
  
      /* now read palette info */
      if (type == 0x06)
-@@ -1032,16 +1038,20 @@ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE*
+@@ -1034,16 +1040,20 @@ static BOOL HLPFILE_RtfAddBitmap(struct RtfData* rd, HLPFILE* file, const BYTE*
      if (!HLPFILE_RtfAddControl(rd, "{\\pict")) goto done;
      if (type == 0x06)
      {
@@ -144,7 +154,7 @@ index 73c4f4a27af..a0908677fa5 100644
          if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
      }
      if (!HLPFILE_RtfAddHexBytes(rd, pict_beg, bi->bmiHeader.biSizeImage)) goto done;
-@@ -1074,7 +1084,7 @@ static BOOL     HLPFILE_RtfAddMetaFile(struct RtfData* rd, HLPFILE* file, const
+@@ -1076,7 +1086,7 @@ static BOOL     HLPFILE_RtfAddMetaFile(struct RtfData* rd, HLPFILE* file, const
      ptr = beg + 2; /* for type and pack */
  
      mm = fetch_ushort(&ptr); /* mapping mode */
@@ -153,7 +163,7 @@ index 73c4f4a27af..a0908677fa5 100644
              mm, GET_USHORT(ptr, 0), GET_USHORT(ptr, 2));
      if (!HLPFILE_RtfAddControl(rd, tmp)) return FALSE;
      ptr += 4;
-@@ -1086,7 +1096,8 @@ static BOOL     HLPFILE_RtfAddMetaFile(struct RtfData* rd, HLPFILE* file, const
+@@ -1088,7 +1098,8 @@ static BOOL     HLPFILE_RtfAddMetaFile(struct RtfData* rd, HLPFILE* file, const
      hs_offset = GET_UINT(ptr, 4);
      ptr += 8;
  
@@ -163,7 +173,7 @@ index 73c4f4a27af..a0908677fa5 100644
  
      WINE_TRACE("sz=%lu csz=%lu offs=%lu/%lu,%lu/%lu\n",
                 size, csize, off, (ULONG)(ptr - beg), hs_size, hs_offset);
-@@ -1144,6 +1155,7 @@ static  BOOL    HLPFILE_RtfAddGfxByAddr(struct RtfData* rd, HLPFILE *hlpfile,
+@@ -1146,6 +1157,7 @@ static  BOOL    HLPFILE_RtfAddGfxByAddr(struct RtfData* rd, HLPFILE *hlpfile,
          if (numpict != 1) WINE_FIXME("Supporting only one bitmap format per logical bitmap (for now). Using first format\n");
          break;
      }
@@ -171,7 +181,7 @@ index 73c4f4a27af..a0908677fa5 100644
      return TRUE;
  }
  
-@@ -1229,7 +1241,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1231,7 +1243,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
      LONG               size, blocksize, datalen;
      unsigned short     bits;
      unsigned           ncol = 1;
@@ -180,7 +190,7 @@ index 73c4f4a27af..a0908677fa5 100644
      char               tmp[256];
      BOOL               ret = FALSE;
  
-@@ -1323,6 +1335,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1325,6 +1337,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
      lastcol = -1;
      for (nc = 0; nc < ncol; /**/)
      {
@@ -188,7 +198,7 @@ index 73c4f4a27af..a0908677fa5 100644
          WINE_TRACE("looking for format at offset %Iu in column %d\n", (SIZE_T)(format - (buf + 0x15)), nc);
          if (!HLPFILE_RtfAddControl(rd, "\\pard")) goto done;
          if (buf[0x14] == HLP_TABLE)
-@@ -1374,11 +1387,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1376,11 +1389,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
              sprintf(tmp, "\\fi%d", HLPFILE_HalfPointsScale(page, fetch_short(&format)));
              if (!HLPFILE_RtfAddControl(rd, tmp)) goto done;
          }
@@ -206,7 +216,7 @@ index 73c4f4a27af..a0908677fa5 100644
              if ((brdr & 0x01) && !HLPFILE_RtfAddControl(rd, "\\box")) goto done;
              if ((brdr & 0x02) && !HLPFILE_RtfAddControl(rd, "\\brdrt")) goto done;
              if ((brdr & 0x04) && !HLPFILE_RtfAddControl(rd, "\\brdrl")) goto done;
-@@ -1386,15 +1403,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1388,15 +1405,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
              if ((brdr & 0x10) && !HLPFILE_RtfAddControl(rd, "\\brdrr")) goto done;
              if ((brdr & 0x20) && !HLPFILE_RtfAddControl(rd, "\\brdrth")) goto done;
              if (!(brdr & 0x20) && !HLPFILE_RtfAddControl(rd, "\\brdrs")) goto done;
@@ -225,7 +235,7 @@ index 73c4f4a27af..a0908677fa5 100644
          }
          if (bits & 0x0200)
          {
-@@ -1430,7 +1447,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1432,7 +1449,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
  
          /* 0x1000 doesn't need space */
          if ((bits & 0x1000) && !HLPFILE_RtfAddControl(rd, "\\keep")) goto done;
@@ -234,7 +244,7 @@ index 73c4f4a27af..a0908677fa5 100644
              WINE_FIXME("Unsupported bits %04x, potential trouble ahead\n", bits);
  
          while (text < text_end && format < format_end)
-@@ -1447,7 +1464,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1449,7 +1466,7 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                  }
                  if (!HLPFILE_RtfAddText(rd, text)) goto done;
                  if (rd->force_color && !HLPFILE_RtfAddControl(rd, "}")) goto done;
@@ -243,7 +253,7 @@ index 73c4f4a27af..a0908677fa5 100644
              }
              /* else: null text, keep on storing attributes */
              text += textsize + 1;
-@@ -1490,12 +1507,13 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1492,12 +1509,13 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                      /* FIXME: colors are missing, at a minimum; also, the bold attribute loses information */
  
                      sprintf(tmp, "\\f%d\\cf%d\\fs%d%s%s%s%s",
@@ -258,7 +268,7 @@ index 73c4f4a27af..a0908677fa5 100644
                  }
                 break;
  
-@@ -1588,14 +1606,34 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1590,14 +1608,34 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                  }
                  break;
  
@@ -294,7 +304,7 @@ index 73c4f4a27af..a0908677fa5 100644
  
              case 0x8B:
                  if (!HLPFILE_RtfAddControl(rd, "\\~")) goto done;
-@@ -1621,6 +1659,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1623,6 +1661,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                  WINE_TRACE("macro => %s\n", debugstr_a((char *)format + 3));
                  HLPFILE_AllocLink(rd, hlp_link_macro, (const char*)format + 3,
                                    GET_USHORT(format, 1), 0, !(*format & 4), FALSE, -1);
@@ -303,7 +313,7 @@ index 73c4f4a27af..a0908677fa5 100644
                  format += 3 + GET_USHORT(format, 1);
                  break;
  
-@@ -1629,8 +1669,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1631,8 +1671,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                  WINE_WARN("jump topic 1 => %u\n", GET_UINT(format, 1));
                  HLPFILE_AllocLink(rd, (*format & 1) ? hlp_link_link : hlp_link_popup,
                                    page->file->lpszPath, -1, GET_UINT(format, 1), TRUE, FALSE, -1);
@@ -314,7 +324,7 @@ index 73c4f4a27af..a0908677fa5 100644
                  format += 5;
                  break;
  
-@@ -1642,6 +1682,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1644,6 +1684,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                  HLPFILE_AllocLink(rd, (*format & 1) ? hlp_link_link : hlp_link_popup,
                                    page->file->lpszPath, -1, GET_UINT(format, 1),
                                    !(*format & 4), FALSE, -1);
@@ -323,7 +333,7 @@ index 73c4f4a27af..a0908677fa5 100644
                  format += 5;
                  break;
  
-@@ -1679,6 +1721,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1681,6 +1723,8 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                      }
                      HLPFILE_AllocLink(rd, (*format & 1) ? hlp_link_link : hlp_link_popup,
                                        ptr, -1, GET_UINT(format, 4), !(*format & 4), FALSE, wnd);
@@ -332,7 +342,7 @@ index 73c4f4a27af..a0908677fa5 100644
                  }
                  format += 3 + GET_USHORT(format, 1);
                  break;
-@@ -1688,6 +1732,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1690,6 +1734,15 @@ static BOOL HLPFILE_BrowseParagraph(HLPFILE_PAGE* page, struct RtfData* rd,
                  format++;
  	    }
  	}
@@ -348,7 +358,7 @@ index 73c4f4a27af..a0908677fa5 100644
      }
      ret = TRUE;
  done:
-@@ -1706,19 +1759,23 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1708,19 +1761,23 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
      HLPFILE     *hlpfile = page->file;
      BYTE        *buf, *end;
      DWORD       ref = page->reference;
@@ -361,7 +371,7 @@ index 73c4f4a27af..a0908677fa5 100644
 +    BOOL        found = FALSE;
  
      rd->in_text = TRUE;
-     rd->data = rd->ptr = HeapAlloc(GetProcessHeap(), 0, rd->allocated = 32768);
+     rd->data = rd->ptr = malloc(rd->allocated = 32768);
      rd->char_pos = 0;
      rd->first_link = rd->current_link = NULL;
 +    rd->first_hs = NULL;
@@ -373,7 +383,7 @@ index 73c4f4a27af..a0908677fa5 100644
  
      switch (hlpfile->charset)
      {
-@@ -1745,20 +1802,31 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1747,20 +1804,31 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
      }
      if (ck)
      {
@@ -407,7 +417,7 @@ index 73c4f4a27af..a0908677fa5 100644
          switch (hlpfile->fonts[index].LogFont.lfPitchAndFamily & 0xF0)
          {
          case FF_MODERN:     family = "modern";  break;
-@@ -1768,11 +1836,13 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1770,11 +1838,13 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
          case FF_DECORATIVE: family = "decor";   break;
          default:            family = "nil";     break;
          }
@@ -423,7 +433,7 @@ index 73c4f4a27af..a0908677fa5 100644
          if (!HLPFILE_RtfAddControl(rd, tmp)) return FALSE;
      }
      if (!HLPFILE_RtfAddControl(rd, "}")) return FALSE;
-@@ -1822,9 +1892,15 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1824,9 +1894,15 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
          case HLP_DISPLAY30:
          case HLP_DISPLAY:
          case HLP_TABLE:
@@ -441,7 +451,7 @@ index 73c4f4a27af..a0908677fa5 100644
              offs += parlen;
              break;
          default:
-@@ -1841,6 +1917,7 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
+@@ -1843,6 +1919,7 @@ BOOL    HLPFILE_BrowsePage(HLPFILE_PAGE* page, struct RtfData* rd,
      } while (ref != 0xffffffff);
  done:
      page->first_link = rd->first_link;
@@ -449,7 +459,7 @@ index 73c4f4a27af..a0908677fa5 100644
      return HLPFILE_RtfAddControl(rd, "}");
  }
  
-@@ -2047,6 +2124,12 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
+@@ -2049,6 +2126,12 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
      if (hlpfile->version <= 16)
      {
          char *str = (char*)buf + 0x15;
@@ -460,28 +470,9 @@ index 73c4f4a27af..a0908677fa5 100644
 +                str = hlpfile->lpszPath;
 +        }
  
-         hlpfile->lpszTitle = HeapAlloc(GetProcessHeap(), 0, strlen(str) + 1);
+         hlpfile->lpszTitle = strdup(str);
          if (!hlpfile->lpszTitle) return FALSE;
-@@ -2105,13 +2188,13 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
-         case 6:
-             if (GET_USHORT(ptr, 2) != 90) {WINE_WARN("system6\n");break;}
- 
--	    if (hlpfile->windows) 
--        	hlpfile->windows = HeapReAlloc(GetProcessHeap(), 0, hlpfile->windows, 
-+	    if (hlpfile->windows)
-+        	hlpfile->windows = HeapReAlloc(GetProcessHeap(), 0, hlpfile->windows,
-                                            sizeof(HLPFILE_WINDOWINFO) * ++hlpfile->numWindows);
--	    else 
--        	hlpfile->windows = HeapAlloc(GetProcessHeap(), 0, 
-+	    else
-+        	hlpfile->windows = HeapAlloc(GetProcessHeap(), 0,
-                                            sizeof(HLPFILE_WINDOWINFO) * ++hlpfile->numWindows);
--	    
-+
-             if (hlpfile->windows)
-             {
-                 HLPFILE_WINDOWINFO* wi = &hlpfile->windows[hlpfile->numWindows - 1];
-@@ -2131,6 +2214,7 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
+@@ -2126,6 +2209,7 @@ static BOOL HLPFILE_SystemCommands(HLPFILE* hlpfile)
                  wi->win_style = WS_OVERLAPPEDWINDOW;
                  wi->sr_color = (flags & 0x0100) ? GET_UINT(ptr, 86) : 0xFFFFFF;
                  wi->nsr_color = (flags & 0x0200) ? GET_UINT(ptr, 90) : 0xFFFFFF;
@@ -489,7 +480,7 @@ index 73c4f4a27af..a0908677fa5 100644
                  WINE_TRACE("System-Window: flags=%c%c%c%c%c%c%c%c type=%s name=%s caption=%s (%ld,%ld)x(%ld,%ld)\n",
                             flags & 0x0001 ? 'T' : 't',
                             flags & 0x0002 ? 'N' : 'n',
-@@ -2257,6 +2341,26 @@ static BOOL HLPFILE_GetTOMap(HLPFILE *hlpfile)
+@@ -2252,6 +2336,26 @@ static BOOL HLPFILE_GetTOMap(HLPFILE *hlpfile)
      return TRUE;
  }
  
@@ -516,20 +507,20 @@ index 73c4f4a27af..a0908677fa5 100644
  /***********************************************************************
   *
   *           DeleteMacro
-@@ -2336,6 +2440,12 @@ void HLPFILE_FreeHlpFile(HLPFILE* hlpfile)
-     HeapFree(GetProcessHeap(), 0, hlpfile->phrases_buffer);
-     HeapFree(GetProcessHeap(), 0, hlpfile->topic_map);
-     HeapFree(GetProcessHeap(), 0, hlpfile->help_on_file);
-+    HeapFree(GetProcessHeap(), 0, hlpfile->kwbtree);
-+    HeapFree(GetProcessHeap(), 0, hlpfile->kwdata);
+@@ -2331,6 +2435,12 @@ void HLPFILE_FreeHlpFile(HLPFILE* hlpfile)
+     free(hlpfile->phrases_buffer);
+     free(hlpfile->topic_map);
+     free(hlpfile->help_on_file);
++    free(hlpfile->kwbtree);
++    free(hlpfile->kwdata);
 +    if (hlpfile->TOMap)
-+	    HeapFree(GetProcessHeap(), 0, hlpfile->TOMap);
++        free(hlpfile->TOMap);
 +    if (hlpfile->ttlbtree)
-+	    HeapFree(GetProcessHeap(), 0, hlpfile->ttlbtree);
-     HeapFree(GetProcessHeap(), 0, hlpfile);
++        free(hlpfile->ttlbtree);
+     free(hlpfile);
  }
  
-@@ -2748,6 +2858,7 @@ static BOOL HLPFILE_DoReadHlpFile(HLPFILE *hlpfile, LPCSTR lpszPath)
+@@ -2741,6 +2851,7 @@ static BOOL HLPFILE_DoReadHlpFile(HLPFILE *hlpfile, LPCSTR lpszPath)
  
      HLPFILE_GetKeywords(hlpfile);
      HLPFILE_GetMap(hlpfile);
@@ -605,10 +596,10 @@ index 55ef681edd8..c680c0e2bab 100644
  
  BOOL          HLPFILE_BrowsePage(HLPFILE_PAGE*, struct RtfData* rd,
 diff --git a/programs/winhlp32/macro.c b/programs/winhlp32/macro.c
-index 777efbbf74f..fe8a60eefef 100644
+index 36bda654afd..d693443eeb1 100644
 --- a/programs/winhlp32/macro.c
 +++ b/programs/winhlp32/macro.c
-@@ -767,7 +767,7 @@ static void CALLBACK MACRO_RegisterRoutine(LPCSTR dll_name, LPCSTR proc, LPCSTR
+@@ -759,7 +759,7 @@ static void CALLBACK MACRO_RegisterRoutine(LPCSTR dll_name, LPCSTR proc, LPCSTR
      {
          HANDLE hLib = LoadLibraryA(dll_name);
  
@@ -617,8 +608,8 @@ index 777efbbf74f..fe8a60eefef 100644
           * We don't send the DW_TERM message
           */
          WINE_TRACE("Loading %s\n", debugstr_a(dll_name));
-@@ -847,13 +847,13 @@ static void CALLBACK MACRO_SetHelpOnFile(LPCSTR str)
-         strcpy(page->file->help_on_file, str);
+@@ -836,13 +836,13 @@ static void CALLBACK MACRO_SetHelpOnFile(LPCSTR str)
+     page->file->help_on_file = strdup(str);
  }
  
 -static void CALLBACK MACRO_SetPopupColor(LONG r, LONG g, LONG b)
@@ -634,7 +625,7 @@ index 777efbbf74f..fe8a60eefef 100644
  }
  
  static void CALLBACK MACRO_ShellExecute(LPCSTR str1, LPCSTR str2, LONG u1, LONG u2, LPCSTR str3, LPCSTR str4)
-@@ -993,7 +993,7 @@ static struct MacroDesc MACRO_Builtins[] = {
+@@ -982,7 +982,7 @@ static struct MacroDesc MACRO_Builtins[] = {
      {"Search",              NULL, 0, "",       MACRO_Search},
      {"SetContents",         NULL, 0, "SU",     MACRO_SetContents},
      {"SetHelpOnFile",       NULL, 0, "S",      MACRO_SetHelpOnFile},
@@ -644,7 +635,7 @@ index 777efbbf74f..fe8a60eefef 100644
      {"ShortCut",            "SH", 0, "SSUUS",  MACRO_ShortCut},
      {"TCard",               NULL, 0, "U",      MACRO_TCard},
 diff --git a/programs/winhlp32/winhelp.c b/programs/winhlp32/winhelp.c
-index 73db4b58876..f651a6fc09f 100644
+index 037d319f290..c4bb4ce35a5 100644
 --- a/programs/winhlp32/winhelp.c
 +++ b/programs/winhlp32/winhelp.c
 @@ -27,6 +27,7 @@
@@ -678,7 +669,7 @@ index 73db4b58876..f651a6fc09f 100644
 -            cp = rd.char_pos_rel;
          }
          /* FIXME: else leaking potentially the rd.first_link chain */
-         HeapFree(GetProcessHeap(), 0, rd.data);
+         free(rd.data);
 -        SendMessageW(hTextWnd, EM_POSFROMCHAR, (WPARAM)&ptl, cp ? cp - 1 : 0);
 +        if (rd.char_pos_rel)
 +        {
@@ -1526,3 +1517,6 @@ index ac50c6af787..446c495693f 100644
  LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
  
  
+-- 
+2.39.1
+

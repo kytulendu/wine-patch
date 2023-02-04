@@ -1,14 +1,17 @@
-From 26d1be1fe7a7ef59fcb4e3d115e7f00df5abba74 Mon Sep 17 00:00:00 2001
-From: Khral Steelforge <garuda2550@gmail.com>
+From f5ebf09753c434b2db5d200e2abce5bb81de5564 Mon Sep 17 00:00:00 2001
+From: Khralkatorrix <garuda2550@gmail.com>
 Date: Mon, 18 Feb 2019 23:27:32 +0700
 Subject: shell.dll16: Port the patch from winevdm.
 
 from https://github.com/otya128/winevdm/tree/v0.7.0/shell
 
-Signed-off-by: Khral Steelforge <garuda2550@gmail.com>
+Signed-off-by: Khralkatorrix <garuda2550@gmail.com>
+---
+ dlls/shell.dll16/shell.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/dlls/shell.dll16/shell.c b/dlls/shell.dll16/shell.c
-index 1b55478be7f..27c04936f1f 100644
+index bc3cfdfc97d..da35dd4eb88 100644
 --- a/dlls/shell.dll16/shell.c
 +++ b/dlls/shell.dll16/shell.c
 @@ -69,6 +69,7 @@ static UINT	uMsgShellActivate = 0;
@@ -27,3 +30,6 @@ index 1b55478be7f..27c04936f1f 100644
      static HICON16 (WINAPI *pCreateIcon16)(HINSTANCE16,INT16,INT16,BYTE,BYTE,LPCVOID,LPCVOID);
      ICONINFO info;
      BITMAP bm;
+-- 
+2.39.1
+
